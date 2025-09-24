@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Investigação de Acidente</title>
+    <style>
+        :root {
+            --primary-blue: #004AC9;
+            --primary-red: #ed383b;
+            --dark-gray: #2b2c34;
+            --light-blue: #E8F2FF;
+            --light-gray: #F5F6FA;
+            --success-green: #28A745;
+            --warning-orange: #FFC107;
+            --white: #FFFFFF;
+            --text-primary: #2b2c34;
+            --text-secondary: #6C757D;
+            --border-color: #E1E5E9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--light-gray) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .form-header {
+            background: var(--white);
+            padding: 32px;
+            border-radius: 16px 16px 0 0;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(0, 74, 201, 0.1);
+        }
+
+        .form-header h1 {
+            color: var(--primary-blue);
+            font-size: 2.5em;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .form-header p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+
+        .form-container {
+            background: var(--white);
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 30px rgba(0, 74, 201, 0.15);
+            overflow: hidden;
+        }
+
+        .form-section {
+            padding: 32px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary-blue);
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .form-grid.two-columns {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-grid.three-columns {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+        }
+
+        .required::after {
+            content: ' *';
+            color: var(--primary-red);
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: var(--white);
+            color: var(--text-primary);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 74, 201, 0.1);
+            background: var(--light-blue);
+        }
+
+        input.error, select.error, textarea.error {
+            border-color: var(--primary-red);
+            background-color: #fff5f5;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            background: var(--light-gray);
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .checkbox-item:hover, .radio-item:hover {
+            background: var(--light-blue);
+        }
+
+        .checkbox-item.error, .radio-item.error {
+            border-color: var(--primary-red);
+        }
+
+        .checkbox-item input, .radio-item input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .subsection {
+            background: var(--light-gray);
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .subsection-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 16px;
+            color: var(--dark-gray);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .currency-input {
+            position: relative;
+        }
+
+        .currency-input::before {
+            content: 'R$';
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            z-index: 1;
+        }
+
+        .currency-input input {
+            padding-left: 40px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--light-gray);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+
+        .file-upload-area.error {
+            border-color: var(--primary-red);
+            background-color: #fff5f5;
+        }
+
+        .file-upload-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-text {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .file-upload-hint {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .file-list {
+            margin-top: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--white);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .file-item button {
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.3s ease;
+        }
+
+        .file-item button:hover {
+            background: #c73235;
+        }
+
+        .signature-section {
+            background: var(--light-blue);
+            padding: 24px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .submit-container {
+            padding: 32px;
+            background: var(--light-gray);
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 220px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #0056d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 74, 201, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: var(--primary-red);
+            font-size: 0.85em;
+            margin-top: 4px;
+            display: none;
+        }
+
+
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-header, .form-section {
+                padding: 20px;
+            }
+
+            .form-grid, .form-grid.two-columns, .form-grid.three-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .form-header h1 {
+                font-size: 2em;
+            }
+
+            .checkbox-group, .radio-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-header">
+            <h1>Registro de Investigação de Acidente</h1>
+            <p>Formulário completo para investigação e análise de acidentes de trabalho</p>
+        </div>
+
+        <form id="investigationForm" class="form-container" novalidate>
+            <!-- 1. Dados do Acidente -->
+            <div class="form-section">
+                <h2 class="section-title">1. Dados do Acidente</h2>
+                <div class="form-grid three-columns">
+                    <div class="form-group">
+                        <label for="dataAcidente" class="required">Data</label>
+                        <input type="date" id="dataAcidente" name="dataAcidente" required>
+                        <div class="error-message">Campo obrigatório</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="horaAcidente" class="required">Hora</label>
+                        <input type="time" id="horaAcidente" name="horaAcidente" required>
+                        <div class="error-message">Campo obrigatório</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="localSetor" class="required">Local / Setor</label>
+                        <input type="text" id="localSetor" name="localSetor" required>
+                        <div class="error-message">Campo obrigatório</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Envolvidos -->
+            <div class="form-section">
+                <h2 class="section-title">2. Envolvidos</h2>
+                
+                <!-- Colaborador -->
+                <div class="subsection">
+                    <h3 class="subsection-title">Dados do Colaborador</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nomeColaborador" class="required">Nome</label>
+                            <input type="text" id="nomeColaborador" name="nomeColaborador" required>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="funcaoColaborador" class="required">Função</label>
+                            <input type="text" id="funcaoColaborador" name="funcaoColaborador" required>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="empresaColaborador" class="required">Empresa</label>
+                            <input type="text" id="empresaColaborador" name="empresaColaborador" required>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid two-columns" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label class="required">Treinamento para função</label>
+                            <div class="radio-group" data-required="true" data-name="treinamento">
+                                <div class="radio-item">
+                                    <input type="radio" id="treinamentoSim" name="treinamento" value="sim" required>
+                                    <label for="treinamentoSim">Sim</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="treinamentoNao" name="treinamento" value="nao" required>
+                                    <label for="treinamentoNao">Não</label>
+                                </div>
+                            </div>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Uso de EPI</label>
+                            <div class="radio-group" data-required="true" data-name="usoEpiColab">
+                                <div class="radio-item">
+                                    <input type="radio" id="usoEpiColabSim" name="usoEpiColab" value="sim" required>
+                                    <label for="usoEpiColabSim">Sim</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="usoEpiColabNao" name="usoEpiColab" value="nao" required>
+                                    <label for="usoEpiColabNao">Não</label>
+                                </div>
+                            </div>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid two-columns" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label class="required">EPI Adequado</label>
+                            <div class="radio-group" data-required="true" data-name="epiAdequadoColab">
+                                <div class="radio-item">
+                                    <input type="radio" id="epiAdequadoColabSim" name="epiAdequadoColab" value="sim" required>
+                                    <label for="epiAdequadoColabSim">Sim</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="epiAdequadoColabNao" name="epiAdequadoColab" value="nao" required>
+                                    <label for="epiAdequadoColabNao">Não</label>
+                                </div>
+                            </div>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Histórico de reincidência</label>
+                            <div class="radio-group" data-required="true" data-name="reincidencia">
+                                <div class="radio-item">
+                                    <input type="radio" id="reincidenciaSim" name="reincidencia" value="sim" required>
+                                    <label for="reincidenciaSim">Sim</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="reincidenciaNao" name="reincidencia" value="nao" required>
+                                    <label for="reincidenciaNao">Não</label>
+                                </div>
+                            </div>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pergunta sobre Terceiro -->
+                <div class="form-group" style="margin-top: 24px;">
+                    <label class="required">Houve envolvimento de terceiro?</label>
+                    <div class="radio-group" data-required="true" data-name="houveTerceiro">
+                        <div class="radio-item">
+                            <input type="radio" id="houveTeceiroSim" name="houveTerceiro" value="sim" required>
+                            <label for="houveTeceiroSim">Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="houveTeceiroNao" name="houveTerceiro" value="nao" required>
+                            <label for="houveTeceiroNao">Não</label>
+                        </div>
+                    </div>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+
+                <!-- Terceiro (inicialmente oculto) -->
+                <div class="subsection" id="terceiroSection" style="display: none; margin-top: 24px;">
+                    <h3 class="subsection-title">Dados do Terceiro</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nomeTerceiro" class="required">Nome</label>
+                            <input type="text" id="nomeTerceiro" name="nomeTerceiro">
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefoneTerceiro" class="required">Telefone</label>
+                            <input type="tel" id="telefoneTerceiro" name="telefoneTerceiro" placeholder="(00) 00000-0000">
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="enderecoTerceiro" class="required">Endereço</label>
+                            <input type="text" id="enderecoTerceiro" name="enderecoTerceiro">
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cpfTerceiro" class="required">CPF</label>
+                            <input type="text" id="cpfTerceiro" name="cpfTerceiro" placeholder="000.000.000-00">
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                    <div class="form-grid two-columns" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label class="required">Uso de EPI</label>
+                            <div class="radio-group" data-required="conditional" data-name="usoEpiTerceiro">
+                                <div class="radio-item">
+                                    <input type="radio" id="usoEpiTerceiroSim" name="usoEpiTerceiro" value="sim">
+                                    <label for="usoEpiTerceiroSim">Sim</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="usoEpiTerceiroNao" name="usoEpiTerceiro" value="nao">
+                                    <label for="usoEpiTerceiroNao">Não</label>
+                                </div>
+                            </div>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">EPI Adequado</label>
+                            <div class="radio-group" data-required="conditional" data-name="epiAdequadoTerceiro">
+                                <div class="radio-item">
+                                    <input type="radio" id="epiAdequadoTerceiroSim" name="epiAdequadoTerceiro" value="sim">
+                                    <label for="epiAdequadoTerceiroSim">Sim</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="epiAdequadoTerceiroNao" name="epiAdequadoTerceiro" value="nao">
+                                    <label for="epiAdequadoTerceiroNao">Não</label>
+                                </div>
+                            </div>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Tipos de Incidente -->
+            <div class="form-section">
+                <h2 class="section-title">3. Tipos de Incidente</h2>
+                <div class="form-grid two-columns">
+                    <div class="form-group">
+                        <label class="required">Classificação do Local</label>
+                        <div class="checkbox-group" data-required="true" data-name="tipoLocal">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="interno" name="tipoLocal" value="interno">
+                                <label for="interno">Interno</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="trajeto" name="tipoLocal" value="trajeto">
+                                <label for="trajeto">Trajeto</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="transito" name="tipoLocal" value="transito">
+                                <label for="transito">Trânsito</label>
+                            </div>
+                        </div>
+                        <div class="error-message">Selecione pelo menos uma opção</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Gravidade</label>
+                        <div class="checkbox-group" data-required="true" data-name="gravidade">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="comAfastamento" name="gravidade" value="comAfastamento">
+                                <label for="comAfastamento">Com afastamento</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="semAfastamento" name="gravidade" value="semAfastamento">
+                                <label for="semAfastamento">Sem afastamento</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="fatal" name="gravidade" value="fatal">
+                                <label for="fatal">Fatal</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="danosMateriais" name="gravidade" value="danosMateriais">
+                                <label for="danosMateriais">Danos materiais</label>
+                            </div>
+                        </div>
+                        <div class="error-message">Selecione pelo menos uma opção</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Caracterização do Acidente -->
+            <div class="form-section">
+                <h2 class="section-title">4. Caracterização do Acidente</h2>
+                <div class="form-group full-width">
+                    <label for="descricaoResumida" class="required">Descrição resumida</label>
+                    <textarea id="descricaoResumida" name="descricaoResumida" placeholder="Descreva resumidamente o que aconteceu..." required></textarea>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+
+                <!-- Natureza da lesão - Colaborador -->
+                <div class="subsection" style="margin-top: 32px;">
+                    <h3 class="subsection-title">Natureza da lesão - Colaborador</h3>
+                    <div class="form-group">
+                        <label class="required">Natureza da Lesão</label>
+                        <div class="checkbox-group" data-required="true" data-name="naturezaLesaoColab">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="corteColab" name="naturezaLesaoColab" value="corte">
+                                <label for="corteColab">Corte</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="escoriacoesColab" name="naturezaLesaoColab" value="escoriacoes">
+                                <label for="escoriacoesColab">Escoriações</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="torcaoColab" name="naturezaLesaoColab" value="torcao">
+                                <label for="torcaoColab">Torção</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="contusaoColab" name="naturezaLesaoColab" value="contusao">
+                                <label for="contusaoColab">Contusão</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="fraturaColab" name="naturezaLesaoColab" value="fratura">
+                                <label for="fraturaColab">Fratura</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="amputacaoColab" name="naturezaLesaoColab" value="amputacao">
+                                <label for="amputacaoColab">Amputação</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="queimaduraColab" name="naturezaLesaoColab" value="queimadura">
+                                <label for="queimaduraColab">Queimadura</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="intoxicacaoColab" name="naturezaLesaoColab" value="intoxicacao">
+                                <label for="intoxicacaoColab">Intoxicação</label>
+                            </div>
+                        </div>
+                        <div class="error-message">Selecione pelo menos uma opção</div>
+                    </div>
+                    <div class="form-grid two-columns" style="margin-top: 16px;">
+                        <div class="form-group">
+                            <label for="outrosLesaoColab">Outras Lesões</label>
+                            <input type="text" id="outrosLesaoColab" name="outrosLesaoColab" placeholder="Especifique outras lesões">
+                        </div>
+                        <div class="form-group">
+                            <label for="parteCorpoColab" class="required">Parte do corpo atingida</label>
+                            <input type="text" id="parteCorpoColab" name="parteCorpoColab" required>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Natureza da lesão - Terceiro (condicional) -->
+                <div class="subsection" id="lesaoTerceiroSection" style="display: none; margin-top: 24px;">
+                    <h3 class="subsection-title">Natureza da lesão - Terceiro</h3>
+                    <div class="form-group">
+                        <label class="required">Natureza da Lesão</label>
+                        <div class="checkbox-group" data-required="conditional" data-name="naturezaLesaoTerceiro">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="corteTerceiro" name="naturezaLesaoTerceiro" value="corte">
+                                <label for="corteTerceiro">Corte</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="escoriacoesTerceiro" name="naturezaLesaoTerceiro" value="escoriacoes">
+                                <label for="escoriacoesTerceiro">Escoriações</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="torcaoTerceiro" name="naturezaLesaoTerceiro" value="torcao">
+                                <label for="torcaoTerceiro">Torção</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="contusaoTerceiro" name="naturezaLesaoTerceiro" value="contusao">
+                                <label for="contusaoTerceiro">Contusão</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="fraturaTerceiro" name="naturezaLesaoTerceiro" value="fratura">
+                                <label for="fraturaTerceiro">Fratura</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="amputacaoTerceiro" name="naturezaLesaoTerceiro" value="amputacao">
+                                <label for="amputacaoTerceiro">Amputação</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="queimaduraTerceiro" name="naturezaLesaoTerceiro" value="queimadura">
+                                <label for="queimaduraTerceiro">Queimadura</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="intoxicacaoTerceiro" name="naturezaLesaoTerceiro" value="intoxicacao">
+                                <label for="intoxicacaoTerceiro">Intoxicação</label>
+                            </div>
+                        </div>
+                        <div class="error-message">Selecione pelo menos uma opção</div>
+                    </div>
+                    <div class="form-grid two-columns" style="margin-top: 16px;">
+                        <div class="form-group">
+                            <label for="outrosLesaoTerceiro">Outras Lesões</label>
+                            <input type="text" id="outrosLesaoTerceiro" name="outrosLesaoTerceiro" placeholder="Especifique outras lesões">
+                        </div>
+                        <div class="form-group">
+                            <label for="parteCorpoTerceiro" class="required">Parte do corpo atingida</label>
+                            <input type="text" id="parteCorpoTerceiro" name="parteCorpoTerceiro">
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 24px;">
+                    <label class="required">Houve vítimas adicionais</label>
+                    <div class="radio-group" data-required="true" data-name="vitimasAdicionais">
+                        <div class="radio-item">
+                            <input type="radio" id="vitimasAdicionaisSim" name="vitimasAdicionais" value="sim" required>
+                            <label for="vitimasAdicionaisSim">Sim</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="vitimasAdicionaisNao" name="vitimasAdicionais" value="nao" required>
+                            <label for="vitimasAdicionaisNao">Não</label>
+                        </div>
+                    </div>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">5. Veículos / Equipamentos</h2>
+                <div class="form-group">
+                    <label class="required">Envolvimento de veículos/equipamentos</label>
+                    <div class="radio-group" data-required="true" data-name="envolvimentoVeiculo">
+                        <div class="radio-item">
+                            <input type="radio" id="naoHouveVeiculo" name="envolvimentoVeiculo" value="naoHouve" required>
+                            <label for="naoHouveVeiculo">Não houve</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="houveVeiculo" name="envolvimentoVeiculo" value="houve" required>
+                            <label for="houveVeiculo">Houve</label>
+                        </div>
+                    </div>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+                
+                <!-- Seção condicional para veículos -->
+                <div id="veiculoDetailsSection" style="display: none; margin-top: 24px;">
+                    <div class="form-grid two-columns">
+                        <div class="form-group">
+                            <label class="required">Tipo</label>
+                            <div class="checkbox-group" data-required="conditional" data-name="tipoVeiculo">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="veiculoLeve" name="tipoVeiculo" value="leve">
+                                    <label for="veiculoLeve">Leve</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="veiculoPesado" name="tipoVeiculo" value="pesado">
+                                    <label for="veiculoPesado">Pesado</label>
+                                </div>
+                            </div>
+                            <input type="text" id="outroTipoVeiculo" name="outroTipoVeiculo" placeholder="Outro tipo..." style="margin-top: 8px;">
+                            <div class="error-message">Selecione pelo menos uma opção</div>
+                        </div>
+                    </div>
+                    <div class="form-grid two-columns" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label for="descricaoVeiculo" class="required">Descrição do veículo/equipamento</label>
+                            <input type="text" id="descricaoVeiculo" name="descricaoVeiculo">
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="placaVeiculo" class="required">Placa</label>
+                            <input type="text" id="placaVeiculo" name="placaVeiculo">
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Danos materiais -->
+                <div class="subsection" style="margin-top: 32px;">
+                    <h3 class="subsection-title">Danos materiais</h3>
+                    <div class="form-group">
+                        <label class="required">Ocorrência</label>
+                        <div class="radio-group" data-required="true" data-name="danosMateriais">
+                            <div class="radio-item">
+                                <input type="radio" id="naoHouveDanos" name="danosMateriais" value="naoHouve" required>
+                                <label for="naoHouveDanos">Não houve</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="houveDanos" name="danosMateriais" value="houve" required>
+                                <label for="houveDanos">Houve</label>
+                            </div>
+                        </div>
+                        <div class="error-message">Campo obrigatório</div>
+                    </div>
+                    
+                    <!-- Seção condicional para danos -->
+                    <div id="danosDetailsSection" style="display: none; margin-top: 24px;">
+                        <div class="form-grid two-columns">
+                            <div class="form-group">
+                                <label class="required">Nível dos Danos</label>
+                                <div class="checkbox-group" data-required="conditional" data-name="nivelDanos">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="danoLeve" name="nivelDanos" value="leve">
+                                        <label for="danoLeve">Leve</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="danoMedio" name="nivelDanos" value="medio">
+                                        <label for="danoMedio">Médio</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="danoAlto" name="nivelDanos" value="alto">
+                                        <label for="danoAlto">Alto</label>
+                                    </div>
+                                </div>
+                                <div class="error-message">Selecione pelo menos uma opção</div>
+                            </div>
+                        </div>
+                        <div class="form-grid two-columns" style="margin-top: 16px;">
+                            <div class="form-group">
+                                <label for="estimativaDanos" class="required">Estimativa</label>
+                                <div class="currency-input">
+                                    <input type="text" id="estimativaDanos" name="estimativaDanos" placeholder="0,00">
+                                </div>
+                                <div class="error-message">Campo obrigatório</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Veículo segurado</label>
+                                <div class="radio-group" data-required="conditional" data-name="veiculoSegurado">
+                                    <div class="radio-item">
+                                        <input type="radio" id="veiculoSeguradoSim" name="veiculoSegurado" value="sim">
+                                        <label for="veiculoSeguradoSim">Sim</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" id="veiculoSeguradoNao" name="veiculoSegurado" value="nao">
+                                        <label for="veiculoSeguradoNao">Não</label>
+                                    </div>
+                                </div>
+                                <div class="error-message">Campo obrigatório</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Análise de Causa (Passo a Passo) -->
+            <div class="form-section">
+                <h2 class="section-title">6. Análise de Causa (Passo a Passo)</h2>
+                <div class="form-group full-width">
+                    <label for="causouAcidente" class="required">1. O que causou o acidente?</label>
+                    <textarea id="causouAcidente" name="causouAcidente" placeholder="Descreva a causa direta do acidente..." required></textarea>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+                <div class="form-group full-width" style="margin-top: 24px;">
+                    <label for="contribuiuFator" class="required">2. O que contribuiu para esse fator?</label>
+                    <textarea id="contribuiuFator" name="contribuiuFator" placeholder="Identifique os fatores contribuintes..." required></textarea>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+                <div class="form-group full-width" style="margin-top: 24px;">
+                    <label for="comoEvitado" class="required">3. Como poderia ter sido evitado?</label>
+                    <textarea id="comoEvitado" name="comoEvitado" placeholder="Descreva as medidas que poderiam ter prevenido o acidente..." required></textarea>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+                <div class="form-group full-width" style="margin-top: 24px;">
+                    <label for="causaRaiz" class="required">4. Causa raiz identificada</label>
+                    <textarea id="causaRaiz" name="causaRaiz" placeholder="Identifique a causa raiz fundamental..." required></textarea>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+            </div>
+
+            <!-- 7. Causas Prováveis -->
+            <div class="form-section">
+                <h2 class="section-title">7. Causas Prováveis</h2>
+                <div class="form-group">
+                    <label class="required">Causas</label>
+                    <div class="checkbox-group" data-required="true" data-name="causasProvaveis">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="atoInseguro" name="causasProvaveis" value="atoInseguro">
+                            <label for="atoInseguro">Ato inseguro</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="condicaoInsegura" name="causasProvaveis" value="condicaoInsegura">
+                            <label for="condicaoInsegura">Condição insegura</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="faltaTreinamento" name="causasProvaveis" value="faltaTreinamento">
+                            <label for="faltaTreinamento">Falta de treinamento</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="faltaEPI" name="causasProvaveis" value="faltaEPI">
+                            <label for="faltaEPI">Falta ou inadequação de EPI</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="falhaProcedimento" name="causasProvaveis" value="falhaProcedimento">
+                            <label for="falhaProcedimento">Falha de procedimento</label>
+                        </div>
+                    </div>
+                    <div class="error-message">Selecione pelo menos uma opção</div>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label for="outrasCausas">Outras Causas</label>
+                    <input type="text" id="outrasCausas" name="outrasCausas" placeholder="Especifique outras causas...">
+                </div>
+            </div>
+
+            <!-- 8. Ações Corretivas/Preventivas -->
+            <div class="form-section">
+                <h2 class="section-title">8. Ações Corretivas/Preventivas</h2>
+                <div class="form-group full-width">
+                    <label for="medidaImediata" class="required">Medida imediata</label>
+                    <textarea id="medidaImediata" name="medidaImediata" placeholder="Descreva as ações imediatas tomadas..." required></textarea>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+                <div class="form-group full-width" style="margin-top: 24px;">
+                    <label for="medidaPreventiva" class="required">Medida preventiva</label>
+                    <textarea id="medidaPreventiva" name="medidaPreventiva" placeholder="Descreva as ações preventivas a serem implementadas..." required></textarea>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+                <div class="form-grid two-columns" style="margin-top: 24px;">
+                    <div class="form-group">
+                        <label for="responsavel" class="required">Responsável</label>
+                        <input type="text" id="responsavel" name="responsavel" required>
+                        <div class="error-message">Campo obrigatório</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="prazo" class="required">Prazo</label>
+                        <input type="date" id="prazo" name="prazo" required>
+                        <div class="error-message">Campo obrigatório</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. Anexos -->
+            <div class="form-section">
+                <h2 class="section-title">9. Anexos</h2>
+                
+                <!-- Upload de Fotos -->
+                <div class="form-group full-width">
+                    <label class="required">Fotos do acidente</label>
+                    <div class="file-upload-area" id="fotoUploadArea" data-required="true">
+                        <div class="file-upload-icon">📷</div>
+                        <div class="file-upload-text">Clique aqui ou arraste fotos</div>
+                        <div class="file-upload-hint">PNG, JPG, JPEG - Máximo 10MB por arquivo</div>
+                        <input type="file" id="fotoInput" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div id="fotoList" class="file-list"></div>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+
+                <!-- Upload de Croqui -->
+                <div class="form-group full-width" style="margin-top: 24px;">
+                    <label class="required">Croqui do local</label>
+                    <div class="file-upload-area" id="croquiUploadArea" data-required="true">
+                        <div class="file-upload-icon">📐</div>
+                        <div class="file-upload-text">Clique aqui ou arraste o croqui</div>
+                        <div class="file-upload-hint">PDF, PNG, JPG, JPEG - Máximo 10MB por arquivo</div>
+                        <input type="file" id="croquiInput" accept=".pdf,.png,.jpg,.jpeg" style="display: none;">
+                    </div>
+                    <div id="croquiList" class="file-list"></div>
+                    <div class="error-message">Campo obrigatório</div>
+                </div>
+
+                <!-- Upload de Boletim (Opcional) -->
+                <div class="form-group full-width" style="margin-top: 24px;">
+                    <label>Boletim de ocorrência</label>
+                    <div class="file-upload-area" id="boletimUploadArea">
+                        <div class="file-upload-icon">📋</div>
+                        <div class="file-upload-text">Clique aqui ou arraste o boletim</div>
+                        <div class="file-upload-hint">PDF, DOC, DOCX - Máximo 10MB por arquivo</div>
+                        <input type="file" id="boletimInput" accept=".pdf,.doc,.docx" style="display: none;">
+                    </div>
+                    <div id="boletimList" class="file-list"></div>
+                </div>
+
+                <!-- Upload de Outros Documentos (Opcional) -->
+                <div class="form-group full-width" style="margin-top: 24px;">
+                    <label>Outros documentos</label>
+                    <div class="file-upload-area" id="outrosUploadArea">
+                        <div class="file-upload-icon">📎</div>
+                        <div class="file-upload-text">Clique aqui ou arraste outros arquivos</div>
+                        <div class="file-upload-hint">PDF, PNG, JPG, JPEG, DOC, DOCX - Máximo 10MB por arquivo</div>
+                        <input type="file" id="outrosInput" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" style="display: none;">
+                    </div>
+                    <div id="outrosList" class="file-list"></div>
+                </div>
+            </div>
+
+            <!-- 10. Equipe de investigação -->
+            <div class="form-section">
+                <h2 class="section-title">10. Equipe de investigação</h2>
+                <div class="signature-section">
+                    <div class="form-grid two-columns">
+                        <div class="form-group">
+                            <label for="nomeInvestigador" class="required">Nome do Investigador</label>
+                            <input type="text" id="nomeInvestigador" name="nomeInvestigador" required>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dataInvestigacao" class="required">Data da Investigação</label>
+                            <input type="date" id="dataInvestigacao" name="dataInvestigacao" required>
+                            <div class="error-message">Campo obrigatório</div>
+                        </div>
+                    </div>
+                    <div class="form-group full-width" style="margin-top: 24px;">
+                        <label for="assinatura" class="required">Responsável pela assinatura</label>
+                        <input type="text" id="assinatura" name="assinatura" placeholder="Nome completo para assinatura digital" required>
+                        <div class="error-message">Campo obrigatório</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botão de Envio -->
+            <div class="submit-container">
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Gerar Relatório de Investigação
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let uploadedFiles = {
+            foto: [],
+            croqui: [],
+            boletim: [],
+            outros: []
+        };
+
+        // Função para converter primeira letra em maiúscula
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Função para formatar valores de checkbox/radio para exibição
+        function formatValue(value) {
+            const translations = {
+                'sim': 'Sim',
+                'nao': 'Não',
+                'atoInseguro': 'Ato inseguro',
+                'condicaoInsegura': 'Condição insegura',
+                'faltaTreinamento': 'Falta de treinamento',
+                'faltaEPI': 'Falta ou inadequação de EPI',
+                'falhaProcedimento': 'Falha de procedimento',
+                'torcao': 'Torção',
+                'contusao': 'Contusão',
+                'fratura': 'Fratura',
+                'corte': 'Corte',
+                'escoriacoes': 'Escoriações',
+                'amputacao': 'Amputação',
+                'queimadura': 'Queimadura',
+                'intoxicacao': 'Intoxicação',
+                'interno': 'Interno',
+                'trajeto': 'Trajeto',
+                'transito': 'Trânsito',
+                'comAfastamento': 'Com afastamento',
+                'semAfastamento': 'Sem afastamento',
+                'fatal': 'Fatal',
+                'danosMateriais': 'Danos materiais',
+                'leve': 'Leve',
+                'pesado': 'Pesado',
+                'medio': 'Médio',
+                'alto': 'Alto',
+                'houve': 'Houve',
+                'naoHouve': 'Não houve'
+            };
+            
+            return translations[value] || capitalizeFirst(value);
+        }
+
+        // Máscara para CPF
+        function applyCPFMask(value) {
+            return value
+                .replace(/\D/g, '')
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+                .replace(/(-\d{2})\d+?$/, '$1');
+        }
+
+        // Máscara para telefone
+        function applyPhoneMask(value) {
+            return value
+                .replace(/\D/g, '')
+                .replace(/(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{4})(\d)/, '$1-$2')
+                .replace(/(\d{4})-(\d)(\d{4})/, '$1$2-$3')
+                .replace(/(-\d{4})\d+?$/, '$1');
+        }
+
+        // Máscara para valores monetários
+        function applyCurrencyMask(value) {
+            value = value.replace(/\D/g, '');
+            value = value.replace(/(\d)(\d{2})$/, '$1,$2');
+            value = value.replace(/(?=(\d{3})+(\D))\B/g, '.');
+            return value;
+        }
+
+        // Aplicar máscaras
+        document.getElementById('cpfTerceiro').addEventListener('input', function(e) {
+            e.target.value = applyCPFMask(e.target.value);
+        });
+
+        document.getElementById('telefoneTerceiro').addEventListener('input', function(e) {
+            e.target.value = applyPhoneMask(e.target.value);
+        });
+
+        document.getElementById('estimativaDanos').addEventListener('input', function(e) {
+            e.target.value = applyCurrencyMask(e.target.value);
+        });
+
+        // Função para limpar campos condicionais
+        function clearConditionalFields(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                // Limpar inputs de texto
+                const textInputs = container.querySelectorAll('input[type="text"], input[type="tel"], textarea');
+                textInputs.forEach(input => {
+                    input.value = '';
+                    input.required = false;
+                    hideError(input);
+                });
+
+                // Desmarcar e limpar radio buttons
+                const radioInputs = container.querySelectorAll('input[type="radio"]');
+                radioInputs.forEach(input => {
+                    input.checked = false;
+                    input.required = false;
+                });
+
+                // Desmarcar checkboxes
+                const checkboxInputs = container.querySelectorAll('input[type="checkbox"]');
+                checkboxInputs.forEach(input => {
+                    input.checked = false;
+                });
+
+                // Remover obrigatoriedade de grupos
+                const radioGroups = container.querySelectorAll('[data-required="true"]');
+                radioGroups.forEach(group => {
+                    group.setAttribute('data-required', 'conditional');
+                    group.classList.remove('error');
+                    const errorDiv = group.parentNode.querySelector('.error-message');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                });
+            }
+        }
+
+        // Controle de exibição de seções condicionais
+        document.querySelectorAll('input[name="houveTerceiro"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const terceiroSection = document.getElementById('terceiroSection');
+                const lesaoTerceiroSection = document.getElementById('lesaoTerceiroSection');
+                
+                if (this.value === 'sim') {
+                    terceiroSection.style.display = 'block';
+                    lesaoTerceiroSection.style.display = 'block';
+                    
+                    // Tornar campos obrigatórios
+                    document.getElementById('nomeTerceiro').required = true;
+                    document.getElementById('telefoneTerceiro').required = true;
+                    document.getElementById('enderecoTerceiro').required = true;
+                    document.getElementById('cpfTerceiro').required = true;
+                    document.getElementById('parteCorpoTerceiro').required = true;
+                    
+                    // Tornar grupos obrigatórios
+                    document.querySelectorAll('#terceiroSection [data-required="conditional"]').forEach(group => {
+                        group.setAttribute('data-required', 'true');
+                    });
+                    document.querySelectorAll('#lesaoTerceiroSection [data-required="conditional"]').forEach(group => {
+                        group.setAttribute('data-required', 'true');
+                    });
+                } else {
+                    terceiroSection.style.display = 'none';
+                    lesaoTerceiroSection.style.display = 'none';
+                    
+                    // Limpar campos condicionais
+                    clearConditionalFields('terceiroSection');
+                    clearConditionalFields('lesaoTerceiroSection');
+                }
+            });
+        });
+
+        // Controle de veículos
+        document.querySelectorAll('input[name="envolvimentoVeiculo"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const veiculoSection = document.getElementById('veiculoDetailsSection');
+                
+                if (this.value === 'houve') {
+                    veiculoSection.style.display = 'block';
+                    
+                    // Tornar campos obrigatórios
+                    document.getElementById('descricaoVeiculo').required = true;
+                    document.getElementById('placaVeiculo').required = true;
+                    
+                    // Tornar grupos obrigatórios
+                    document.querySelectorAll('#veiculoDetailsSection [data-required="conditional"]').forEach(group => {
+                        group.setAttribute('data-required', 'true');
+                    });
+                } else {
+                    veiculoSection.style.display = 'none';
+                    clearConditionalFields('veiculoDetailsSection');
+                }
+            });
+        });
+
+        // Controle de danos materiais
+        document.querySelectorAll('input[name="danosMateriais"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const danosSection = document.getElementById('danosDetailsSection');
+                
+                if (this.value === 'houve') {
+                    danosSection.style.display = 'block';
+                    
+                    // Tornar campos obrigatórios
+                    document.getElementById('estimativaDanos').required = true;
+                    
+                    // Tornar grupos obrigatórios
+                    document.querySelectorAll('#danosDetailsSection [data-required="conditional"]').forEach(group => {
+                        group.setAttribute('data-required', 'true');
+                    });
+                } else {
+                    danosSection.style.display = 'none';
+                    clearConditionalFields('danosDetailsSection');
+                }
+            });
+        });
+
+        // Sistema de upload de arquivos
+        function setupFileUpload(uploadAreaId, inputId, listId, fileType) {
+            const uploadArea = document.getElementById(uploadAreaId);
+            const fileInput = document.getElementById(inputId);
+            const fileList = document.getElementById(listId);
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-blue)';
+                uploadArea.style.background = 'var(--light-blue)';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'var(--border-color)';
+                uploadArea.style.background = 'var(--light-gray)';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--border-color)';
+                uploadArea.style.background = 'var(--light-gray)';
+                handleFiles(e.dataTransfer.files, fileType, fileList);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files, fileType, fileList);
+            });
+        }
+
+        // Configurar uploads
+        setupFileUpload('fotoUploadArea', 'fotoInput', 'fotoList', 'foto');
+        setupFileUpload('croquiUploadArea', 'croquiInput', 'croquiList', 'croqui');
+        setupFileUpload('boletimUploadArea', 'boletimInput', 'boletimList', 'boletim');
+        setupFileUpload('outrosUploadArea', 'outrosInput', 'outrosList', 'outros');
+
+        function handleFiles(files, fileType, listElement) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+
+            Array.from(files).forEach(file => {
+                if (file.size > maxSize) {
+                    alert(`Arquivo muito grande: ${file.name}. Máximo 10MB.`);
+                    return;
+                }
+
+                if (uploadedFiles[fileType].find(f => f.name === file.name && f.size === file.size)) {
+                    alert(`Arquivo já adicionado: ${file.name}`);
+                    return;
+                }
+
+                uploadedFiles[fileType].push(file);
+                displayFile(file, fileType, listElement);
+                
+                // Atualizar validação
+                if (fileType === 'foto' || fileType === 'croqui') {
+                    const uploadArea = document.getElementById(fileType === 'foto' ? 'fotoUploadArea' : 'croquiUploadArea');
+                    uploadArea.classList.remove('error');
+                    const errorMsg = uploadArea.parentNode.querySelector('.error-message');
+                    if (errorMsg) errorMsg.style.display = 'none';
+                }
+            });
+        }
+
+        function displayFile(file, fileType, listElement) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            fileItem.innerHTML = `
+                <span>${file.name} (${formatFileSize(file.size)})</span>
+                <button type="button" onclick="removeFile('${file.name}', ${file.size}, '${fileType}')">Remover</button>
+            `;
+
+            listElement.appendChild(fileItem);
+        }
+
+        function removeFile(fileName, fileSize, fileType) {
+            uploadedFiles[fileType] = uploadedFiles[fileType].filter(f => !(f.name === fileName && f.size === fileSize));
+            
+            const listElement = document.getElementById(fileType === 'foto' ? 'fotoList' : 
+                                                     fileType === 'croqui' ? 'croquiList' :
+                                                     fileType === 'boletim' ? 'boletimList' : 'outrosList');
+            
+            listElement.innerHTML = '';
+            uploadedFiles[fileType].forEach(file => displayFile(file, fileType, listElement));
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Auto-preenchimento da data de investigação
+        document.getElementById('dataInvestigacao').valueAsDate = new Date();
+
+        // Sistema de validação
+        function showError(element, message) {
+            element.classList.add('error');
+            const errorDiv = element.parentNode.querySelector('.error-message');
+            if (errorDiv) {
+                errorDiv.textContent = message || 'Campo obrigatório';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function hideError(element) {
+            element.classList.remove('error');
+            const errorDiv = element.parentNode.querySelector('.error-message');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        function validateRadioGroup(groupName, required = true) {
+            if (!required) return true;
+            
+            const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+            const checked = document.querySelector(`input[name="${groupName}"]:checked`);
+            const group = document.querySelector(`[data-name="${groupName}"]`);
+            
+            if (!checked) {
+                if (group) {
+                    group.classList.add('error');
+                    const errorDiv = group.parentNode.querySelector('.error-message');
+                    if (errorDiv) errorDiv.style.display = 'block';
+                }
+                return false;
+            } else {
+                if (group) {
+                    group.classList.remove('error');
+                    const errorDiv = group.parentNode.querySelector('.error-message');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                }
+                return true;
+            }
+        }
+
+        function validateCheckboxGroup(groupName, required = true) {
+            if (!required) return true;
+            
+            const checkboxes = document.querySelectorAll(`input[name="${groupName}"]`);
+            const checked = document.querySelectorAll(`input[name="${groupName}"]:checked`);
+            const group = document.querySelector(`[data-name="${groupName}"]`);
+            
+            if (checked.length === 0) {
+                if (group) {
+                    group.classList.add('error');
+                    const errorDiv = group.parentNode.querySelector('.error-message');
+                    if (errorDiv) errorDiv.style.display = 'block';
+                }
+                return false;
+            } else {
+                if (group) {
+                    group.classList.remove('error');
+                    const errorDiv = group.parentNode.querySelector('.error-message');
+                    if (errorDiv) errorDiv.style.display = 'none';
+                }
+                return true;
+            }
+        }
+
+        function validateFileUpload(fileType, required = true) {
+            if (!required) return true;
+            
+            const uploadArea = document.getElementById(fileType + 'UploadArea');
+            if (!uploadArea) return false;
+            
+            const hasFiles = uploadedFiles[fileType] && uploadedFiles[fileType].length > 0;
+            
+            if (!hasFiles) {
+                uploadArea.classList.add('error');
+                const errorDiv = uploadArea.parentNode.querySelector('.error-message');
+                if (errorDiv) errorDiv.style.display = 'block';
+                return false;
+            } else {
+                uploadArea.classList.remove('error');
+                const errorDiv = uploadArea.parentNode.querySelector('.error-message');
+                if (errorDiv) errorDiv.style.display = 'none';
+                return true;
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            // Validar campos de texto obrigatórios
+            const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    showError(field);
+                    isValid = false;
+                } else {
+                    hideError(field);
+                }
+            });
+
+            // Validar grupos de radio obrigatórios
+            const radioGroups = ['treinamento', 'usoEpiColab', 'epiAdequadoColab', 'reincidencia', 'houveTerceiro', 'vitimasAdicionais', 'envolvimentoVeiculo', 'danosMateriais'];
+            radioGroups.forEach(groupName => {
+                const groupElement = document.querySelector(`[data-name="${groupName}"]`);
+                const isRequired = groupElement && groupElement.getAttribute('data-required') === 'true';
+                if (isRequired && !validateRadioGroup(groupName)) isValid = false;
+            });
+
+            // Validar grupos de checkbox obrigatórios
+            const checkboxGroups = ['tipoLocal', 'gravidade', 'naturezaLesaoColab', 'causasProvaveis'];
+            checkboxGroups.forEach(groupName => {
+                const groupElement = document.querySelector(`[data-name="${groupName}"]`);
+                const isRequired = groupElement && groupElement.getAttribute('data-required') === 'true';
+                if (isRequired && !validateCheckboxGroup(groupName)) isValid = false;
+            });
+
+            // Validações condicionais para terceiro
+            const houveTerc = document.querySelector('input[name="houveTerceiro"]:checked');
+            if (houveTerc && houveTerc.value === 'sim') {
+                if (!validateRadioGroup('usoEpiTerceiro')) isValid = false;
+                if (!validateRadioGroup('epiAdequadoTerceiro')) isValid = false;
+                if (!validateCheckboxGroup('naturezaLesaoTerceiro')) isValid = false;
+            }
+
+            // Validações condicionais para veículos
+            const houveVeic = document.querySelector('input[name="envolvimentoVeiculo"]:checked');
+            if (houveVeic && houveVeic.value === 'houve') {
+                if (!validateCheckboxGroup('tipoVeiculo')) isValid = false;
+            }
+
+            // Validações condicionais para danos
+            const houveDanos = document.querySelector('input[name="danosMateriais"]:checked');
+            if (houveDanos && houveDanos.value === 'houve') {
+                if (!validateCheckboxGroup('nivelDanos')) isValid = false;
+                if (!validateRadioGroup('veiculoSegurado')) isValid = false;
+            }
+
+            // Validar uploads obrigatórios
+            if (!validateFileUpload('foto')) isValid = false;
+            if (!validateFileUpload('croqui')) isValid = false;
+
+            return isValid;
+        }
+
+        // Validação em tempo real
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    showError(this);
+                } else {
+                    hideError(this);
+                }
+            });
+        });
+
+        // Submissão do formulário com formatação dos valores
+        document.getElementById('investigationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                const firstError = document.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Processando...';
+            submitBtn.disabled = true;
+
+            // Preparar dados para envio com formatação corrigida
+            const formData = new FormData();
+            
+            // Coletar todos os campos do formulário
+            const inputs = this.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    if (input.checked) {
+                        const currentValue = formData.get(input.name);
+                        const formattedValue = formatValue(input.value);
+                        if (currentValue) {
+                            formData.set(input.name, currentValue + ', ' + formattedValue);
+                        } else {
+                            formData.set(input.name, formattedValue);
+                        }
+                    }
+                } else if (input.type === 'radio') {
+                    if (input.checked) {
+                        formData.set(input.name, formatValue(input.value));
+                    }
+                } else if (input.value.trim()) {
+                    formData.set(input.name, input.value.trim());
+                }
+            });
+            
+            // Adicionar arquivos
+            Object.keys(uploadedFiles).forEach(fileType => {
+                uploadedFiles[fileType].forEach((file, index) => {
+                    formData.append(`${fileType}_${index}`, file);
+                });
+            });
+
+            // Enviar para webhook n8n
+            fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/registro-acidente', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Relatório de investigação enviado com sucesso!\n\nDados coletados e documento gerado.');
+                this.reset();
+                uploadedFiles = { foto: [], croqui: [], boletim: [], outros: [] };
+                document.querySelectorAll('.file-list').forEach(list => list.innerHTML = '');
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar formulário. Tente novamente.');
+            })
+            .finally(() => {
+                submitBtn.textContent = 'Gerar Relatório de Investigação';
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
