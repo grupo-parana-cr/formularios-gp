@@ -939,10 +939,10 @@
             const formData = new FormData(this);
 
             // Aqui você pode enviar para seu webhook n8n
-            // fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/vistoria-veicular', {
-            //     method: 'POST',
-            //     body: formData
-            // })
+            fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/checklist-veicular', {
+                method: 'POST',
+                body: formData
+            })
 
             setTimeout(() => {
                 alert('Vistoria registrada com sucesso!');
