@@ -614,7 +614,7 @@
                 </div>
             </div>
 
-            <div class="form-section" data-section="10">
+            <!-- <div class="form-section" data-section="10">
                 <h2 class="section-title">Itens de Vistoria</h2>
                 <div class="vistoria-item">
                     <div class="vistoria-titulo">Documentação do veículo</div>
@@ -635,7 +635,7 @@
                     </div>
                     <div class="error-message">Selecione uma opção</div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="form-section" data-section="11">
                 <h2 class="section-title">Itens de Vistoria</h2>
@@ -764,7 +764,8 @@
         // Configurar event listeners para os radios
         const radioNames = [
             'nivelOleo', 'nivelAgua', 'condicaoPneus', 'luzes', 'freios',
-            'limpador', 'combustivel', 'itensObrigatorios', 'documentacao',
+            'limpador', 'combustivel', 'itensObrigatorios', 
+            //'documentacao',
             'cintoSeguranca', 'ruidosVibracoes', 'higienizacao'
         ];
 
@@ -796,9 +797,9 @@
             });
         });
 
-        // Sistema de navegação
+        // Sistema de navegação (ajustar caso necessario se for usar documentacao para 14)
         let currentSection = 1;
-        const totalSections = 14;
+        const totalSections = 13;
 
         function updateSection() {
             document.querySelectorAll('.form-section').forEach(section => {
