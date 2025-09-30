@@ -938,13 +938,18 @@
 
             const formData = new FormData(this);
 
-            // Aqui você pode enviar para seu webhook n8n
+            // Enviar para webhook n8n
             fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/checklist-veicular', {
                 method: 'POST',
                 body: formData
             })
-
-            setTimeout(() => {
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao enviar formulário');
+                }
+                return response.json();
+            })
+            .then(data => {
                 alert('Vistoria registrada com sucesso!');
                 this.reset();
                 
@@ -962,7 +967,13 @@
                 
                 submitBtn.textContent = 'Enviar';
                 submitBtn.disabled = false;
-            }, 1500);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar vistoria. Verifique sua conexão e tente novamente.');
+                submitBtn.textContent = 'Enviar';
+                submitBtn.disabled = false;
+            });
         });
     </script>
 </body>
