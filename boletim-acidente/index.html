@@ -18,12 +18,6 @@
             --white: #FFFFFF;
         }
 
-        .logo {
-            max-width: 90px;
-            display: block;
-            margin: 40px auto 20px auto;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -48,9 +42,19 @@
         .header {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
             color: white;
-            padding: 24px 20px;
+            padding: 24px 20px 32px 20px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0, 74, 201, 0.2);
+            position: relative;
+        }
+
+        .header .logo {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin: 0 auto 20px auto;
+            max-width: 100px;
         }
 
         .header h1 {
@@ -636,15 +640,13 @@
             }
         });
 
-        // Upload de fotos
+        // Upload de fotos - Simplificado para melhor compatibilidade mobile
         const photoUploadArea = document.getElementById('photoUploadArea');
         const photoInput = document.getElementById('photoInput');
         const photoPreviewGrid = document.getElementById('photoPreviewGrid');
 
-        // Melhor suporte para mobile - click direto na área
-        photoUploadArea.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        // Evento principal de click
+        photoUploadArea.addEventListener('click', function(e) {
             if (uploadedPhotos.length < maxPhotos) {
                 photoInput.click();
             } else {
@@ -652,15 +654,15 @@
             }
         });
 
-        // Prevenir que cliques em outros elementos ativem o input
-        photoUploadArea.addEventListener('touchstart', (e) => {
+        // Touch para mobile
+        photoUploadArea.addEventListener('touchend', function(e) {
             e.preventDefault();
             if (uploadedPhotos.length < maxPhotos) {
                 photoInput.click();
             } else {
                 alert(`Máximo de ${maxPhotos} fotos permitidas`);
             }
-        }, { passive: false });
+        });
 
         // Drag and drop
         photoUploadArea.addEventListener('dragover', (e) => {
