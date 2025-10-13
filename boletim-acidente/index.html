@@ -274,18 +274,23 @@
             background: var(--light-gray);
             border-radius: 10px;
             margin-bottom: 12px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .whatsapp-option input[type="checkbox"] {
             width: 24px;
             height: 24px;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .whatsapp-option label {
             margin: 0;
             cursor: pointer;
             flex: 1;
+            user-select: none;
         }
 
         .whatsapp-icon {
@@ -549,8 +554,8 @@
                     <div class="photo-upload-area" id="photoUploadArea">
                         <div class="photo-icon">📸</div>
                         <div class="photo-text">Toque para adicionar fotos</div>
-                        <div class="photo-hint">Máximo 5 fotos • JPG, PNG • Até 5MB cada</div>
-                        <input type="file" id="photoInput" accept="image/*" capture="environment" multiple style="display: none;">
+                        <div class="photo-hint">Câmera ou Galeria • Máximo 5 fotos • Até 5MB cada</div>
+                        <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
                     </div>
                     <div class="photo-preview-grid" id="photoPreviewGrid"></div>
                 </div>
@@ -559,10 +564,10 @@
             <!-- Seção 7: WhatsApp (Opcional) -->
             <div class="form-section">
                 <div class="section-title">💬 Notificação WhatsApp</div>
-                <div class="whatsapp-option">
+                <div class="whatsapp-option" onclick="document.getElementById('receberWhatsapp').click();">
                     <span class="whatsapp-icon">📱</span>
-                    <input type="checkbox" id="receberWhatsapp" name="receberWhatsapp">
-                    <label for="receberWhatsapp">Desejo receber uma cópia via WhatsApp</label>
+                    <input type="checkbox" id="receberWhatsapp" name="receberWhatsapp" onclick="event.stopPropagation();">
+                    <label for="receberWhatsapp" onclick="event.stopPropagation();">Desejo receber uma cópia via WhatsApp</label>
                 </div>
                 <div class="whatsapp-input-container" id="whatsappInputContainer">
                     <div class="form-group">
@@ -629,13 +634,26 @@
         const photoInput = document.getElementById('photoInput');
         const photoPreviewGrid = document.getElementById('photoPreviewGrid');
 
-        photoUploadArea.addEventListener('click', () => {
+        // Melhor suporte para mobile - click direto na área
+        photoUploadArea.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if (uploadedPhotos.length < maxPhotos) {
                 photoInput.click();
             } else {
                 alert(`Máximo de ${maxPhotos} fotos permitidas`);
             }
         });
+
+        // Prevenir que cliques em outros elementos ativem o input
+        photoUploadArea.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (uploadedPhotos.length < maxPhotos) {
+                photoInput.click();
+            } else {
+                alert(`Máximo de ${maxPhotos} fotos permitidas`);
+            }
+        }, { passive: false });
 
         // Drag and drop
         photoUploadArea.addEventListener('dragover', (e) => {
