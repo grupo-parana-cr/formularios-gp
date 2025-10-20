@@ -53,7 +53,24 @@
     .submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--primary-red),#c92f32);color:#fff;border:none;border-radius:12px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(237,56,59,.3)}
     .submit-btn.loading::after{content:"";margin-left:8px;display:inline-block;width:16px;height:16px;border:2px solid #fff;border-radius:50%;border-top-color:transparent;animation:spin .8s linear infinite}
     .submit-btn:disabled{background:var(--disabled-gray)!important;box-shadow:none;cursor:not-allowed;opacity:1}
-    .submit-hint{font-size:.78rem;color:var(--text-secondary);margin-top:6px;text-align:center}
+    
+    /* 🔥 AJUSTE: Linha-guia escondida por padrão */
+    .submit-hint{
+      font-size:.78rem;
+      color:var(--text-secondary);
+      margin-top:6px;
+      text-align:center;
+      display:none; /* 🔥 ESCONDIDA INICIALMENTE */
+      animation: fadeIn 0.3s ease;
+    }
+    .submit-hint.show{
+      display:block;
+    }
+    @keyframes fadeIn{
+      from{opacity:0}
+      to{opacity:1}
+    }
+    
     @keyframes spin{to{transform:rotate(360deg)}}
     .error-message{color:var(--error-red);font-size:.85em;margin-top:6px;display:none}
     .form-group.error input,.form-group.error textarea,.form-group.error select{border-color:var(--error-red)}
@@ -192,7 +209,7 @@
 
     <div class="submit-container">
       <button type="submit" form="boletimForm" class="submit-btn" id="submitBtn">Enviar Boletim</button>
-      <div class="submit-hint">Isso pode levar alguns segundos.</div>
+      <div class="submit-hint" id="submitHint">Isso pode levar alguns segundos.</div>
     </div>
   </div>
 
@@ -281,10 +298,12 @@
     }
 
     document.getElementById('btnRegistrarNovo').addEventListener('click',()=>location.reload());
+    
+    // 🔥 AJUSTE: Aumentar tempo do agradecimento de 1.4s para 3.5s
     document.getElementById('btnFinalizar').addEventListener('click',()=>{
       document.getElementById('successActions').style.display='none';
       document.getElementById('thanks').style.display='block';
-      setTimeout(()=>location.reload(),1400);
+      setTimeout(()=>location.reload(), 3500); // 🔥 MUDOU DE 1400 para 3500
     });
 
     function validateForm(){
@@ -304,9 +323,12 @@
       if(!validateForm()){ alert('Por favor, preencha todos os campos obrigatórios corretamente.'); return; }
 
       const btn=document.getElementById('submitBtn');
+      const hint=document.getElementById('submitHint');
+      
       btn.disabled=true;
       btn.classList.add('loading');
       btn.textContent='Enviando 🚀 Aguarde na tela';
+      hint.classList.add('show'); // 🔥 MOSTRA A LINHA-GUIA APÓS CLICAR
 
       const fd=new FormData();
       fd.append('tipo',document.querySelector('input[name="tipo"]:checked').value);
@@ -322,7 +344,7 @@
       uploadedPhotos.forEach((p,i)=>fd.append(`foto_${i}`,p));
 
       try{
-        const r=await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/boletim-acidente',{method:'POST',body:fd});
+        const r=await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook/boletim-acidente',{method:'POST',body:fd});
         const data=await r.json();
         if(r.ok && (data.success || data.data)){ showSuccessModal(data); }
         else { throw new Error(data?.message || 'Erro ao enviar formulário'); }
@@ -333,10 +355,11 @@
         btn.disabled=false;
         btn.classList.remove('loading');
         btn.textContent='Enviar Boletim';
+        hint.classList.remove('show'); // 🔥 ESCONDE A LINHA-GUIA NOVAMENTE
       }
     });
 
-    // Auto-preencher data/hora como na V1
+    // Auto-preencher data/hora
     const now=new Date();
     document.getElementById('data').valueAsDate = now;
     document.getElementById('hora').value = now.toTimeString().slice(0,5);
