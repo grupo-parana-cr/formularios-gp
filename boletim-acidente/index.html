@@ -403,6 +403,7 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .success-modal.show {
@@ -415,6 +416,7 @@
             border-radius: 16px;
             text-align: center;
             max-width: 90%;
+            width: 400px;
             animation: modalPop 0.4s ease;
         }
 
@@ -441,7 +443,13 @@
 
         .success-content p {
             color: var(--text-secondary);
-            margin-bottom: 24px;
+            margin-bottom: 12px;
+            line-height: 1.8;
+        }
+
+        .success-content p strong {
+            color: var(--primary-blue);
+            font-weight: 700;
         }
 
         .success-btn {
@@ -452,6 +460,7 @@
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
+            margin-top: 12px;
         }
 
         @media (min-width: 768px) {
@@ -722,6 +731,27 @@
             uploadedPhotos.forEach((file, i) => createPhotoPreview(file, i));
         }
 
+        // 🔥 NOVA FUNÇÃO: Exibe o modal com os dados da resposta do webhook
+        function showSuccessModal(data) {
+            const modal = document.getElementById('successModal');
+            const successContent = modal.querySelector('.success-content');
+            
+            // Atualiza o conteúdo do modal com os dados recebidos do n8n
+            successContent.innerHTML = `
+                <div class="success-icon">✅</div>
+                <h2>Boletim Enviado!</h2>
+                <p><strong>Protocolo:</strong> ${data.data?.registroId || 'N/A'}</p>
+                <p><strong>Tipo:</strong> ${data.data?.tipo || 'N/A'}</p>
+                <p style="margin-top: 16px;">${data.message || 'O registro foi enviado com sucesso.'}</p>
+                <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 12px;">
+                    Em breve você receberá uma confirmação.
+                </p>
+                <button class="success-btn" onclick="location.reload()">Registrar Novo</button>
+            `;
+            
+            modal.classList.add('show');
+        }
+
         // Validação do formulário
         function validateForm() {
             let isValid = true;
@@ -756,7 +786,7 @@
             return isValid;
         }
 
-        // Envio do formulário
+        // 🔥 ENVIO DO FORMULÁRIO - CORRIGIDO PARA RECEBER A RESPOSTA DO WEBHOOK
         document.getElementById('boletimForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -795,14 +825,20 @@
                     body: formData
                 });
 
-                if (response.ok) {
-                    document.getElementById('successModal').classList.add('show');
+                // 🔥 MUDANÇA AQUI: Captura e processa a resposta JSON do webhook
+                const data = await response.json();
+                
+                console.log('✅ Resposta completa do webhook:', data);
+                
+                if (response.ok && data.success) {
+                    // Exibe os dados recebidos no modal
+                    showSuccessModal(data);
                 } else {
-                    throw new Error('Erro ao enviar formulário');
+                    throw new Error(data.message || 'Erro ao enviar formulário');
                 }
             } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao enviar o boletim. Tente novamente.');
+                console.error('❌ Erro ao enviar:', error);
+                alert('Erro ao enviar o boletim: ' + error.message);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('loading');
