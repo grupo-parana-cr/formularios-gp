@@ -9,6 +9,7 @@
       --primary-blue:#004AC9; --primary-red:#ed383b; --dark-blue:#003580;
       --light-gray:#F5F7FA; --text-primary:#2C3E50; --text-secondary:#7F8C8D;
       --border-color:#E0E6ED; --success-green:#27AE60; --error-red:#E74C3C; --white:#FFF;
+      --disabled-gray:#9aa3af;
     }
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;background:var(--light-gray);color:var(--text-primary);line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -51,6 +52,8 @@
     .submit-container{position:sticky;bottom:0;padding:16px 20px;background:#fff;border-top:1px solid var(--border-color);box-shadow:0 -4px 20px rgba(0,0,0,.05)}
     .submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--primary-red),#c92f32);color:#fff;border:none;border-radius:12px;font-size:1.1em;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(237,56,59,.3)}
     .submit-btn.loading::after{content:"";margin-left:8px;display:inline-block;width:16px;height:16px;border:2px solid #fff;border-radius:50%;border-top-color:transparent;animation:spin .8s linear infinite}
+    .submit-btn:disabled{background:var(--disabled-gray)!important;box-shadow:none;cursor:not-allowed;opacity:1}
+    .submit-hint{font-size:.78rem;color:var(--text-secondary);margin-top:6px;text-align:center}
     @keyframes spin{to{transform:rotate(360deg)}}
     .error-message{color:var(--error-red);font-size:.85em;margin-top:6px;display:none}
     .form-group.error input,.form-group.error textarea,.form-group.error select{border-color:var(--error-red)}
@@ -189,6 +192,7 @@
 
     <div class="submit-container">
       <button type="submit" form="boletimForm" class="submit-btn" id="submitBtn">Enviar Boletim</button>
+      <div class="submit-hint">Isso pode levar alguns segundos.</div>
     </div>
   </div>
 
@@ -196,7 +200,7 @@
   <div class="success-modal" id="successModal">
     <div class="success-content">
       <div class="success-icon">✅</div>
-      <h2>Boletim Enviado!</h2>
+      <h2>Tudo certo!</h2>
       <div class="meta" id="successMeta">
         <p><span class="label">Protocolo:</span> <span id="proto">—</span></p>
         <p><span class="label">Tipo:</span> <span id="tipo">—</span></p>
@@ -205,7 +209,7 @@
         <p>O registro foi enviado com sucesso.</p>
         <p id="whatsConfirm">📱 Em breve você receberá uma confirmação.</p>
       </div>
-      <div id="thanks"><strong>Obrigado!</strong><br>Sua ocorrência foi registrada e nossa equipe dará sequência.</div>
+      <div id="thanks" style="display:none;"><strong>Obrigado!</strong><br>Sua ocorrência foi registrada e nossa equipe dará sequência.</div>
       <div class="success-actions" id="successActions">
         <button class="success-btn" id="btnRegistrarNovo">Registrar Novo</button>
         <button class="success-btn secondary" id="btnFinalizar">Finalizar</button>
@@ -268,7 +272,6 @@
       const whatsConfirm=document.getElementById('whatsConfirm');
       whatsConfirm.style.display = whatsChecked ? 'block' : 'none';
 
-      // Preenche Protocolo e Tipo (sempre visíveis)
       const proto = (data?.data?.registroId || data?.registroId || 'N/A');
       const tipo  = ((data?.data?.tipo || data?.tipo || 'N/A') + '').toUpperCase();
       document.getElementById('proto').textContent = proto;
@@ -280,7 +283,7 @@
     document.getElementById('btnRegistrarNovo').addEventListener('click',()=>location.reload());
     document.getElementById('btnFinalizar').addEventListener('click',()=>{
       document.getElementById('successActions').style.display='none';
-      document.getElementById('thanks').style.display='block'; // mantém Protocolo/Tipo
+      document.getElementById('thanks').style.display='block';
       setTimeout(()=>location.reload(),1400);
     });
 
@@ -300,7 +303,10 @@
       e.preventDefault();
       if(!validateForm()){ alert('Por favor, preencha todos os campos obrigatórios corretamente.'); return; }
 
-      const btn=document.getElementById('submitBtn'); btn.disabled=true; btn.classList.add('loading'); btn.textContent='Enviando...';
+      const btn=document.getElementById('submitBtn');
+      btn.disabled=true;
+      btn.classList.add('loading');
+      btn.textContent='Enviando 🚀 Aguarde na tela';
 
       const fd=new FormData();
       fd.append('tipo',document.querySelector('input[name="tipo"]:checked').value);
@@ -318,9 +324,16 @@
       try{
         const r=await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/boletim-acidente',{method:'POST',body:fd});
         const data=await r.json();
-        if(r.ok && (data.success || data.data)){ showSuccessModal(data); } else { throw new Error(data?.message || 'Erro ao enviar formulário'); }
-      }catch(err){ console.error(err); alert('Erro ao enviar o boletim: '+err.message); }
-      finally{ btn.disabled=false; btn.classList.remove('loading'); btn.textContent='Enviar Boletim'; }
+        if(r.ok && (data.success || data.data)){ showSuccessModal(data); }
+        else { throw new Error(data?.message || 'Erro ao enviar formulário'); }
+      }catch(err){
+        console.error(err);
+        alert('Ops, algo saiu do previsto. Tente novamente.');
+      }finally{
+        btn.disabled=false;
+        btn.classList.remove('loading');
+        btn.textContent='Enviar Boletim';
+      }
     });
 
     // Auto-preencher data/hora como na V1
