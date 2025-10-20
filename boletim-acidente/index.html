@@ -344,7 +344,7 @@
       uploadedPhotos.forEach((p,i)=>fd.append(`foto_${i}`,p));
 
       try{
-        const r=await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook/boletim-acidente',{method:'POST',body:fd});
+        const r=await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/boletim-acidente',{method:'POST',body:fd});
         const data=await r.json();
         if(r.ok && (data.success || data.data)){ showSuccessModal(data); }
         else { throw new Error(data?.message || 'Erro ao enviar formulário'); }
