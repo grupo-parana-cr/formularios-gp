@@ -1,1166 +1,564 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Boletim de Acidente - Grupo Paraná</title>
-    <style>
-        :root {
-            --primary-blue: #004AC9;
-            --primary-red: #ed383b;
-            --dark-blue: #003580;
-            --light-gray: #F5F7FA;
-            --text-primary: #2C3E50;
-            --text-secondary: #7F8C8D;
-            --border-color: #E0E6ED;
-            --success-green: #27AE60;
-            --error-red: #E74C3C;
-            --white: #FFFFFF;
-            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --shadow-primary: 0 10px 40px rgba(0, 74, 201, 0.15);
-            --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--text-primary);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Efeito de partículas/grid animado no fundo */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background: var(--white);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: var(--shadow-card);
-            position: relative;
-            z-index: 1;
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-            color: white;
-            padding: 32px 24px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Efeito de brilho animado no header */
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: headerGlow 8s ease-in-out infinite;
-        }
-
-        @keyframes headerGlow {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, 30px); }
-        }
-
-        .header .logo-container {
-            position: relative;
-            z-index: 2;
-            margin-bottom: 20px;
-        }
-
-        .header .logo {
-            background: white;
-            padding: 16px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            margin: 0 auto;
-            max-width: 100px;
-            transition: transform 0.3s ease;
-        }
-
-        .header .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .header h1 {
-            font-size: 1.8em;
-            font-weight: 800;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .header p {
-            font-size: 0.95em;
-            opacity: 0.95;
-            font-weight: 500;
-        }
-
-        .form-container {
-            padding: 32px 24px;
-        }
-
-        .form-section {
-            margin-bottom: 32px;
-            animation: fadeInUp 0.6s ease-out backwards;
-        }
-
-        .form-section:nth-child(1) { animation-delay: 0.1s; }
-        .form-section:nth-child(2) { animation-delay: 0.2s; }
-        .form-section:nth-child(3) { animation-delay: 0.3s; }
-        .form-section:nth-child(4) { animation-delay: 0.4s; }
-        .form-section:nth-child(5) { animation-delay: 0.5s; }
-        .form-section:nth-child(6) { animation-delay: 0.6s; }
-        .form-section:nth-child(7) { animation-delay: 0.7s; }
-        .form-section:nth-child(8) { animation-delay: 0.8s; }
-        .form-section:nth-child(9) { animation-delay: 0.9s; }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .section-title {
-            color: var(--primary-blue);
-            font-size: 0.85em;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 3px solid;
-            border-image: linear-gradient(90deg, var(--primary-red), transparent) 1;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 10px;
-            font-size: 0.95em;
-        }
-
-        label.required::after {
-            content: ' *';
-            color: var(--error-red);
-        }
-
-        label.optional {
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        label.optional::after {
-            content: ' (opcional)';
-            font-size: 0.85em;
-            font-weight: 400;
-        }
-
-        input[type="text"],
-        input[type="date"],
-        input[type="time"],
-        input[type="tel"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 16px 18px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: var(--white);
-            color: var(--text-primary);
-            box-sizing: border-box;
-            display: block;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 4px rgba(0, 74, 201, 0.1);
-            transform: translateY(-2px);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 140px;
-            line-height: 1.6;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .radio-item {
-            flex: 1;
-            min-width: 140px;
-        }
-
-        .radio-item input[type="radio"] {
-            display: none;
-        }
-
-        .radio-item label {
-            display: block;
-            padding: 18px 24px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 700;
-            background: var(--white);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .radio-item label::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .radio-item label span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .radio-item input[type="radio"]:checked + label {
-            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
-            color: white;
-            border-color: var(--primary-blue);
-            transform: scale(1.05);
-            box-shadow: 0 8px 24px rgba(0, 74, 201, 0.3);
-        }
-
-        .photo-upload-area {
-            border: 3px dashed var(--border-color);
-            border-radius: 16px;
-            padding: 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .photo-upload-area::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(0, 74, 201, 0.1);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .photo-upload-area:active::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .photo-upload-area:active {
-            transform: scale(0.98);
-        }
-
-        .photo-upload-area.dragover {
-            border-color: var(--primary-blue);
-            background: linear-gradient(135deg, rgba(0, 74, 201, 0.1) 0%, rgba(0, 74, 201, 0.05) 100%);
-            transform: scale(1.02);
-        }
-
-        .photo-icon {
-            font-size: 3.5em;
-            margin-bottom: 16px;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-        }
-
-        .photo-text {
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 1.1em;
-        }
-
-        .photo-hint {
-            font-size: 0.9em;
-            color: var(--text-secondary);
-        }
-
-        .photo-preview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .photo-preview-item {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            aspect-ratio: 1;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease;
-        }
-
-        .photo-preview-item:hover {
-            transform: scale(1.05);
-        }
-
-        .photo-preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-remove-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: var(--error-red);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
-            font-weight: bold;
-        }
-
-        .photo-remove-btn:hover {
-            transform: scale(1.1);
-            background: #c0392b;
-        }
-
-        .photo-remove-btn:active {
-            transform: scale(0.95);
-        }
-
-        .whatsapp-option {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 12px;
-            margin-bottom: 16px;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .whatsapp-option:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            border-color: var(--primary-blue);
-        }
-
-        .whatsapp-option input[type="checkbox"] {
-            width: 26px;
-            height: 26px;
-            cursor: pointer;
-            flex-shrink: 0;
-            accent-color: var(--primary-blue);
-        }
-
-        .whatsapp-option label {
-            margin: 0;
-            cursor: pointer;
-            flex: 1;
-            user-select: none;
-            font-weight: 600;
-        }
-
-        .whatsapp-icon {
-            font-size: 1.8em;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        .whatsapp-input-container {
-            display: none;
-            margin-top: 16px;
-        }
-
-        .whatsapp-input-container.show {
-            display: block;
-            animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .submit-container {
-            position: sticky;
-            bottom: 0;
-            padding: 20px 24px;
-            background: linear-gradient(180deg, transparent 0%, white 20%, white 100%);
-            border-top: 1px solid var(--border-color);
-            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
-            z-index: 10;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--primary-red) 0%, #c92f32 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.15em;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(237, 56, 59, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .submit-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .submit-btn:hover::before {
-            left: 100%;
-        }
-
-        .submit-btn:active {
-            transform: scale(0.97);
-        }
-
-        .submit-btn:disabled {
-            background: var(--text-secondary);
-            cursor: not-allowed;
-            opacity: 0.6;
-            box-shadow: none;
-        }
-
-        .submit-btn.loading::after {
-            content: '';
-            margin-left: 12px;
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 3px solid white;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            color: var(--error-red);
-            font-size: 0.85em;
-            margin-top: 8px;
-            display: none;
-            font-weight: 600;
-        }
-
-        .form-group.error input,
-        .form-group.error textarea,
-        .form-group.error select {
-            border-color: var(--error-red);
-            animation: shake 0.3s ease;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
-
-        .form-group.error .error-message {
-            display: block;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.show {
-            display: flex;
-            animation: modalFadeIn 0.3s ease;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: white;
-            padding: 40px 32px;
-            border-radius: 24px;
-            text-align: center;
-            max-width: 90%;
-            width: 440px;
-            animation: modalPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes modalPop {
-            0% {
-                opacity: 0;
-                transform: scale(0.5) translateY(50px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .modal-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
-            animation: iconBounce 0.6s ease 0.3s;
-        }
-
-        @keyframes iconBounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .modal-content h2 {
-            color: var(--success-green);
-            margin-bottom: 16px;
-            font-size: 1.8em;
-            font-weight: 800;
-        }
-
-        .modal-content p {
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            line-height: 1.8;
-            font-size: 1em;
-        }
-
-        .modal-content p strong {
-            color: var(--primary-blue);
-            font-weight: 800;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 28px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .modal-btn-primary {
-            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
-            color: white;
-            box-shadow: 0 6px 20px rgba(0, 74, 201, 0.3);
-        }
-
-        .modal-btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(0, 74, 201, 0.4);
-        }
-
-        .modal-btn-secondary {
-            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-            color: var(--text-primary);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Modal de agradecimento */
-        .thank-you-modal .modal-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .thank-you-modal h2 {
-            color: white;
-        }
-
-        .thank-you-modal p {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .thank-you-modal .modal-btn {
-            background: white;
-            color: var(--primary-blue);
-            font-weight: 800;
-        }
-
-        @media (min-width: 768px) {
-            .container {
-                margin: 40px auto;
-            }
-
-            .header h1 {
-                font-size: 2.2em;
-            }
-
-            .form-container {
-                padding: 40px 48px;
-            }
-
-            .photo-preview-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
-        }
-
-        @media (max-width: 480px) {
-            .modal-buttons {
-                flex-direction: column;
-            }
-
-            .modal-btn {
-                width: 100%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Boletim de Acidente - Grupo Paraná</title>
+  <style>
+    :root {
+      --primary-blue: #004ac9;
+      --primary-red: #ed383b;
+      --dark-blue: #003580;
+      --light-gray: #f5f7fa;
+      --text-primary: #2c3e50;
+      --text-secondary: #7f8c8d;
+      --border-color: #e0e6ed;
+      --success-green: #27ae60;
+      --error-red: #e74c3c;
+      --white: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--light-gray);            /* ✅ volta ao fundo mais delicado (Versão 1) */
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--white);
+      min-height: 100vh;
+      box-shadow: 0 2px 12px rgba(0,0,0,.04);   /* ✅ sombra sutil */
+    }
+
+    /* ===== Header mais clean ===== */
+    .header {
+      background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+      color: white;
+      padding: 24px 20px 28px;
+      text-align: center;
+    }
+    .header .logo {
+      background: white;
+      padding: 10px;
+      border-radius: 12px;
+      margin: 0 auto 16px;
+      max-width: 96px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    }
+    .header h1 {
+      font-size: 1.45rem;        /* ✅ tipografia mais elegante e menos “pesada” */
+      font-weight: 700;
+      letter-spacing: 0;         /* ✅ remove exageros */
+      margin-bottom: 6px;
+    }
+    .header p {
+      font-size: .95rem;
+      opacity: .95;
+      font-weight: 500;
+    }
+
+    .form-container { padding: 24px 20px; }
+    .form-section { margin-bottom: 22px; }
+
+    .section-title {
+      color: var(--primary-blue);
+      font-size: .85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary-red);
+    }
+
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-weight: 600;           /* ✅ reduz peso da fonte */
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-size: .95rem;
+    }
+    label.required::after { content: " *"; color: var(--error-red); }
+    label.optional { font-weight: 500; color: var(--text-secondary); }
+    label.optional::after { content: " (opcional)"; font-size: .85em; font-weight: 400; }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="tel"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 14px 14px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all .25s ease;
+      background: var(--white);
+      color: var(--text-primary);
+      display: block;
+    }
+    input[type="date"],
+    input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(0,74,201,.12);
+    }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+
+    /* ===== Radios ===== */
+    .radio-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 420px) { .radio-group { grid-template-columns: 1fr; } }
+    .radio-item input[type="radio"] { display: none; }
+    .radio-item label {
+      display: block; text-align: center; cursor: pointer;
+      padding: 14px 18px; border: 2px solid var(--border-color);
+      border-radius: 10px; background: var(--white);
+      font-weight: 600; transition: all .25s ease;
+    }
+    .radio-item input[type="radio"]:checked + label {
+      background: var(--primary-blue); color: white; border-color: var(--primary-blue);
+      transform: scale(1.02);
+    }
+
+    /* ===== Upload de fotos ===== */
+    .photo-upload-area {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 22px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s ease;
+      background: var(--light-gray);
+    }
+    .photo-upload-area.dragover {
+      border-color: var(--primary-blue);
+      background: rgba(0,74,201,.05);
+    }
+    .photo-icon { font-size: 2.6rem; margin-bottom: 8px; }
+    .photo-text { font-weight: 600; margin-bottom: 4px; }
+    .photo-hint { font-size: .85rem; color: var(--text-secondary); }
+    .photo-preview-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(92px,1fr));
+      gap: 10px; margin-top: 12px;
+    }
+    .photo-preview-item {
+      position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .photo-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-remove-btn {
+      position: absolute; top: 6px; right: 6px;
+      background: var(--error-red); color: white; border: none; border-radius: 50%;
+      width: 26px; height: 26px; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: transform .2s;
+    }
+    .photo-remove-btn:active { transform: scale(.92); }
+
+    /* ===== WhatsApp ===== */
+    .whatsapp-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px;
+      background: var(--light-gray);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    .whatsapp-option input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; }
+    .whatsapp-option label { margin: 0; cursor: pointer; flex: 1; }
+    .whatsapp-icon { font-size: 1.4rem; }
+    .whatsapp-input-container { display: none; margin-top: 10px; }
+    .whatsapp-input-container.show { display: block; animation: slideDown .25s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px);} to {opacity:1; transform: translateY(0);} }
+
+    /* ===== Submit stick ===== */
+    .submit-container {
+      position: sticky; bottom: 0;
+      padding: 14px 20px; background: white;
+      border-top: 1px solid var(--border-color);
+      box-shadow: 0 -4px 18px rgba(0,0,0,.05);
+    }
+    .submit-btn {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, var(--primary-red), #c92f32);
+      color: white; border: none; border-radius: 12px;
+      font-size: 1.05rem; font-weight: 700;
+      cursor: pointer; transition: all .2s ease;
+      box-shadow: 0 4px 14px rgba(237,56,59,.28);
+    }
+    .submit-btn:active { transform: scale(.985); }
+    .submit-btn:disabled { background: var(--text-secondary); cursor: not-allowed; opacity:.65; box-shadow: none; }
+    .submit-btn.loading::after {
+      content: ""; margin-left: 8px; display: inline-block; width: 16px; height: 16px;
+      border: 2px solid white; border-radius: 50%; border-top-color: transparent; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg);} }
+
+    .error-message { color: var(--error-red); font-size: .85rem; margin-top: 6px; display: none; }
+    .form-group.error input, .form-group.error textarea, .form-group.error select { border-color: var(--error-red); }
+    .form-group.error .error-message { display: block; }
+
+    /* ===== Duas colunas responsivas só para Data/Hora (>=480px) ===== */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 480px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; } /* ✅ no mobile empilha; em telas maiores fica lado a lado */
+    }
+
+    /* ===== Modal de Sucesso (clean) ===== */
+    .success-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.8); z-index: 1000;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .success-modal.show { display: flex; }
+    .success-content {
+      background: white; padding: 28px 22px; border-radius: 16px; text-align: center; width: 420px; max-width: 92%;
+      box-shadow: 0 18px 64px rgba(0,0,0,.25);
+      animation: modalPop .35s ease;
+    }
+    .success-icon { font-size: 3.4rem; margin-bottom: 10px; }
+    .success-content h2 { color: var(--success-green); margin-bottom: 8px; }
+    .success-content p { color: var(--text-secondary); margin-bottom: 10px; line-height: 1.7; }
+    .success-content p strong { color: var(--primary-blue); font-weight: 700; }
+    .success-btn { padding: 12px 26px; background: var(--primary-blue); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+    @keyframes modalPop { from { opacity: 0; transform: scale(.9);} to { opacity: 1; transform: scale(1);} }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo-container">
-                <img src="../img/logo-grupo-parana.png" alt="Logo Grupo Paraná" class="logo">
-            </div>
-            <div class="header-content">
-                <h1>⚠️ Boletim de Acidente</h1>
-                <p>Registro Inicial de Ocorrência</p>
-            </div>
-        </div>
-
-        <form id="boletimForm" class="form-container" novalidate>
-            
-            <!-- Seção 1: Tipo de Ocorrência -->
-            <div class="form-section">
-                <div class="section-title">📋 Tipo de Ocorrência</div>
-                <div class="form-group">
-                    <label class="required">Selecione o tipo</label>
-                    <div class="radio-group">
-                        <div class="radio-item">
-                            <input type="radio" id="tipoAcidente" name="tipo" value="acidente" required>
-                            <label for="tipoAcidente"><span>🚨 Acidente</span></label>
-                        </div>
-                        <div class="radio-item">
-                            <input type="radio" id="tipoIncidente" name="tipo" value="incidente" required>
-                            <label for="tipoIncidente"><span>⚠️ Incidente</span></label>
-                        </div>
-                    </div>
-                    <div class="error-message">Selecione o tipo de ocorrência</div>
-                </div>
-            </div>
-
-            <!-- Seção 2: Data e Hora -->
-            <div class="form-section">
-                <div class="section-title">📅 Data e Hora</div>
-                <div class="form-group">
-                    <label for="data" class="required">Data</label>
-                    <input type="date" id="data" name="data" required>
-                    <div class="error-message">Campo obrigatório</div>
-                </div>
-                <div class="form-group">
-                    <label for="hora" class="required">Hora</label>
-                    <input type="time" id="hora" name="hora" required>
-                    <div class="error-message">Campo obrigatório</div>
-                </div>
-            </div>
-
-            <!-- Seção 3: Local -->
-            <div class="form-section">
-                <div class="section-title">📍 Local</div>
-                <div class="form-group">
-                    <label for="local" class="required">Endereço/Local da ocorrência</label>
-                    <input type="text" id="local" name="local" placeholder="Ex: Rua Leandro Ortiz Menezes n.401" required>
-                    <div class="error-message">Campo obrigatório</div>
-                </div>
-            </div>
-
-            <!-- Seção 4: Dados Gerais -->
-            <div class="form-section">
-                <div class="section-title">🏢 Dados Gerais</div>
-                <div class="form-group">
-                    <label for="empresa" class="required">Empresa</label>
-                    <input type="text" id="empresa" name="empresa" placeholder="Nome da empresa" required>
-                    <div class="error-message">Campo obrigatório</div>
-                </div>
-            </div>
-
-            <!-- Seção 5: Quem está reportando -->
-            <div class="form-section">
-                <div class="section-title">📢 Quem está reportando</div>
-                <div class="form-group">
-                    <label for="comunicante" class="required">Seu nome (quem está registrando)</label>
-                    <input type="text" id="comunicante" name="comunicante" placeholder="Seu nome completo" required>
-                    <div class="error-message">Campo obrigatório</div>
-                </div>
-            </div>
-
-            <!-- Seção 6: Pessoa Envolvida no Acidente -->
-            <div class="form-section">
-                <div class="section-title">👤 Pessoa Envolvida no Acidente</div>
-                <div class="form-group">
-                    <label for="colaborador" class="required">Nome da pessoa acidentada</label>
-                    <input type="text" id="colaborador" name="colaborador" placeholder="Nome completo da vítima" required>
-                    <div class="error-message">Campo obrigatório</div>
-                </div>
-            </div>
-
-            <!-- Seção 7: Relato -->
-            <div class="form-section">
-                <div class="section-title">📝 Breve Relato</div>
-                <div class="form-group">
-                    <label for="relato" class="required">Descreva o ocorrido</label>
-                    <textarea id="relato" name="relato" placeholder="Descreva brevemente o que aconteceu..." required></textarea>
-                    <div class="error-message">Campo obrigatório</div>
-                </div>
-            </div>
-
-            <!-- Seção 8: Fotos -->
-            <div class="form-section">
-                <div class="section-title">📷 Fotos</div>
-                <div class="form-group">
-                    <label class="optional">Fotos do local/acidente</label>
-                    <div class="photo-upload-area" id="photoUploadArea">
-                        <div class="photo-icon">📸</div>
-                        <div class="photo-text">Toque para adicionar fotos</div>
-                        <div class="photo-hint">Câmera ou Galeria • Máximo 5 fotos • Até 5MB cada</div>
-                        <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
-                    </div>
-                    <div class="photo-preview-grid" id="photoPreviewGrid"></div>
-                </div>
-            </div>
-
-            <!-- Seção 9: WhatsApp -->
-            <div class="form-section">
-                <div class="section-title">💬 Notificação WhatsApp</div>
-                <div class="whatsapp-option" onclick="document.getElementById('receberWhatsapp').click();">
-                    <span class="whatsapp-icon">📱</span>
-                    <input type="checkbox" id="receberWhatsapp" name="receberWhatsapp" onclick="event.stopPropagation();">
-                    <label for="receberWhatsapp" onclick="event.stopPropagation();">Quero receber uma cópia via WhatsApp</label>
-                </div>
-                <div class="whatsapp-input-container" id="whatsappInputContainer">
-                    <div class="form-group">
-                        <label for="whatsapp" class="optional">Meu número de WhatsApp</label>
-                        <input type="tel" id="whatsapp" name="whatsapp" placeholder="(67) 99921-7329" maxlength="15">
-                        <div class="error-message">Número inválido</div>
-                    </div>
-                </div>
-            </div>
-
-        </form>
-
-        <div class="submit-container">
-            <button type="submit" form="boletimForm" class="submit-btn" id="submitBtn">
-                Enviar Boletim
-            </button>
-        </div>
+  <div class="container">
+    <div class="header">
+      <img src="../img/logo-grupo-parana.png" alt="Logo Grupo Paraná" class="logo" />
+      <h1>⚠️ Boletim de Acidente</h1>
+      <p>Registro Inicial de Ocorrência</p>
     </div>
 
-    <!-- Modal de Sucesso -->
-    <div class="modal" id="successModal">
-        <div class="modal-content">
-            <div class="modal-icon">✅</div>
-            <h2>Boletim Enviado!</h2>
-            <div id="successDetails"></div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-primary" onclick="location.reload()">
-                    🔄 Registrar Novo
-                </button>
-                <button class="modal-btn modal-btn-secondary" onclick="showThankYouModal()">
-                    ✓ Finalizar
-                </button>
+    <form id="boletimForm" class="form-container" novalidate>
+      <!-- Seção 1: Tipo de Ocorrência -->
+      <div class="form-section">
+        <div class="section-title">📋 Tipo de Ocorrência</div>
+        <div class="form-group">
+          <label class="required">Selecione o tipo</label>
+          <div class="radio-group">
+            <div class="radio-item">
+              <input type="radio" id="tipoAcidente" name="tipo" value="acidente" required />
+              <label for="tipoAcidente">🚨 Acidente</label>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal de Agradecimento -->
-    <div class="modal thank-you-modal" id="thankYouModal">
-        <div class="modal-content">
-            <div class="modal-icon">🎉</div>
-            <h2>Muito Obrigado!</h2>
-            <p style="font-size: 1.1em; margin-top: 16px;">
-                Agradecemos por reportar este incidente.<br>
-                Sua contribuição é fundamental para<br>
-                mantermos um ambiente seguro.
-            </p>
-            <p style="margin-top: 20px; font-size: 0.95em;">
-                <strong>Grupo Paraná</strong><br>
-                Segurança em primeiro lugar! 🛡️
-            </p>
-            <div class="modal-buttons">
-                <button class="modal-btn" onclick="window.location.href='/'">
-                    Voltar ao Início
-                </button>
+            <div class="radio-item">
+              <input type="radio" id="tipoIncidente" name="tipo" value="incidente" required />
+              <label for="tipoIncidente">⚠️ Incidente</label>
             </div>
+          </div>
+          <div class="error-message">Selecione o tipo de ocorrência</div>
         </div>
+      </div>
+
+      <!-- Seção 2: Data e Hora (corrigido o desalinhamento mobile) -->
+      <div class="form-section">
+        <div class="section-title">📅 Data e Hora</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="data" class="required">Data</label>
+            <input type="date" id="data" name="data" required />
+            <div class="error-message">Campo obrigatório</div>
+          </div>
+          <div class="form-group">
+            <label for="hora" class="required">Hora</label>
+            <input type="time" id="hora" name="hora" required />
+            <div class="error-message">Campo obrigatório</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 3: Local -->
+      <div class="form-section">
+        <div class="section-title">📍 Local</div>
+        <div class="form-group">
+          <label for="local" class="required">Endereço/Local da ocorrência</label>
+          <input type="text" id="local" name="local" placeholder="Ex: Rua Leandro Ortiz Menezes n.401" required />
+          <div class="error-message">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <!-- Seção 4: Dados Gerais -->
+      <div class="form-section">
+        <div class="section-title">🏢 Dados Gerais</div>
+        <div class="form-group">
+          <label for="empresa" class="required">Empresa</label>
+          <input type="text" id="empresa" name="empresa" placeholder="Nome da empresa" required />
+          <div class="error-message">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <!-- Seção 5: Quem está reportando -->
+      <div class="form-section">
+        <div class="section-title">📢 Quem está reportando</div>
+        <div class="form-group">
+          <label for="comunicante" class="required">Seu nome (quem está registrando)</label>
+          <input type="text" id="comunicante" name="comunicante" placeholder="Seu nome completo" required />
+          <div class="error-message">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <!-- Seção 6: Pessoa Envolvida no Acidente -->
+      <div class="form-section">
+        <div class="section-title">👤 Pessoa Envolvida no Acidente</div>
+        <div class="form-group">
+          <label for="colaborador" class="required">Nome da pessoa acidentada</label>
+          <input type="text" id="colaborador" name="colaborador" placeholder="Nome completo da vítima" required />
+          <div class="error-message">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <!-- Seção 7: Relato -->
+      <div class="form-section">
+        <div class="section-title">📝 Breve Relato</div>
+        <div class="form-group">
+          <label for="relato" class="required">Descreva o ocorrido</label>
+          <textarea id="relato" name="relato" placeholder="Descreva brevemente o que aconteceu..." required></textarea>
+          <div class="error-message">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <!-- Seção 8: Fotos -->
+      <div class="form-section">
+        <div class="section-title">📷 Fotos</div>
+        <div class="form-group">
+          <label class="optional">Fotos do local/acidente</label>
+          <div class="photo-upload-area" id="photoUploadArea">
+            <div class="photo-icon">📸</div>
+            <div class="photo-text">Toque para adicionar fotos</div>
+            <div class="photo-hint">Câmera ou Galeria • Máximo 5 fotos • Até 5MB cada</div>
+            <input type="file" id="photoInput" accept="image/*" multiple style="display:none" />
+          </div>
+          <div class="photo-preview-grid" id="photoPreviewGrid"></div>
+        </div>
+      </div>
+
+      <!-- Seção 9: WhatsApp -->
+      <div class="form-section">
+        <div class="section-title">💬 Notificação WhatsApp</div>
+        <div class="whatsapp-option" onclick="document.getElementById('receberWhatsapp').click();">
+          <span class="whatsapp-icon">📱</span>
+          <input type="checkbox" id="receberWhatsapp" name="receberWhatsapp" onclick="event.stopPropagation();" />
+          <label for="receberWhatsapp" onclick="event.stopPropagation();">Quero receber uma cópia via WhatsApp</label>
+        </div>
+        <div class="whatsapp-input-container" id="whatsappInputContainer">
+          <div class="form-group">
+            <label for="whatsapp" class="optional">Meu número de WhatsApp</label>
+            <input type="tel" id="whatsapp" name="whatsapp" placeholder="(67) 99921-7329" maxlength="15" />
+            <div class="error-message">Número inválido</div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="submit-container">
+      <button type="submit" form="boletimForm" class="submit-btn" id="submitBtn">Enviar Boletim</button>
     </div>
+  </div>
 
-    <script>
-        let uploadedPhotos = [];
-        const maxPhotos = 5;
-        const maxFileSize = 5 * 1024 * 1024;
-        let userSelectedWhatsApp = false; // 🔥 NOVA VARIÁVEL para controlar se o usuário marcou WhatsApp
+  <!-- Modal Sucesso -->
+  <div class="success-modal" id="successModal">
+    <div class="success-content">
+      <div class="success-icon">✅</div>
+      <h2>Boletim Enviado!</h2>
+      <div id="successDetails">
+        <p>O registro foi enviado com sucesso.</p>
+      </div>
+      <button class="success-btn" onclick="location.reload()">Registrar Novo</button>
+    </div>
+  </div>
 
-        // Formatação do WhatsApp
-        const whatsappInput = document.getElementById('whatsapp');
-        whatsappInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 11) {
-                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
-            }
-            e.target.value = value;
-        });
+  <script>
+    let uploadedPhotos = [];
+    const maxPhotos = 5;
+    const maxFileSize = 5 * 1024 * 1024;
+    let userSelectedWhatsApp = false;
 
-        // Toggle WhatsApp Input
-        document.getElementById('receberWhatsapp').addEventListener('change', function(e) {
-            const container = document.getElementById('whatsappInputContainer');
-            userSelectedWhatsApp = e.target.checked; // 🔥 ARMAZENA SE O USUÁRIO MARCOU
-            
-            if (e.target.checked) {
-                container.classList.add('show');
-                whatsappInput.focus();
-            } else {
-                container.classList.remove('show');
-                whatsappInput.value = '';
-            }
-        });
+    // Máscara WhatsApp
+    const whatsappInput = document.getElementById("whatsapp");
+    whatsappInput.addEventListener("input", function (e) {
+      let value = e.target.value.replace(/\\D/g, "");
+      if (value.length <= 11) {
+        value = value.replace(/^(\\d{2})(\\d)/g, "($1) $2");
+        value = value.replace(/(\\d)(\\d{4})$/, "$1-$2");
+      }
+      e.target.value = value;
+    });
 
-        // Upload de fotos
-        const photoUploadArea = document.getElementById('photoUploadArea');
-        const photoInput = document.getElementById('photoInput');
-        const photoPreviewGrid = document.getElementById('photoPreviewGrid');
+    // Toggle WhatsApp
+    document.getElementById("receberWhatsapp").addEventListener("change", function (e) {
+      const container = document.getElementById("whatsappInputContainer");
+      userSelectedWhatsApp = e.target.checked;
+      if (e.target.checked) {
+        container.classList.add("show");
+        whatsappInput.focus();
+      } else {
+        container.classList.remove("show");
+        whatsappInput.value = "";
+      }
+    });
 
-        photoUploadArea.addEventListener('click', function(e) {
-            if (uploadedPhotos.length < maxPhotos) {
-                photoInput.click();
-            } else {
-                alert(`Máximo de ${maxPhotos} fotos permitidas`);
-            }
-        });
+    // Upload de fotos
+    const photoUploadArea = document.getElementById("photoUploadArea");
+    const photoInput = document.getElementById("photoInput");
+    const photoPreviewGrid = document.getElementById("photoPreviewGrid");
 
-        photoUploadArea.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            if (uploadedPhotos.length < maxPhotos) {
-                photoInput.click();
-            } else {
-                alert(`Máximo de ${maxPhotos} fotos permitidas`);
-            }
-        });
+    photoUploadArea.addEventListener("click", function () {
+      if (uploadedPhotos.length < maxPhotos) photoInput.click();
+      else alert(`Máximo de ${maxPhotos} fotos permitidas`);
+    });
+    photoUploadArea.addEventListener("touchend", function (e) {
+      e.preventDefault();
+      if (uploadedPhotos.length < maxPhotos) photoInput.click();
+      else alert(`Máximo de ${maxPhotos} fotos permitidas`);
+    });
+    photoUploadArea.addEventListener("dragover", (e) => {
+      e.preventDefault(); photoUploadArea.classList.add("dragover");
+    });
+    photoUploadArea.addEventListener("dragleave", () => {
+      photoUploadArea.classList.remove("dragover");
+    });
+    photoUploadArea.addEventListener("drop", (e) => {
+      e.preventDefault(); photoUploadArea.classList.remove("dragover"); handleFiles(e.dataTransfer.files);
+    });
+    photoInput.addEventListener("change", (e) => { handleFiles(e.target.files); });
 
-        photoUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            photoUploadArea.classList.add('dragover');
-        });
+    function handleFiles(files) {
+      for (let file of files) {
+        if (uploadedPhotos.length >= maxPhotos) { alert(`Máximo de ${maxPhotos} fotos permitidas`); break; }
+        if (!file.type.startsWith("image/")) { alert("Apenas imagens são permitidas"); continue; }
+        if (file.size > maxFileSize) { alert(`${file.name} excede o tamanho máximo de 5MB`); continue; }
+        uploadedPhotos.push(file);
+        createPhotoPreview(file, uploadedPhotos.length - 1);
+      }
+      photoInput.value = "";
+    }
 
-        photoUploadArea.addEventListener('dragleave', () => {
-            photoUploadArea.classList.remove('dragover');
-        });
+    function createPhotoPreview(file, index) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const div = document.createElement("div");
+        div.className = "photo-preview-item";
+        div.innerHTML = \`
+          <img src="\${e.target.result}" alt="Foto \${index + 1}" />
+          <button type="button" class="photo-remove-btn" onclick="removePhoto(\${index})">×</button>\`;
+        photoPreviewGrid.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    }
 
-        photoUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            photoUploadArea.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
+    function removePhoto(index) {
+      uploadedPhotos.splice(index, 1);
+      photoPreviewGrid.innerHTML = "";
+      uploadedPhotos.forEach((file, i) => createPhotoPreview(file, i));
+    }
 
-        photoInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
+    // Modal de sucesso
+    function showSuccessModal(data) {
+      const modal = document.getElementById("successModal");
+      const details = document.getElementById("successDetails");
+      let whatsappMessage = "";
+      if (userSelectedWhatsApp) {
+        whatsappMessage = \`
+          <p style="font-size:.95em; color: var(--text-secondary); margin-top: 10px; padding: 10px; background:#f0f9ff; border-radius:8px; border-left:3px solid var(--primary-blue);">
+            📱 Em breve você receberá uma confirmação via WhatsApp.
+          </p>\`;
+      }
+      details.innerHTML = \`
+        <p><strong>Protocolo:</strong> \${data?.data?.registroId || "N/A"}</p>
+        <p><strong>Tipo:</strong> \${(data?.data?.tipo || "N/A").toString().toUpperCase()}</p>
+        <p style="margin-top: 10px;">\${data?.message || "Boletim registrado e enviado com sucesso!"}</p>
+        \${whatsappMessage}\`;
+      modal.classList.add("show");
+    }
 
-        function handleFiles(files) {
-            for (let file of files) {
-                if (uploadedPhotos.length >= maxPhotos) {
-                    alert(`Máximo de ${maxPhotos} fotos permitidas`);
-                    break;
-                }
-                if (!file.type.startsWith('image/')) {
-                    alert('Apenas imagens são permitidas');
-                    continue;
-                }
-                if (file.size > maxFileSize) {
-                    alert(`${file.name} excede o tamanho máximo de 5MB`);
-                    continue;
-                }
-                uploadedPhotos.push(file);
-                createPhotoPreview(file, uploadedPhotos.length - 1);
-            }
-            photoInput.value = '';
+    // Validação
+    function validateForm() {
+      let isValid = true;
+      const form = document.getElementById("boletimForm");
+      form.querySelectorAll(".form-group").forEach((g) => g.classList.remove("error"));
+      form.querySelectorAll("[required]").forEach((field) => {
+        if (!field.value.trim() && field.type !== "radio") {
+          field.closest(".form-group").classList.add("error");
+          isValid = false;
         }
-
-        function createPhotoPreview(file, index) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const div = document.createElement('div');
-                div.className = 'photo-preview-item';
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="Foto ${index + 1}">
-                    <button type="button" class="photo-remove-btn" onclick="removePhoto(${index})">×</button>
-                `;
-                photoPreviewGrid.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+      });
+      const tipoSel = form.querySelector('input[name="tipo"]:checked');
+      if (!tipoSel) {
+        const anyRadio = form.querySelector('input[name="tipo"]');
+        if (anyRadio) anyRadio.closest(".form-group").classList.add("error");
+        isValid = false;
+      }
+      if (document.getElementById("receberWhatsapp").checked) {
+        const w = whatsappInput.value.replace(/\\D/g, "");
+        if (w.length !== 11) {
+          whatsappInput.closest(".form-group").classList.add("error");
+          isValid = false;
         }
+      }
+      return isValid;
+    }
 
-        function removePhoto(index) {
-            uploadedPhotos.splice(index, 1);
-            photoPreviewGrid.innerHTML = '';
-            uploadedPhotos.forEach((file, i) => createPhotoPreview(file, i));
-        }
+    // Envio
+    document.getElementById("boletimForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (!validateForm()) { alert("Por favor, preencha todos os campos obrigatórios corretamente."); return; }
 
-        // 🔥 FUNÇÃO ATUALIZADA: Exibe o modal com os dados da resposta do webhook
-        function showSuccessModal(data) {
-            const modal = document.getElementById('successModal');
-            const detailsDiv = document.getElementById('successDetails');
-            
-            // 🔥 NOVA LÓGICA: Mostra mensagem de WhatsApp apenas se o usuário marcou a opção
-            let whatsappMessage = '';
-            if (userSelectedWhatsApp) {
-                whatsappMessage = `
-                    <p style="font-size: 0.95em; color: var(--text-secondary); margin-top: 16px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 3px solid var(--primary-blue);">
-                        📱 Em breve você receberá uma confirmação via WhatsApp.
-                    </p>
-                `;
-            }
-            
-            // Atualiza o conteúdo do modal com os dados recebidos do n8n
-            detailsDiv.innerHTML = `
-                <p><strong>Protocolo:</strong> ${data.data?.registroId || 'N/A'}</p>
-                <p><strong>Tipo:</strong> ${data.data?.tipo?.toUpperCase() || 'N/A'}</p>
-                <p style="margin-top: 16px;">${data.message || 'Boletim registrado e enviado com sucesso!'}</p>
-                ${whatsappMessage}
-            `;
-            
-            modal.classList.add('show');
-        }
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true; submitBtn.classList.add("loading"); submitBtn.textContent = "Enviando...";
 
-        // 🔥 NOVA FUNÇÃO: Mostra modal de agradecimento
-        function showThankYouModal() {
-            document.getElementById('successModal').classList.remove('show');
-            document.getElementById('thankYouModal').classList.add('show');
-        }
+      const formData = new FormData();
+      formData.append("tipo", document.querySelector('input[name="tipo"]:checked').value);
+      formData.append("data", document.getElementById("data").value);
+      formData.append("hora", document.getElementById("hora").value);
+      formData.append("local", document.getElementById("local").value);
+      formData.append("empresa", document.getElementById("empresa").value);
+      formData.append("comunicante", document.getElementById("comunicante").value);
+      formData.append("colaborador", document.getElementById("colaborador").value);
+      formData.append("relato", document.getElementById("relato").value);
+      formData.append("receberWhatsapp", document.getElementById("receberWhatsapp").checked);
+      if (document.getElementById("receberWhatsapp").checked) {
+        formData.append("whatsapp", whatsappInput.value.replace(/\\D/g, ""));
+      }
+      uploadedPhotos.forEach((photo, index) => formData.append(\`foto_\${index}\`, photo));
 
-        // Validação do formulário
-        function validateForm() {
-            let isValid = true;
-            const form = document.getElementById('boletimForm');
-            
-            form.querySelectorAll('.form-group').forEach(group => {
-                group.classList.remove('error');
-            });
-
-            form.querySelectorAll('[required]').forEach(field => {
-                if (!field.value.trim() && field.type !== 'radio') {
-                    field.closest('.form-group').classList.add('error');
-                    isValid = false;
-                }
-            });
-
-            const tipoSelecionado = form.querySelector('input[name="tipo"]:checked');
-            if (!tipoSelecionado) {
-                form.querySelector('input[name="tipo"]').closest('.form-group').classList.add('error');
-                isValid = false;
-            }
-
-            const receberWhatsapp = document.getElementById('receberWhatsapp');
-            if (receberWhatsapp.checked) {
-                const whatsappValue = whatsappInput.value.replace(/\D/g, '');
-                if (whatsappValue.length !== 11) {
-                    whatsappInput.closest('.form-group').classList.add('error');
-                    isValid = false;
-                }
-            }
-
-            return isValid;
-        }
-
-        // 🔥 ENVIO DO FORMULÁRIO - CORRIGIDO PARA RECEBER A RESPOSTA DO WEBHOOK
-        document.getElementById('boletimForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (!validateForm()) {
-                alert('Por favor, preencha todos os campos obrigatórios corretamente.');
-                return;
-            }
-
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('loading');
-            submitBtn.textContent = 'Enviando...';
-
-            const formData = new FormData();
-            formData.append('tipo', document.querySelector('input[name="tipo"]:checked').value);
-            formData.append('data', document.getElementById('data').value);
-            formData.append('hora', document.getElementById('hora').value);
-            formData.append('local', document.getElementById('local').value);
-            formData.append('empresa', document.getElementById('empresa').value);
-            formData.append('comunicante', document.getElementById('comunicante').value);
-            formData.append('colaborador', document.getElementById('colaborador').value);
-            formData.append('relato', document.getElementById('relato').value);
-            formData.append('receberWhatsapp', document.getElementById('receberWhatsapp').checked);
-            
-            if (document.getElementById('receberWhatsapp').checked) {
-                formData.append('whatsapp', whatsappInput.value.replace(/\D/g, ''));
-            }
-
-            uploadedPhotos.forEach((photo, index) => {
-                formData.append(`foto_${index}`, photo);
-            });
-
-            try {
-                const response = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/boletim-acidente', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                // 🔥 Captura e processa a resposta JSON do webhook
-                const data = await response.json();
-                
-                console.log('✅ Resposta completa do webhook:', data);
-                
-                if (response.ok && data.success) {
-                    // Exibe os dados recebidos no modal
-                    showSuccessModal(data);
-                } else {
-                    throw new Error(data.message || 'Erro ao enviar formulário');
-                }
-            } catch (error) {
-                console.error('❌ Erro ao enviar:', error);
-                alert('Erro ao enviar o boletim: ' + error.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
-                submitBtn.textContent = 'Enviar Boletim';
-            }
+      try {
+        const response = await fetch("https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/boletim-acidente", {
+          method: "POST", body: formData
         });
+        const data = await response.json();
+        if (response.ok && (data?.success || data?.data)) {
+          showSuccessModal(data);
+        } else { throw new Error(data?.message || "Erro ao enviar formulário"); }
+      } catch (err) {
+        console.error("Erro ao enviar:", err);
+        alert("Erro ao enviar o boletim: " + err.message);
+      } finally {
+        submitBtn.disabled = false; submitBtn.classList.remove("loading"); submitBtn.textContent = "Enviar Boletim";
+      }
+    });
 
-        // Preencher data e hora atuais
-        const now = new Date();
-        document.getElementById('data').valueAsDate = now;
-        document.getElementById('hora').value = now.toTimeString().slice(0, 5);
-    </script>
+    // Data e hora atuais
+    const now = new Date();
+    document.getElementById("data").valueAsDate = now;
+    document.getElementById("hora").value = now.toTimeString().slice(0, 5);
+  </script>
 </body>
 </html>
