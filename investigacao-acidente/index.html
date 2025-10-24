@@ -500,7 +500,84 @@
             box-shadow: 0 6px 16px rgba(0, 74, 201, 0.4);
         }
 
+        /* Modal de Erro */
+        .error-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
 
+        .error-modal.show {
+            display: flex;
+        }
+
+        .error-content {
+            background: white;
+            padding: 40px 32px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 90%;
+            max-width: 500px;
+            animation: modalPop 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .error-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: errorShake 0.6s ease;
+        }
+
+        @keyframes errorShake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .error-content h2 {
+            color: var(--primary-red);
+            margin-bottom: 12px;
+            font-size: 1.8em;
+        }
+
+        .error-content p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        .error-btn {
+            padding: 14px 32px;
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(237, 56, 59, 0.3);
+        }
+
+        .error-btn:hover {
+            background: #c92a2d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(237, 56, 59, 0.4);
+        }
 
         @media (max-width: 768px) {
             .container {
@@ -1219,8 +1296,21 @@
         <div class="success-content">
             <div class="success-icon">✅</div>
             <h2>Relatório Enviado!</h2>
-            <p>O registro de investigação foi enviado com sucesso.<br>Em breve você receberá uma confirmação.</p>
+            <p id="successMessage">O registro de investigação foi enviado com sucesso.<br>Em breve você receberá uma confirmação.</p>
+            <p id="registroId" style="margin-top: 16px; padding: 12px; background: #f0f7ff; border-radius: 8px; font-weight: 600; color: #004AC9; display: none;">
+                <span style="font-weight: normal; color: #666;">ID do Registro:</span> <span id="idValue"></span>
+            </p>
             <button class="success-btn" onclick="location.reload()">Registrar Nova Investigação</button>
+        </div>
+    </div>
+
+    <!-- Modal de Erro -->
+    <div class="error-modal" id="errorModal">
+        <div class="error-content">
+            <div class="error-icon">❌</div>
+            <h2>Erro ao Enviar!</h2>
+            <p id="errorMessage">Não foi possível enviar o registro.<br>Verifique sua conexão e tente novamente.</p>
+            <button class="error-btn" onclick="document.getElementById('errorModal').classList.remove('show')">Tentar Novamente</button>
         </div>
     </div>
 
@@ -1766,6 +1856,12 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Preenche o ID do registro se vier do webhook
+                if (data && data.id) {
+                    document.getElementById('idValue').textContent = data.id;
+                    document.getElementById('registroId').style.display = 'block';
+                }
+                
                 // Mostra modal de sucesso
                 document.getElementById('successModal').classList.add('show');
                 
@@ -1776,7 +1872,9 @@
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao enviar formulário. Tente novamente.');
+                
+                // Mostra modal de erro
+                document.getElementById('errorModal').classList.add('show');
             })
             .finally(() => {
                 submitBtn.textContent = 'Gerar Relatório de Investigação';
