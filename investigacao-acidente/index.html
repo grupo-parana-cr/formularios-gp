@@ -1362,6 +1362,8 @@
 
             fileInput.addEventListener('change', (e) => {
                 handleFiles(e.target.files, fileType, fileList);
+                // Resetar o input para permitir adicionar o mesmo arquivo novamente
+                e.target.value = '';
             });
         }
 
