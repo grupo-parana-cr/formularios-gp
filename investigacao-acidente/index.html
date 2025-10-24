@@ -413,6 +413,93 @@
             padding: 24px;
         }
 
+        /* Modal de Sucesso */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        .success-content {
+            background: white;
+            padding: 40px 32px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 90%;
+            max-width: 500px;
+            animation: modalPop 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: successPulse 0.6s ease;
+        }
+
+        @keyframes successPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .success-content h2 {
+            color: var(--success-green);
+            margin-bottom: 12px;
+            font-size: 1.8em;
+        }
+
+        .success-content p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        .success-btn {
+            padding: 14px 32px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 74, 201, 0.3);
+        }
+
+        .success-btn:hover {
+            background: #0056d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 74, 201, 0.4);
+        }
+
 
 
         @media (max-width: 768px) {
@@ -1127,6 +1214,16 @@
         </form>
     </div>
 
+    <!-- Modal de Sucesso -->
+    <div class="success-modal" id="successModal">
+        <div class="success-content">
+            <div class="success-icon">✅</div>
+            <h2>Relatório Enviado!</h2>
+            <p>O registro de investigação foi enviado com sucesso.<br>Em breve você receberá uma confirmação.</p>
+            <button class="success-btn" onclick="location.reload()">Registrar Nova Investigação</button>
+        </div>
+    </div>
+
     <script>
         // Variáveis globais
         let uploadedFiles = {
@@ -1669,7 +1766,10 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert('Relatório de investigação enviado com sucesso!\n\nDados coletados e documento gerado.');
+                // Mostra modal de sucesso
+                document.getElementById('successModal').classList.add('show');
+                
+                // Reseta o formulário
                 this.reset();
                 uploadedFiles = { foto: [], croqui: [], boletim: [], outros: [] };
                 document.querySelectorAll('.file-list').forEach(list => list.innerHTML = '');
