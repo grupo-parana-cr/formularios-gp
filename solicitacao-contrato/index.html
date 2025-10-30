@@ -2150,6 +2150,11 @@
           </select>
           <div class="error-message">Campo obrigatório</div>
         </div>
+        <div class="form-group">
+          <label for="objetoLocacao" class="required">Descrição do objeto do contrato</label>
+          <textarea id="objetoLocacao" name="objetoLocacao" placeholder="Descreva detalhadamente o imóvel, suas características, dependências, condições e especificações..." required></textarea>
+          <div class="error-message">Campo obrigatório</div>
+        </div>
       `;
       
       valoresC.innerHTML = `
@@ -2391,8 +2396,8 @@
               <input type="tel" data-field="${targetId}_pf_telefone" placeholder="(67) 99999-9999" required>
             </div>
             <div class="form-group">
-              <label>E-mail (opcional)</label>
-              <input type="email" data-field="${targetId}_pf_email" placeholder="email@exemplo.com">
+              <label class="required">E-mail</label>
+              <input type="email" data-field="${targetId}_pf_email" placeholder="email@exemplo.com" required>
             </div>
           </div>
           <div class="pfpj-grid hidden" data-grid="pj">
@@ -2418,8 +2423,8 @@
               <input type="tel" data-field="${targetId}_pj_telefone" placeholder="(67) 99999-9999">
             </div>
             <div class="form-group">
-              <label>E-mail (opcional)</label>
-              <input type="email" data-field="${targetId}_pj_email" placeholder="email@exemplo.com">
+              <label class="required">E-mail</label>
+              <input type="email" data-field="${targetId}_pj_email" placeholder="email@exemplo.com" required>
             </div>
             <div class="form-group" style="grid-column: 1 / -1;">
               <div style="background: var(--light-blue); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
