@@ -39,11 +39,15 @@ body {
     z-index: 2;
 }
 
+/* Logo com fundo branco e sombra */
 .logo {
     max-width: 280px;
     height: auto;
     margin-bottom: 20px;
-    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+    padding: 20px 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .title {
@@ -52,6 +56,7 @@ body {
     font-weight: 800;
     margin-bottom: 10px;
     text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
 }
 
 .subtitle {
@@ -352,6 +357,11 @@ body {
     box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
 }
 
+.btn-submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .btn-primary {
     background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
     color: white;
@@ -422,6 +432,7 @@ body {
 
     .logo {
         max-width: 220px;
+        padding: 15px 20px;
     }
 
     .title {
