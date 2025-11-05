@@ -286,12 +286,13 @@ body {
    ============================================ */
 .table-container {
     max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 30px;
+    margin: 0 auto 40px;
+    padding: 30px;
+    margin-left: 30px;
+    margin-right: 30px;
     background: white;
     border-radius: 15px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    padding: 30px;
 }
 
 .table-container h2 {
@@ -315,9 +316,11 @@ thead {
 }
 
 thead th {
-    padding: 15px;
+    padding: 15px 10px;
     text-align: left;
     font-weight: 600;
+    font-size: 0.9em;
+    white-space: nowrap;
 }
 
 tbody tr {
@@ -330,8 +333,10 @@ tbody tr:hover {
 }
 
 tbody td {
-    padding: 15px;
+    padding: 12px 10px;
     color: var(--dark);
+    font-size: 0.85em;
+    vertical-align: top;
 }
 
 .no-data {
