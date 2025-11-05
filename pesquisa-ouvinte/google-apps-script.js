@@ -20,7 +20,7 @@
 
 // ID da sua planilha (você pode pegar na URL da planilha)
 // Exemplo: https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/edit
-const SPREADSHEET_ID = 'https://docs.google.com/spreadsheets/d/1vHpV68fmwP2hlvw9hwfva9G7_p6l_WEa5WRtkvyUZDM/edit';
+const SPREADSHEET_ID = '1vHpV68fmwP2hlvw9hwfva9G7_p6l_WEa5WRtkvyUZDM';
 
 // Nome da aba onde os dados serão salvos
 const SHEET_NAME = 'Respostas';
