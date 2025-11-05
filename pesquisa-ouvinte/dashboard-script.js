@@ -49,6 +49,8 @@ function showDashboard(username) {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboardScreen').style.display = 'block';
     document.getElementById('userName').textContent = username.charAt(0).toUpperCase() + username.slice(1);
+    
+    // Atualizar dados automaticamente ao entrar
     loadData();
 }
 
@@ -411,21 +413,21 @@ function fillTable() {
         }
         
         row.innerHTML = `
-            <td>${dataFormatada}</td>
+            <td style="white-space: nowrap;">${dataFormatada}</td>
             <td>${resposta['Horário'] || '--'}</td>
             <td>${resposta['Estilo Musical'] || '--'}</td>
             <td>${resposta['Locutor'] || '--'}</td>
             <td>${resposta['Programa'] || '--'}</td>
-            <td>${resposta['Muda de Rádio'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['Muda de Rádio'] || '--'}</td>
             <td>${resposta['Usa como Companhia'] || '--'}</td>
-            <td style="max-width: 200px; white-space: normal;">${resposta['Motivos'] || '--'}</td>
-            <td>${resposta['Plataforma'] || '--'}</td>
-            <td style="max-width: 180px; white-space: normal;">${resposta['Novo Conteúdo'] || '--'}</td>
-            <td>${resposta['Anúncios'] || '--'}</td>
-            <td>${resposta['Nome'] || '--'}</td>
-            <td>${resposta['Telefone'] || '--'}</td>
-            <td>${resposta['Sexo'] || '--'}</td>
-            <td>${resposta['Idade'] || '--'}</td>
+            <td style="min-width: 150px;">${resposta['Motivos'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['Plataforma'] || '--'}</td>
+            <td style="min-width: 120px;">${resposta['Novo Conteúdo'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['Anúncios'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['Nome'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['Telefone'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['Sexo'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['Idade'] || '--'}</td>
         `;
         
         tbody.appendChild(row);
