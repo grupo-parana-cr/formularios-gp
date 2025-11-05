@@ -112,7 +112,10 @@ body {
 }
 
 .logo-small {
-    height: 50px;
+    height: 60px;
+    padding: 10px 15px;
+    background: white;
+    border-radius: 12px;
 }
 
 .dashboard-header h1 {
