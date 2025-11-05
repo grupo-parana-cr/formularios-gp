@@ -1,13 +1,6 @@
 // ============================================
 // CONFIGURAÇÃO DO GOOGLE SHEETS
 // ============================================
-// INSTRUÇÕES PARA CONFIGURAR:
-// 1. Acesse https://script.google.com
-// 2. Crie um novo projeto
-// 3. Cole o código do arquivo google-apps-script.js
-// 4. Publique como Web App
-// 5. Cole a URL gerada abaixo:
-
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw28DjwSek59S0T-uDFS7Gf-jajIiagYuzI4B9OTXdfb2bJ0QVwtqQ7TGnNG1-ZG3e/exec';
 
 // ============================================
@@ -68,45 +61,26 @@ document.addEventListener('DOMContentLoaded', function() {
 // NAVEGAÇÃO ENTRE SEÇÕES
 // ============================================
 function nextSection() {
-    // Validar seção atual
     if (!validateCurrentSection()) {
         alert('Por favor, responda a pergunta antes de continuar! 😊');
         return;
     }
 
     if (currentSection < totalSections) {
-        // Esconder seção atual
         document.querySelector(`.section[data-section="${currentSection}"]`).classList.remove('active');
-        
-        // Avançar para próxima seção
         currentSection++;
-        
-        // Mostrar próxima seção
         document.querySelector(`.section[data-section="${currentSection}"]`).classList.add('active');
-        
-        // Atualizar barra de progresso
         updateProgress();
-        
-        // Scroll para o topo
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
 function prevSection() {
     if (currentSection > 1) {
-        // Esconder seção atual
         document.querySelector(`.section[data-section="${currentSection}"]`).classList.remove('active');
-        
-        // Voltar para seção anterior
         currentSection--;
-        
-        // Mostrar seção anterior
         document.querySelector(`.section[data-section="${currentSection}"]`).classList.add('active');
-        
-        // Atualizar barra de progresso
         updateProgress();
-        
-        // Scroll para o topo
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
@@ -117,18 +91,15 @@ function prevSection() {
 function validateCurrentSection() {
     const currentSectionElement = document.querySelector(`.section[data-section="${currentSection}"]`);
     
-    // Seção 7 (checkboxes) - validação especial
     if (currentSection === 7) {
         const checkedCount = document.querySelectorAll('input[name="motivos"]:checked').length;
         return checkedCount >= 1 && checkedCount <= 2;
     }
     
-    // Seção 11 (informações pessoais) - opcional
     if (currentSection === 11) {
         return true;
     }
     
-    // Outras seções com radio buttons obrigatórios
     const requiredInputs = currentSectionElement.querySelectorAll('input[required]');
     
     for (let input of requiredInputs) {
@@ -158,13 +129,19 @@ function updateProgress() {
 async function handleSubmit(e) {
     e.preventDefault();
     
-    // Validar última seção (embora seja opcional)
     if (currentSection !== totalSections) {
         alert('Por favor, complete todas as perguntas!');
         return;
     }
 
-    // Coletar dados do formulário
+    // Mudar botão para estado de loading
+    const submitBtn = document.querySelector('.btn-submit');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '⏳ Enviando, aguarde...';
+    submitBtn.style.background = '#999';
+    submitBtn.style.cursor = 'not-allowed';
+    submitBtn.disabled = true;
+
     const formData = new FormData(e.target);
     const data = {
         timestamp: new Date().toISOString(),
@@ -184,7 +161,6 @@ async function handleSubmit(e) {
         idade: formData.get('idade') || ''
     };
 
-    // Se "Outro" foi selecionado no estilo
     if (data.estilo === 'Outro') {
         const outroEstilo = document.getElementById('estiloOutroTexto').value;
         if (outroEstilo) {
@@ -195,22 +171,24 @@ async function handleSubmit(e) {
     console.log('Dados da pesquisa:', data);
 
     try {
-        // Enviar para Google Sheets
         await sendToGoogleSheets(data);
         
-        // Mostrar mensagem de sucesso
+        // Limpar localStorage antigo (dados com erro)
+        localStorage.removeItem('superfm_respostas');
+        
         document.getElementById('successMessage').style.display = 'flex';
         
     } catch (error) {
         console.error('Erro ao enviar dados:', error);
-        
-        // Se falhar, salvar localmente
         saveLocalBackup(data);
-        
         alert('✅ Pesquisa registrada com sucesso! Obrigado por participar! 🎵');
-        
-        // Mostrar mensagem de sucesso mesmo com erro
         document.getElementById('successMessage').style.display = 'flex';
+    } finally {
+        // Restaurar botão
+        submitBtn.innerHTML = originalText;
+        submitBtn.style.background = '';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.disabled = false;
     }
 }
 
@@ -218,7 +196,6 @@ async function handleSubmit(e) {
 // INTEGRAÇÃO COM GOOGLE SHEETS
 // ============================================
 async function sendToGoogleSheets(data) {
-    // Verificar se a URL está configurada
     if (GOOGLE_SCRIPT_URL === 'SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI') {
         console.warn('Google Sheets não configurado. Salvando apenas localmente.');
         throw new Error('Google Sheets não configurado');
@@ -241,16 +218,10 @@ async function sendToGoogleSheets(data) {
 // ============================================
 function saveLocalBackup(data) {
     try {
-        // Obter dados salvos anteriormente
         let savedData = localStorage.getItem('superfm_respostas');
         let respostas = savedData ? JSON.parse(savedData) : [];
-        
-        // Adicionar nova resposta
         respostas.push(data);
-        
-        // Salvar de volta
         localStorage.setItem('superfm_respostas', JSON.stringify(respostas));
-        
         console.log('Dados salvos localmente como backup');
     } catch (error) {
         console.error('Erro ao salvar backup local:', error);
@@ -258,7 +229,7 @@ function saveLocalBackup(data) {
 }
 
 // ============================================
-// FUNÇÕES AUXILIARES PARA O DASHBOARD
+// FUNÇÕES AUXILIARES
 // ============================================
 function getLocalResponses() {
     try {
