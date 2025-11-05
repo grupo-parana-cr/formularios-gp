@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pesquisa Super FM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="dashboard-styles.css">
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <img src="Super_FM.png" alt="Super FM" class="logo">
+            <h1>Dashboard de Pesquisa</h1>
+            <p>Acesso Restrito</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>👤 Usuário:</label>
+                    <input type="text" id="username" placeholder="Digite seu nome" required>
+                </div>
+                <div class="form-group">
+                    <label>🔒 Senha:</label>
+                    <input type="password" id="password" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-login">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboardScreen" class="dashboard-screen" style="display: none;">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <img src="Super_FM.png" alt="Super FM" class="logo-small">
+                <h1>Dashboard de Pesquisa</h1>
+            </div>
+            <div class="header-right">
+                <span class="user-name" id="userName"></span>
+                <button onclick="logout()" class="btn btn-logout">Sair</button>
+            </div>
+        </header>
+
+        <!-- Controles -->
+        <div class="controls">
+            <button onclick="refreshData()" class="btn btn-refresh">🔄 Atualizar Dados</button>
+            <div class="last-update" id="lastUpdate">Última atualização: --</div>
+        </div>
+
+        <!-- Estatísticas Rápidas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="totalRespostas">0</div>
+                    <div class="stat-label">Total de Respostas</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🕐</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="horarioFavorito">--</div>
+                    <div class="stat-label">Horário Mais Ouvido</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎵</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="estiloFavorito">--</div>
+                    <div class="stat-label">Estilo Mais Popular</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="programaFavorito">--</div>
+                    <div class="stat-label">Programa Favorito</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+            <!-- Gráfico 1: Horários -->
+            <div class="chart-card">
+                <h2>📅 Horários de Audiência</h2>
+                <canvas id="chartHorarios"></canvas>
+            </div>
+
+            <!-- Gráfico 2: Estilos Musicais -->
+            <div class="chart-card">
+                <h2>🎵 Estilos Musicais Preferidos</h2>
+                <canvas id="chartEstilos"></canvas>
+            </div>
+
+            <!-- Gráfico 3: Locutores -->
+            <div class="chart-card">
+                <h2>🎙️ Locutores Favoritos</h2>
+                <canvas id="chartLocutores"></canvas>
+            </div>
+
+            <!-- Gráfico 4: Programas -->
+            <div class="chart-card">
+                <h2>📺 Programas Favoritos</h2>
+                <canvas id="chartProgramas"></canvas>
+            </div>
+
+            <!-- Gráfico 5: Plataformas -->
+            <div class="chart-card">
+                <h2>📱 Como Ouvem</h2>
+                <canvas id="chartPlataformas"></canvas>
+            </div>
+
+            <!-- Gráfico 6: Faixa Etária -->
+            <div class="chart-card">
+                <h2>👥 Faixa Etária dos Ouvintes</h2>
+                <canvas id="chartIdade"></canvas>
+            </div>
+
+            <!-- Gráfico 7: Motivos -->
+            <div class="chart-card full-width">
+                <h2>💙 Motivos para Ouvir a Super FM</h2>
+                <canvas id="chartMotivos"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabela de Respostas -->
+        <div class="table-container">
+            <h2>📋 Respostas Detalhadas</h2>
+            <div class="table-scroll">
+                <table id="respostasTable">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Horário</th>
+                            <th>Estilo</th>
+                            <th>Locutor</th>
+                            <th>Programa</th>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="respostasBody">
+                        <tr>
+                            <td colspan="7" class="no-data">Carregando dados...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard-script.js"></script>
+</body>
+</html>

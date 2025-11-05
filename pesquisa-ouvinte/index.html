@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa de Opinião - Super FM 98.9</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Música ambiente (toca automaticamente) -->
+    <audio id="backgroundMusic" autoplay loop>
+        <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_4a480c37e7.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="Super_FM.png" alt="Super FM" class="logo">
+            <h1 class="title">Pesquisa de Opinião</h1>
+            <p class="subtitle">Sua opinião é nossa sintonia! 🎵</p>
+        </div>
+        <!-- Ondas sonoras animadas -->
+        <div class="sound-waves">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+    </header>
+
+    <!-- Barra de progresso -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-text" id="progressText">Pergunta 1 de 11</div>
+    </div>
+
+    <!-- Container do formulário -->
+    <div class="container">
+        <form id="pesquisaForm">
+            
+            <!-- Seção 1: Horário -->
+            <div class="section active" data-section="1">
+                <div class="question-card">
+                    <div class="question-number">1</div>
+                    <h2 class="question-title">🕐 Qual horário você mais costuma ouvir a Rádio Super FM?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="horario" value="Madrugada" required>
+                            <span class="option-text">Madrugada (00h às 6h)</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="horario" value="Manhã">
+                            <span class="option-text">Manhã (7h às 11h)</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="horario" value="Tarde">
+                            <span class="option-text">Tarde (12h às 18h)</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="horario" value="Noite">
+                            <span class="option-text">Noite (18h às 23h)</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="horario" value="Dia todo">
+                            <span class="option-text">Ouço o dia todo</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="horario" value="Horários específicos">
+                            <span class="option-text">Apenas em horários específicos</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 2: Estilo Musical -->
+            <div class="section" data-section="2">
+                <div class="question-card">
+                    <div class="question-number">2</div>
+                    <h2 class="question-title">🎵 Qual é o seu estilo musical preferido?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="estilo" value="Sertanejo" required>
+                            <span class="option-text">Sertanejo</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="estilo" value="Gospel">
+                            <span class="option-text">Gospel</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="estilo" value="Forró">
+                            <span class="option-text">Forró</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="estilo" value="MPB">
+                            <span class="option-text">MPB</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="estilo" value="Pop/Rock">
+                            <span class="option-text">Pop/Rock</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="estilo" value="Pagode/Samba">
+                            <span class="option-text">Pagode/Samba</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="estilo" value="Todos">
+                            <span class="option-text">Todos os estilos</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="estilo" value="Outro" id="estiloOutro">
+                            <span class="option-text">Outro</span>
+                        </label>
+                    </div>
+                    <input type="text" id="estiloOutroTexto" class="input-text" placeholder="Especifique outro estilo" style="display: none;">
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 3: Locutor -->
+            <div class="section" data-section="3">
+                <div class="question-card">
+                    <div class="question-number">3</div>
+                    <h2 class="question-title">🎙️ Qual locutor você mais gosta de ouvir na Super FM?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Edmar Goiano" required>
+                            <span class="option-text">Edmar Goiano</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Júnior Cardoso">
+                            <span class="option-text">Júnior Cardoso</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Roney">
+                            <span class="option-text">Roney</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Edileuza">
+                            <span class="option-text">Edileuza</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Sabrina">
+                            <span class="option-text">Sabrina</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Verlinda">
+                            <span class="option-text">Verlinda</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Sueli">
+                            <span class="option-text">Sueli</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="locutor" value="Todos">
+                            <span class="option-text">Gosto de todos</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 4: Programa -->
+            <div class="section" data-section="4">
+                <div class="question-card">
+                    <div class="question-number">4</div>
+                    <h2 class="question-title">⭐ Qual é o seu programa favorito na Super FM?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="programa" value="Alô Bom dia" required>
+                            <span class="option-text">Alô Bom dia, com Sergio Fontinelli</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Porteira 98">
+                            <span class="option-text">Porteira 98, com Edmar Goiano</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Jornal da manhã">
+                            <span class="option-text">Jornal da manhã, com Roney Rodrigues</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Super Manhã">
+                            <span class="option-text">Super Manhã, com Junior Cardoso</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Jornal da Super">
+                            <span class="option-text">Jornal da Super, com Roney Rodrigues e Edileusa Rodrigues</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Super Tarde">
+                            <span class="option-text">Super Tarde, com Sabrina Avelino</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Super Sertanejo">
+                            <span class="option-text">Super Sertanejo, com Verlinda Robles</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Rota Sertaneja">
+                            <span class="option-text">Rota Sertaneja, com Suely Pereira</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Podsonhar e Empreender">
+                            <span class="option-text">Podsonhar e Empreender, com Liliane Campos</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Fé e Café">
+                            <span class="option-text">Fé e Café, com Elizandra Rosa Matsumoto</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Coração Valente">
+                            <span class="option-text">Coração Valente, com Pr Leandro Paim e convidados</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Todos">
+                            <span class="option-text">Todos os programas</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="programa" value="Sem preferência">
+                            <span class="option-text">Não tenho preferência</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 5: Mudar de Rádio -->
+            <div class="section" data-section="5">
+                <div class="question-card">
+                    <div class="question-number">5</div>
+                    <h2 class="question-title">🔄 Você costuma mudar de Rádio durante o dia?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="mudarRadio" value="Sim" required>
+                            <span class="option-text">Sim</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="mudarRadio" value="Não">
+                            <span class="option-text">Não</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="mudarRadio" value="Às vezes">
+                            <span class="option-text">Às vezes</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 6: Companhia -->
+            <div class="section" data-section="6">
+                <div class="question-card">
+                    <div class="question-number">6</div>
+                    <h2 class="question-title">🏠 Você costuma deixar a Super FM ligada no seu rádio como companhia?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="companhia" value="Sim, o dia todo" required>
+                            <span class="option-text">Sim, o dia todo</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="companhia" value="Sim, parte do dia">
+                            <span class="option-text">Sim, durante parte do dia</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="companhia" value="Não">
+                            <span class="option-text">Não, ouço apenas quando quero algo específico</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 7: Motivos (Checkbox) -->
+            <div class="section" data-section="7">
+                <div class="question-card">
+                    <div class="question-number">7</div>
+                    <h2 class="question-title">💙 O que te faz continuar ouvindo a Super FM?</h2>
+                    <div class="alert">👉 Escolha até 2 opções</div>
+                    <div class="options">
+                        <label class="option checkbox">
+                            <input type="checkbox" name="motivos" value="Seleção musical">
+                            <span class="option-text">A seleção musical</span>
+                        </label>
+                        <label class="option checkbox">
+                            <input type="checkbox" name="motivos" value="Locutores">
+                            <span class="option-text">A voz e simpatia dos locutores</span>
+                        </label>
+                        <label class="option checkbox">
+                            <input type="checkbox" name="motivos" value="Notícias">
+                            <span class="option-text">As notícias e informações</span>
+                        </label>
+                        <label class="option checkbox">
+                            <input type="checkbox" name="motivos" value="Programas especiais">
+                            <span class="option-text">Os programas especiais</span>
+                        </label>
+                        <label class="option checkbox">
+                            <input type="checkbox" name="motivos" value="Companhia">
+                            <span class="option-text">A companhia durante o dia</span>
+                        </label>
+                        <label class="option checkbox">
+                            <input type="checkbox" name="motivos" value="Brindes e sorteios">
+                            <span class="option-text">Os brindes e sorteios</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 8: Plataforma -->
+            <div class="section" data-section="8">
+                <div class="question-card">
+                    <div class="question-number">8</div>
+                    <h2 class="question-title">📱 Como você ouve a Super FM com mais frequência?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="plataforma" value="Rádio" required>
+                            <span class="option-text">Pelo Rádio</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="plataforma" value="Aplicativo">
+                            <span class="option-text">Pelo aplicativo da Super FM</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="plataforma" value="Site">
+                            <span class="option-text">Pelo site da Super FM</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="plataforma" value="Alexa">
+                            <span class="option-text">Pela Alexa</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 9: Novos Conteúdos -->
+            <div class="section" data-section="9">
+                <div class="question-card">
+                    <div class="question-number">9</div>
+                    <h2 class="question-title">✨ Você gostaria de ver novos conteúdos na programação?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="novoConteudo" value="Sim, cristãos" required>
+                            <span class="option-text">Sim, gostaria de conteúdos cristãos</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="novoConteudo" value="Sim, mais música">
+                            <span class="option-text">Sim, gostaria de mais música</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="novoConteudo" value="Sim, mais notícias">
+                            <span class="option-text">Sim, gostaria de mais notícias locais</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="novoConteudo" value="Sim, mais entrevistas">
+                            <span class="option-text">Sim, gostaria de mais entrevistas</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="novoConteudo" value="Não">
+                            <span class="option-text">Não, estou satisfeito com a programação atual</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 10: Anúncios -->
+            <div class="section" data-section="10">
+                <div class="question-card">
+                    <div class="question-number">10</div>
+                    <h2 class="question-title">🛍️ Você já comprou algum produto ou contratou algum serviço anunciado na Super FM?</h2>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="anuncio" value="Sim, mais de uma vez" required>
+                            <span class="option-text">Sim, mais de uma vez</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="anuncio" value="Sim, uma vez">
+                            <span class="option-text">Sim, uma vez</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="anuncio" value="Não, mas tive interesse">
+                            <span class="option-text">Não, mas tive interesse</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="anuncio" value="Não">
+                            <span class="option-text">Não, e também não tive interesse</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="anuncio" value="Não lembro">
+                            <span class="option-text">Não me lembro</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="button" class="btn btn-next" onclick="nextSection()">Próxima →</button>
+                </div>
+            </div>
+
+            <!-- Seção 11: Informações Pessoais -->
+            <div class="section" data-section="11">
+                <div class="question-card">
+                    <div class="question-number">11</div>
+                    <h2 class="question-title">👤 Informações sobre o ouvinte <small>(opcional)</small></h2>
+                    <div class="form-group">
+                        <label>Nome:</label>
+                        <input type="text" name="nome" class="input-text" placeholder="Digite seu nome">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone:</label>
+                        <input type="tel" name="telefone" id="telefone" class="input-text" placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label>Sexo:</label>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="sexo" value="Masculino">
+                                <span class="option-text">Masculino</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="sexo" value="Feminino">
+                                <span class="option-text">Feminino</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="sexo" value="Prefiro não dizer">
+                                <span class="option-text">Prefiro não dizer</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Faixa etária:</label>
+                        <div class="options">
+                            <label class="option">
+                                <input type="radio" name="idade" value="Até 17 anos">
+                                <span class="option-text">Até 17 anos</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="idade" value="18 a 24 anos">
+                                <span class="option-text">18 a 24 anos</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="idade" value="25 a 34 anos">
+                                <span class="option-text">25 a 34 anos</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="idade" value="35 a 44 anos">
+                                <span class="option-text">35 a 44 anos</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="idade" value="45 a 54 anos">
+                                <span class="option-text">45 a 54 anos</span>
+                            </label>
+                            <label class="option">
+                                <input type="radio" name="idade" value="55 anos ou mais">
+                                <span class="option-text">55 anos ou mais</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
+                    <button type="submit" class="btn btn-submit">✅ Enviar Pesquisa</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Mensagem de sucesso -->
+    <div id="successMessage" class="success-message" style="display: none;">
+        <div class="success-content">
+            <div class="success-icon">🎉</div>
+            <h2>Obrigado por participar!</h2>
+            <p>Sua opinião foi registrada com sucesso na Super FM 98.9!</p>
+            <button onclick="window.location.reload()" class="btn btn-primary">Fazer nova pesquisa</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

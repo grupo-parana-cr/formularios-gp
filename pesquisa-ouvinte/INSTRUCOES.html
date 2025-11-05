@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instruções - Sistema Pesquisa Super FM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #E3F2FD 0%, #ffffff 100%);
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        header img {
+            max-width: 250px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2B5BA8;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            font-size: 1.2em;
+        }
+        
+        .step {
+            background: #F8F9FA;
+            border-left: 5px solid #2B5BA8;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #2B5BA8;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+        
+        .step h2 {
+            color: #2B5BA8;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .step ol {
+            margin-left: 55px;
+            margin-top: 15px;
+        }
+        
+        .step li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .code-box {
+            background: #1a1a2e;
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .alert {
+            background: #FFF9C4;
+            border-left: 5px solid #FFD700;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 10px;
+        }
+        
+        .alert strong {
+            color: #F57F17;
+            font-size: 1.1em;
+        }
+        
+        .files-list {
+            background: #E3F2FD;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .files-list h3 {
+            color: #2B5BA8;
+            margin-bottom: 15px;
+        }
+        
+        .files-list ul {
+            list-style: none;
+        }
+        
+        .files-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #BBDEFB;
+        }
+        
+        .files-list li:before {
+            content: "📄 ";
+            margin-right: 8px;
+        }
+        
+        .links {
+            background: #2B5BA8;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .links h2 {
+            margin-bottom: 20px;
+        }
+        
+        .links a {
+            display: inline-block;
+            background: white;
+            color: #2B5BA8;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .links a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .step {
+                padding: 20px 15px;
+            }
+            
+            .step ol {
+                margin-left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="Super_FM.png" alt="Super FM">
+            <h1>🎯 Instruções de Configuração</h1>
+            <p class="subtitle">Sistema de Pesquisa Super FM 98.9</p>
+        </header>
+
+        <div class="alert">
+            <strong>⚠️ IMPORTANTE:</strong> Siga os passos na ordem. O sistema precisa do Google Sheets configurado para funcionar perfeitamente!
+        </div>
+
+        <div class="files-list">
+            <h3>📦 Arquivos do Sistema</h3>
+            <ul>
+                <li><strong>index.html</strong> - Formulário da pesquisa</li>
+                <li><strong>styles.css</strong> - Estilos do formulário</li>
+                <li><strong>script.js</strong> - Lógica do formulário</li>
+                <li><strong>dashboard.html</strong> - Painel administrativo</li>
+                <li><strong>dashboard-styles.css</strong> - Estilos do dashboard</li>
+                <li><strong>dashboard-script.js</strong> - Lógica do dashboard</li>
+                <li><strong>google-apps-script.js</strong> - Código para Google</li>
+                <li><strong>Super_FM.png</strong> - Logo da rádio</li>
+                <li><strong>README.md</strong> - Documentação completa</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <h2>Criar Planilha no Google Sheets</h2>
+            <ol>
+                <li>Acesse <a href="https://sheets.google.com" target="_blank">sheets.google.com</a></li>
+                <li>Crie uma nova planilha</li>
+                <li>Nomeie como "Pesquisa Super FM"</li>
+                <li>Copie o ID da URL:</li>
+            </ol>
+            <div class="code-box">
+https://docs.google.com/spreadsheets/d/<strong style="color: #FFD700;">COPIE_ESTE_ID</strong>/edit
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <h2>Configurar Google Apps Script</h2>
+            <ol>
+                <li>Na planilha: <strong>Extensões > Apps Script</strong></li>
+                <li>Apague o código padrão</li>
+                <li>Cole o conteúdo do arquivo <strong>google-apps-script.js</strong></li>
+                <li>Na linha 19, cole o ID copiado no Passo 1</li>
+                <li>Clique em <strong>Salvar</strong> (ícone de disquete)</li>
+                <li>Execute <strong>testSave</strong> para testar</li>
+                <li>Autorize as permissões (primeira vez)</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <h2>Publicar como Web App</h2>
+            <ol>
+                <li>No Apps Script: <strong>Implantar > Nova implantação</strong></li>
+                <li>Escolha tipo: <strong>Aplicativo da Web</strong></li>
+                <li>Configure:
+                    <ul>
+                        <li>Executar como: <strong>Eu</strong></li>
+                        <li>Quem tem acesso: <strong>Qualquer pessoa</strong></li>
+                    </ul>
+                </li>
+                <li>Clique em <strong>Implantar</strong></li>
+                <li><strong>COPIE A URL</strong> gerada (muito importante!)</li>
+            </ol>
+            <div class="code-box">
+https://script.google.com/macros/s/<strong style="color: #FFD700;">COPIE_ESTA_URL_COMPLETA</strong>/exec
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">4</span>
+            <h2>Configurar Arquivos HTML/JS</h2>
+            <ol>
+                <li>Abra o arquivo <strong>script.js</strong></li>
+                <li>Na linha 12, cole a URL copiada no Passo 3</li>
+                <li>Abra o arquivo <strong>dashboard-script.js</strong></li>
+                <li>Na linha 5, cole a mesma URL</li>
+                <li>Salve ambos os arquivos</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <span class="step-number">5</span>
+            <h2>Publicar no GitHub Pages</h2>
+            <ol>
+                <li>Acesse seu GitHub</li>
+                <li>Crie um novo repositório "pesquisa-superfm"</li>
+                <li>Faça upload de TODOS os arquivos</li>
+                <li>Vá em <strong>Settings > Pages</strong></li>
+                <li>Selecione branch: <strong>main</strong>, pasta: <strong>/ (root)</strong></li>
+                <li>Clique em <strong>Save</strong></li>
+                <li>Aguarde 2-3 minutos</li>
+            </ol>
+        </div>
+
+        <div class="alert">
+            <strong>✅ PRONTO!</strong><br>
+            Seu sistema estará disponível em:<br>
+            <code style="background: white; padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 10px;">
+                https://seu-usuario.github.io/pesquisa-superfm/
+            </code>
+        </div>
+
+        <div class="step">
+            <span class="step-number">💡</span>
+            <h2>Como Usar</h2>
+            <ol>
+                <li><strong>Formulário:</strong> Compartilhe o link com os ouvintes</li>
+                <li><strong>Dashboard:</strong> Acesse /dashboard.html</li>
+                <li>Login padrão:
+                    <ul>
+                        <li>Usuário: <strong>elizandra</strong></li>
+                        <li>Senha: <strong>superfm2025</strong></li>
+                    </ul>
+                </li>
+                <li>Clique em "🔄 Atualizar Dados" para ver novas respostas</li>
+            </ol>
+        </div>
+
+        <div class="links">
+            <h2>📚 Recursos Úteis</h2>
+            <a href="https://sheets.google.com" target="_blank">Google Sheets</a>
+            <a href="https://script.google.com" target="_blank">Apps Script</a>
+            <a href="https://github.com" target="_blank">GitHub</a>
+            <a href="README.md" target="_blank">📖 Documentação Completa</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px; color: #6c757d;">
+            <p><strong>Desenvolvido para Super FM 98.9</strong></p>
+            <p>🎵 Mais alegria no ar!</p>
+        </div>
+    </div>
+</body>
+</html>
