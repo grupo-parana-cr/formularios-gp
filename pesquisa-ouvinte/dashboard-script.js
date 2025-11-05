@@ -363,8 +363,8 @@ function createMotivosChart() {
             datasets: [{
                 label: 'Número de Respostas',
                 data: Object.values(motivosCount),
-                backgroundColor: 'rgba(255, 215, 0, 0.7)',
-                borderColor: 'rgba(255, 215, 0, 1)',
+                backgroundColor: 'rgba(43, 91, 168, 0.7)',
+                borderColor: 'rgba(43, 91, 168, 1)',
                 borderWidth: 2
             }]
         },
@@ -397,7 +397,7 @@ function fillTable() {
     tbody.innerHTML = '';
     
     if (respostasData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Nenhuma resposta encontrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="15" class="no-data">Nenhuma resposta encontrada</td></tr>';
         return;
     }
     
@@ -416,8 +416,16 @@ function fillTable() {
             <td>${resposta['Estilo Musical'] || '--'}</td>
             <td>${resposta['Locutor'] || '--'}</td>
             <td>${resposta['Programa'] || '--'}</td>
+            <td>${resposta['Muda de Rádio'] || '--'}</td>
+            <td>${resposta['Usa como Companhia'] || '--'}</td>
+            <td style="max-width: 200px; white-space: normal;">${resposta['Motivos'] || '--'}</td>
+            <td>${resposta['Plataforma'] || '--'}</td>
+            <td style="max-width: 180px; white-space: normal;">${resposta['Novo Conteúdo'] || '--'}</td>
+            <td>${resposta['Anúncios'] || '--'}</td>
             <td>${resposta['Nome'] || '--'}</td>
             <td>${resposta['Telefone'] || '--'}</td>
+            <td>${resposta['Sexo'] || '--'}</td>
+            <td>${resposta['Idade'] || '--'}</td>
         `;
         
         tbody.appendChild(row);
