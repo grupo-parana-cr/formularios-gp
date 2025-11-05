@@ -21,356 +21,477 @@ body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, var(--super-light-blue) 0%, #ffffff 100%);
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
-/* ============================================
-   TELA DE LOGIN
-   ============================================ */
-.login-screen {
+/* Header */
+.header {
+    position: relative;
+    background: linear-gradient(135deg, var(--super-dark-blue) 0%, var(--super-blue) 100%);
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.header-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* Logo com fundo branco e sombra */
+.logo {
+    max-width: 280px;
+    height: auto;
+    margin-bottom: 20px;
+    padding: 20px 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+    color: var(--white);
+    font-size: 2.5em;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    color: var(--super-yellow);
+    font-size: 1.3em;
+    font-weight: 400;
+}
+
+/* Ondas sonoras animadas */
+.sound-waves {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 5px;
+    padding: 0 20px;
+    opacity: 0.3;
+}
+
+.wave {
+    width: 4px;
+    background: var(--super-yellow);
+    border-radius: 2px;
+    animation: soundWave 1s ease-in-out infinite;
+}
+
+.wave:nth-child(1) {
+    height: 20px;
+    animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+    height: 35px;
+    animation-delay: 0.1s;
+}
+
+.wave:nth-child(3) {
+    height: 50px;
+    animation-delay: 0.2s;
+}
+
+.wave:nth-child(4) {
+    height: 35px;
+    animation-delay: 0.3s;
+}
+
+.wave:nth-child(5) {
+    height: 20px;
+    animation-delay: 0.4s;
+}
+
+@keyframes soundWave {
+    0%, 100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(1.5);
+    }
+}
+
+/* Barra de progresso */
+.progress-container {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    height: 6px;
+    background: linear-gradient(90deg, var(--super-blue) 0%, var(--super-yellow) 100%);
+    transition: width 0.5s ease;
+    width: 9.09%;
+}
+
+.progress-text {
+    text-align: center;
+    padding: 15px;
+    font-weight: 600;
+    color: var(--super-blue);
+}
+
+/* Container */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Seções */
+.section {
+    display: none;
+    animation: slideIn 0.5s ease-out;
+}
+
+.section.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Card da pergunta */
+.question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.question-number {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
+    color: white;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, var(--super-dark-blue) 0%, var(--super-blue) 100%);
+    font-size: 1.5em;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(43, 91, 168, 0.3);
 }
 
-.login-container {
-    background: white;
-    padding: 50px 40px;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-}
-
-.login-container .logo {
-    max-width: 250px;
+.question-title {
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--dark);
     margin-bottom: 30px;
+    padding-right: 70px;
+    line-height: 1.4;
 }
 
-.login-container h1 {
-    color: var(--super-blue);
-    font-size: 2em;
-    margin-bottom: 10px;
-}
-
-.login-container p {
+.question-title small {
+    font-size: 0.6em;
     color: var(--gray);
-    margin-bottom: 30px;
+    font-weight: 400;
 }
 
+/* Opções */
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    padding: 18px 20px;
+    background: var(--light-gray);
+    border: 3px solid transparent;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.option:hover {
+    background: var(--super-light-blue);
+    border-color: var(--super-blue);
+    transform: translateX(10px);
+}
+
+.option input[type="radio"],
+.option input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    margin-right: 15px;
+    cursor: pointer;
+    accent-color: var(--super-blue);
+}
+
+.option input:checked ~ .option-text {
+    font-weight: 600;
+    color: var(--super-blue);
+}
+
+.option:has(input:checked) {
+    background: linear-gradient(135deg, var(--super-light-blue) 0%, #BBDEFB 100%);
+    border-color: var(--super-blue);
+    box-shadow: 0 5px 20px rgba(43, 91, 168, 0.2);
+}
+
+.option-text {
+    font-size: 1.05em;
+    color: var(--dark);
+    flex: 1;
+}
+
+/* Inputs de texto */
+.input-text {
+    width: 100%;
+    padding: 15px 20px;
+    border: 3px solid var(--light-gray);
+    border-radius: 15px;
+    font-size: 1em;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.input-text:focus {
+    outline: none;
+    border-color: var(--super-blue);
+    box-shadow: 0 5px 20px rgba(43, 91, 168, 0.2);
+}
+
+/* Form groups */
 .form-group {
-    margin-bottom: 20px;
-    text-align: left;
+    margin-bottom: 25px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
     font-weight: 600;
     color: var(--dark);
+    margin-bottom: 12px;
+    font-size: 1.1em;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid var(--light-gray);
+/* Alerta */
+.alert {
+    background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+    border-left: 5px solid var(--super-yellow);
+    padding: 15px 20px;
     border-radius: 10px;
-    font-size: 1em;
-    font-family: 'Poppins', sans-serif;
-    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: #F57F17;
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: var(--super-blue);
-    box-shadow: 0 0 0 3px rgba(43, 91, 168, 0.1);
-}
-
-/* ============================================
-   DASHBOARD
-   ============================================ */
-.dashboard-screen {
-    padding-bottom: 50px;
-}
-
-.dashboard-header {
-    background: linear-gradient(135deg, var(--super-dark-blue) 0%, var(--super-blue) 100%);
-    color: white;
-    padding: 20px 30px;
+/* Navegação */
+.navigation {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    gap: 15px;
+    margin-top: 30px;
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.logo-small {
-    height: 50px;
-}
-
-.dashboard-header h1 {
-    font-size: 1.8em;
-    font-weight: 700;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.user-name {
-    font-weight: 600;
-}
-
-/* ============================================
-   BOTÕES
-   ============================================ */
 .btn {
-    padding: 12px 30px;
-    font-size: 1em;
+    padding: 15px 40px;
+    font-size: 1.1em;
     font-weight: 600;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Poppins', sans-serif;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.btn-login {
-    width: 100%;
-    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
-    color: white;
-    margin-top: 10px;
-    box-shadow: 0 5px 15px rgba(43, 91, 168, 0.3);
-}
-
-.btn-login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(43, 91, 168, 0.4);
-}
-
-.btn-logout {
+.btn-prev {
     background: white;
     color: var(--super-blue);
-    border: 2px solid white;
+    border: 3px solid var(--super-blue);
 }
 
-.btn-logout:hover {
-    background: var(--super-yellow);
-    color: var(--dark);
-}
-
-.btn-refresh {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+.btn-prev:hover {
+    background: var(--super-blue);
     color: white;
 }
 
-.btn-refresh:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+.btn-next {
+    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
+    color: white;
 }
 
-/* ============================================
-   CONTROLES
-   ============================================ */
-.controls {
-    max-width: 1400px;
-    margin: 30px auto;
-    padding: 0 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.btn-next:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(43, 91, 168, 0.4);
 }
 
-.last-update {
-    color: var(--gray);
-    font-weight: 500;
+.btn-submit {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    width: 100%;
 }
 
-/* ============================================
-   ESTATÍSTICAS RÁPIDAS
-   ============================================ */
-.stats-grid {
-    max-width: 1400px;
-    margin: 0 auto 40px;
-    padding: 0 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
 }
 
-.stat-card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: all 0.3s ease;
+.btn-submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+.btn-primary {
+    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
+    color: white;
 }
 
-.stat-icon {
-    font-size: 3em;
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, var(--super-light-blue) 0%, #BBDEFB 100%);
-    border-radius: 50%;
+/* Mensagem de sucesso */
+.success-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
 }
 
-.stat-info {
-    flex: 1;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.stat-value {
-    font-size: 2em;
-    font-weight: 700;
-    color: var(--super-blue);
-}
-
-.stat-label {
-    color: var(--gray);
-    font-weight: 500;
-}
-
-/* ============================================
-   GRÁFICOS
-   ============================================ */
-.charts-grid {
-    max-width: 1400px;
-    margin: 0 auto 40px;
-    padding: 0 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 25px;
-}
-
-.chart-card {
+.success-content {
     background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
-
-.chart-card h2 {
-    color: var(--super-blue);
-    font-size: 1.3em;
-    margin-bottom: 20px;
-}
-
-.chart-card.full-width {
-    grid-column: 1 / -1;
-}
-
-/* ============================================
-   TABELA
-   ============================================ */
-.table-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 30px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-}
-
-.table-container h2 {
-    color: var(--super-blue);
-    font-size: 1.5em;
-    margin-bottom: 20px;
-}
-
-.table-scroll {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-thead {
-    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
-    color: white;
-}
-
-thead th {
-    padding: 15px;
-    text-align: left;
-    font-weight: 600;
-}
-
-tbody tr {
-    border-bottom: 1px solid var(--light-gray);
-    transition: all 0.2s ease;
-}
-
-tbody tr:hover {
-    background: var(--super-light-blue);
-}
-
-tbody td {
-    padding: 15px;
-    color: var(--dark);
-}
-
-.no-data {
+    padding: 50px;
+    border-radius: 20px;
     text-align: center;
-    padding: 40px;
-    color: var(--gray);
-    font-style: italic;
+    max-width: 500px;
+    animation: scaleIn 0.5s ease;
 }
 
-/* ============================================
-   RESPONSIVO
-   ============================================ */
+@keyframes scaleIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-icon {
+    font-size: 5em;
+    margin-bottom: 20px;
+}
+
+.success-content h2 {
+    color: var(--super-blue);
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+.success-content p {
+    color: var(--gray);
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+/* Responsivo */
 @media (max-width: 768px) {
-    .dashboard-header {
+    .header {
+        padding: 30px 15px;
+    }
+
+    .logo {
+        max-width: 220px;
+        padding: 15px 20px;
+    }
+
+    .title {
+        font-size: 2em;
+    }
+
+    .subtitle {
+        font-size: 1.1em;
+    }
+
+    .question-card {
+        padding: 25px 20px;
+    }
+
+    .question-title {
+        font-size: 1.3em;
+        padding-right: 60px;
+    }
+
+    .question-number {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2em;
+        top: 15px;
+        right: 15px;
+    }
+
+    .navigation {
         flex-direction: column;
-        gap: 15px;
-        text-align: center;
     }
 
-    .header-left {
-        flex-direction: column;
-        gap: 10px;
+    .btn {
+        width: 100%;
     }
 
-    .dashboard-header h1 {
-        font-size: 1.5em;
+    .success-content {
+        margin: 20px;
+        padding: 40px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        max-width: 180px;
     }
 
-    .controls {
-        flex-direction: column;
-        gap: 15px;
+    .title {
+        font-size: 1.6em;
     }
 
-    .charts-grid {
-        grid-template-columns: 1fr;
+    .subtitle {
+        font-size: 1em;
     }
 
-    .stats-grid {
-        grid-template-columns: 1fr;
+    .question-title {
+        font-size: 1.2em;
     }
 
-    .table-scroll {
-        overflow-x: scroll;
+    .option-text {
+        font-size: 0.95em;
     }
 }
