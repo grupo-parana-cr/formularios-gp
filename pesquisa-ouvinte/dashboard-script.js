@@ -398,7 +398,6 @@ function createMotivosChart() {
             }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
@@ -407,7 +406,7 @@ function createMotivosChart() {
                 }
             },
             scales: {
-                x: {
+                y: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
