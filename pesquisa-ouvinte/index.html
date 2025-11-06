@@ -525,11 +525,42 @@
                 
                 <div class="navigation">
                     <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
-                    <button type="submit" class="btn btn-submit btn-sorteio">✅ PARTICIPAR DO SORTEIO</button>
+                    <button type="submit" class="btn btn-submit btn-sorteio">📤 ENVIAR PESQUISA E PARTICIPAR DO SORTEIO</button>
                 </div>
             </div>
 
         </form>
+    </div>
+
+    <!-- Modal de validação (pergunta não respondida) -->
+    <div id="validacaoModal" class="validacao-modal" style="display: none;">
+        <div class="validacao-content">
+            <div class="validacao-icon">❓</div>
+            <h3>Ops! 😊</h3>
+            <p>Por favor, responda a pergunta antes de continuar.</p>
+            <button onclick="fecharValidacaoModal()" class="btn btn-modal-close">Entendi!</button>
+        </div>
+    </div>
+
+    <!-- Modal de CPF Inválido -->
+    <div id="cpfInvalidoModal" class="validacao-modal" style="display: none;">
+        <div class="validacao-content">
+            <div class="validacao-icon">⚠️</div>
+            <h3>CPF Inválido</h3>
+            <p>Por favor, digite um CPF válido para concorrer ao sorteio!</p>
+            <button onclick="fecharCpfInvalidoModal()" class="btn btn-modal-close">Tentar novamente</button>
+        </div>
+    </div>
+
+    <!-- Modal de CPF Duplicado -->
+    <div id="duplicadoMessage" class="success-message" style="display: none;">
+        <div class="success-content">
+            <div class="duplicado-icon">❌</div>
+            <h2>Você já respondeu!</h2>
+            <p>Este CPF já foi cadastrado em nossa base de dados.</p>
+            <p class="duplicado-info">Se acredita que é um erro, entre em contato com a Super FM 98.9</p>
+            <button onclick="window.location.reload()" class="btn btn-primary">Tentar com outro CPF</button>
+        </div>
     </div>
 
     <!-- Mensagem de sucesso -->
