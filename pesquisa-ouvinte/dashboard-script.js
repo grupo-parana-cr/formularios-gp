@@ -12,6 +12,8 @@ const USUARIOS_VALIDOS = {
 
 let chartInstances = {};
 let respostasData = [];
+let historicoSorteios = [];
+let cpfsSorteados = [];
 
 // ============================================
 // INICIALIZAÇÃO
@@ -25,7 +27,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+    // Carregar histórico de sorteios do localStorage
+    carregarHistoricoSorteios();
 });
+
+// ============================================
+// NAVEGAÇÃO DE ABAS
+// ============================================
+function switchTab(tabName) {
+    // Esconder todas as abas
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.classList.remove('active'));
+
+    // Mostrar aba selecionada
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+
+    // Atualizar botões
+    const btnTabs = document.querySelectorAll('.tab-btn');
+    btnTabs.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Se for aba de sorteio, carregar dados
+    if (tabName === 'sorteio') {
+        atualizarDadosSorteio();
+    }
+}
 
 // ============================================
 // LOGIN
@@ -107,7 +134,6 @@ async function refreshData() {
     const refreshBtn = document.querySelector('.btn-refresh');
     const originalText = refreshBtn.innerHTML;
     
-    // Mudar botão para loading
     refreshBtn.innerHTML = '⏳ Carregando...';
     refreshBtn.style.background = '#999';
     refreshBtn.style.cursor = 'not-allowed';
@@ -116,7 +142,6 @@ async function refreshData() {
     try {
         await loadData();
     } finally {
-        // Restaurar botão após 1 segundo
         setTimeout(() => {
             refreshBtn.innerHTML = originalText;
             refreshBtn.style.background = '';
@@ -399,7 +424,7 @@ function fillTable() {
     tbody.innerHTML = '';
     
     if (respostasData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="15" class="no-data">Nenhuma resposta encontrada</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="16" class="no-data">Nenhuma resposta encontrada</td></tr>';
         return;
     }
     
@@ -425,6 +450,7 @@ function fillTable() {
             <td style="min-width: 120px;">${resposta['Novo Conteúdo'] || '--'}</td>
             <td style="white-space: nowrap;">${resposta['Anúncios'] || '--'}</td>
             <td style="white-space: nowrap;">${resposta['Nome'] || '--'}</td>
+            <td style="white-space: nowrap;">${resposta['CPF'] || '--'}</td>
             <td style="white-space: nowrap;">${resposta['Telefone'] || '--'}</td>
             <td style="white-space: nowrap;">${resposta['Sexo'] || '--'}</td>
             <td style="white-space: nowrap;">${resposta['Idade'] || '--'}</td>
@@ -432,4 +458,123 @@ function fillTable() {
         
         tbody.appendChild(row);
     });
+}
+
+// ============================================
+// SORTEIO - FUNÇÕES
+// ============================================
+function atualizarDadosSorteio() {
+    document.getElementById('totalParticipantes').textContent = respostasData.length;
+    document.getElementById('totalSorteados').textContent = historicoSorteios.length;
+}
+
+async function iniciarSorteio() {
+    if (respostasData.length === 0) {
+        alert('❌ Nenhum participante para sortear!');
+        return;
+    }
+
+    document.getElementById('sorteioArea').style.display = 'block';
+    document.getElementById('btnSortear').disabled = true;
+    document.getElementById('carregando').style.display = 'block';
+    document.getElementById('contagem').style.display = 'none';
+    document.getElementById('resultado').style.display = 'none';
+
+    // Simular carregamento
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Passar para contagem
+    document.getElementById('carregando').style.display = 'none';
+    document.getElementById('contagem').style.display = 'block';
+
+    // Contagem dramática 10 -> 0
+    for (let i = 10; i >= 0; i--) {
+        document.getElementById('numeroContagem').textContent = i;
+        document.getElementById('numeroContagem').style.transform = 'scale(1.2)';
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        document.getElementById('numeroContagem').style.transform = 'scale(1)';
+    }
+
+    // Sortear participante
+    const vencedor = sortearParticipante();
+
+    // Mostrar resultado
+    document.getElementById('contagem').style.display = 'none';
+    document.getElementById('resultado').style.display = 'block';
+    document.getElementById('resultadoNome').textContent = vencedor.nome;
+    document.getElementById('resultadoCPF').textContent = vencedor.cpf;
+    document.getElementById('resultadoTelefone').textContent = vencedor.telefone;
+    document.getElementById('resultadoHora').textContent = new Date().toLocaleString('pt-BR');
+
+    // Salvar no histórico
+    salvarSorteio(vencedor);
+
+    // Marcar como sorteado
+    cpfsSorteados.push(vencedor.cpf);
+
+    // Habilitar botão
+    document.getElementById('btnSortear').disabled = false;
+}
+
+function sortearParticipante() {
+    // Filtrar participantes ainda não sorteados
+    let disponiveis = respostasData.filter(p => !cpfsSorteados.includes(p['CPF']));
+
+    if (disponiveis.length === 0) {
+        alert('⚠️ Todos os participantes já foram sorteados!');
+        return null;
+    }
+
+    // Sortear aleatoriamente
+    const indice = Math.floor(Math.random() * disponiveis.length);
+    const vencedor = disponiveis[indice];
+
+    return {
+        nome: vencedor['Nome'] || '--',
+        cpf: vencedor['CPF'] || '--',
+        telefone: vencedor['Telefone'] || '--',
+        data: new Date().toLocaleString('pt-BR')
+    };
+}
+
+function salvarSorteio(vencedor) {
+    historicoSorteios.push(vencedor);
+    localStorage.setItem('superfm_sorteios', JSON.stringify(historicoSorteios));
+    atualizarHistoricoUI();
+}
+
+function carregarHistoricoSorteios() {
+    const salvo = localStorage.getItem('superfm_sorteios');
+    if (salvo) {
+        historicoSorteios = JSON.parse(salvo);
+        cpfsSorteados = historicoSorteios.map(s => s.cpf);
+    }
+}
+
+function atualizarHistoricoUI() {
+    const lista = document.getElementById('historicoLista');
+    
+    if (historicoSorteios.length === 0) {
+        lista.innerHTML = '<p class="historico-vazio">Nenhum sorteio realizado ainda</p>';
+        return;
+    }
+
+    lista.innerHTML = historicoSorteios.map((s, idx) => `
+        <div class="historico-item">
+            <div class="historico-numero">#${idx + 1}</div>
+            <div class="historico-info">
+                <strong>${s.nome}</strong><br>
+                CPF: ${s.cpf}<br>
+                <small>${s.data}</small>
+            </div>
+        </div>
+    `).join('');
+}
+
+function fecharResultado() {
+    document.getElementById('sorteioArea').style.display = 'none';
+    document.getElementById('resultado').style.display = 'none';
+    atualizarDadosSorteio();
 }
