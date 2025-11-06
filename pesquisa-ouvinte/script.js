@@ -73,7 +73,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Máscara de telefone
+    // Máscara de CPF
+    document.getElementById('cpf').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (value.length > 11) {
+            value = value.substring(0, 11);
+        }
+        
+        if (value.length <= 11) {
+            if (value.length <= 3) {
+                value = value.replace(/^(\d{0,3})/, '$1');
+            } else if (value.length <= 6) {
+                value = value.replace(/^(\d{3})(\d{0,3})/, '$1.$2');
+            } else if (value.length <= 9) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+            } else {
+                value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+            }
+        }
+        
+        e.target.value = value;
+    });
     document.getElementById('telefone').addEventListener('input', function(e) {
         let value = e.target.value.replace(/\D/g, '');
         
@@ -143,8 +164,38 @@ function prevSection() {
 }
 
 // ============================================
-// VALIDAÇÃO
+// VALIDAÇÃO CPF
 // ============================================
+function validarCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    
+    if (cpf.length !== 11) return false;
+    
+    // Verificar se todos os dígitos são iguais
+    if (/^(\d)\1{10}$/.test(cpf)) return false;
+    
+    // Validar primeiro dígito
+    let soma = 0;
+    for (let i = 0; i < 9; i++) {
+        soma += parseInt(cpf.charAt(i)) * (10 - i);
+    }
+    let resto = soma % 11;
+    let digito1 = resto < 2 ? 0 : 11 - resto;
+    
+    if (parseInt(cpf.charAt(9)) !== digito1) return false;
+    
+    // Validar segundo dígito
+    soma = 0;
+    for (let i = 0; i < 10; i++) {
+        soma += parseInt(cpf.charAt(i)) * (11 - i);
+    }
+    resto = soma % 11;
+    let digito2 = resto < 2 ? 0 : 11 - resto;
+    
+    if (parseInt(cpf.charAt(10)) !== digito2) return false;
+    
+    return true;
+}
 function validateCurrentSection() {
     const currentSectionElement = document.querySelector(`.section[data-section="${currentSection}"]`);
     
@@ -293,12 +344,23 @@ async function handleSubmit(e) {
 
     // Validar seção 11 (campos obrigatórios)
     const nome = document.querySelector('input[name="nome"]').value.trim();
+    const cpf = document.querySelector('input[name="cpf"]').value.trim();
     const telefone = document.querySelector('input[name="telefone"]').value.trim();
     const sexo = document.querySelector('input[name="sexo"]:checked');
     const idade = document.querySelector('input[name="idade"]:checked');
 
     if (!nome || nome.length < 3) {
         alert('⚠️ Por favor, digite seu nome completo para concorrer ao sorteio! 🎁');
+        return;
+    }
+
+    if (!cpf) {
+        alert('⚠️ Por favor, digite seu CPF para concorrer ao sorteio! 🆔');
+        return;
+    }
+
+    if (!validarCPF(cpf)) {
+        alert('⚠️ CPF inválido! Por favor, digite um CPF válido para concorrer ao sorteio! 🆔');
         return;
     }
 
@@ -320,10 +382,33 @@ async function handleSubmit(e) {
     // Mudar botão para estado de loading
     const submitBtn = document.querySelector('.btn-submit');
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '⏳ Enviando, aguarde...';
+    submitBtn.innerHTML = '⏳ Verificando...';
     submitBtn.style.background = '#999';
     submitBtn.style.cursor = 'not-allowed';
     submitBtn.disabled = true;
+
+    // Verificar se CPF já existe na planilha
+    try {
+        const cpfLimpo = cpf.replace(/\D/g, '');
+        const urlVerificacao = `${GOOGLE_SCRIPT_URL}?action=verificarCPF&cpf=${cpfLimpo}`;
+        
+        const responseVerificacao = await fetch(urlVerificacao);
+        const resultVerificacao = await responseVerificacao.json();
+        
+        if (resultVerificacao.duplicado) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.style.background = '';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.disabled = false;
+            alert('❌ Você já respondeu a pesquisa! CPF já cadastrado.');
+            return;
+        }
+    } catch (error) {
+        console.log('Não conseguiu verificar CPF (Google Sheets pode estar offline)');
+    }
+
+    submitBtn.innerHTML = '⏳ Enviando, aguarde...';
+    submitBtn.style.background = '#999';
 
     const formData = new FormData(e.target);
     const data = {
@@ -339,6 +424,7 @@ async function handleSubmit(e) {
         novoConteudo: formData.get('novoConteudo'),
         anuncio: formData.get('anuncio'),
         nome: nome,
+        cpf: cpf.replace(/\D/g, ''),
         telefone: telefone,
         sexo: formData.get('sexo'),
         idade: formData.get('idade')
