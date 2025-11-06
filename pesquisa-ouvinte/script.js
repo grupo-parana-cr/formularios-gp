@@ -16,9 +16,38 @@ let confettiInstance = null;
 document.addEventListener('DOMContentLoaded', function() {
     // Iniciar música com volume baixo
     const music = document.getElementById('backgroundMusic');
+    const musicToggle = document.getElementById('musicToggle');
+    
     if (music) {
         music.volume = 0.15;
-        music.play().catch(e => console.log('Autoplay bloqueado pelo navegador'));
+        
+        // Tentar autoplay (pode ser bloqueado pelo navegador)
+        const playPromise = music.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // Autoplay foi bloqueado, usuário precisa clicar
+                console.log('Autoplay bloqueado. Usuário pode clicar para ativar.');
+                if (musicToggle) {
+                    musicToggle.classList.add('muted');
+                }
+            });
+        }
+    }
+
+    // Toggle de música
+    if (musicToggle && music) {
+        musicToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (music.paused) {
+                music.play();
+                musicToggle.classList.remove('muted');
+            } else {
+                music.pause();
+                musicToggle.classList.add('muted');
+            }
+        });
     }
 
     // Campo "Outro" do estilo musical
