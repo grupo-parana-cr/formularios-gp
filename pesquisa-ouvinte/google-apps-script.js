@@ -75,6 +75,7 @@ function saveToSheet(data) {
       'Novo Conteúdo',
       'Anúncios',
       'Nome',
+      'CPF',
       'Telefone',
       'Sexo',
       'Idade'
@@ -104,6 +105,7 @@ function saveToSheet(data) {
     data.novoConteudo,
     data.anuncio,
     data.nome,
+    data.cpf,
     data.telefone,
     data.sexo,
     data.idade
@@ -121,6 +123,18 @@ function saveToSheet(data) {
 // ============================================
 function doGet(e) {
   try {
+    const action = e.parameter.action;
+    
+    // NOVO: Ação para verificar CPF duplicado
+    if (action === 'verificarCPF') {
+      const cpf = e.parameter.cpf;
+      const duplicado = cpfJaExiste(cpf);
+      
+      return ContentService
+        .createTextOutput(JSON.stringify({ 'duplicado': duplicado }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
     // Verificar senha
     const password = e.parameter.password;
     
@@ -169,6 +183,35 @@ function getSheetData() {
     });
     return obj;
   });
+}
+
+// ============================================
+// NOVO: VERIFICAR SE CPF JÁ EXISTE
+// ============================================
+function cpfJaExiste(cpf) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  
+  if (!sheet) {
+    return false;
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  
+  // CPF está na coluna M (índice 12)
+  // Data/Hora(0), Horário(1), Estilo(2), Locutor(3), Programa(4), MudaRadio(5), 
+  // Companhia(6), Motivos(7), Plataforma(8), NovoConteudo(9), Anuncios(10), 
+  // Nome(11), CPF(12), Telefone(13), Sexo(14), Idade(15)
+  
+  for (let i = 1; i < data.length; i++) {
+    const cpfNaPlanilha = String(data[i][12]).replace(/\D/g, '');
+    
+    if (cpfNaPlanilha === cpf && cpfNaPlanilha.length === 11) {
+      return true; // CPF encontrado
+    }
+  }
+  
+  return false; // CPF não encontrado
 }
 
 // ============================================
