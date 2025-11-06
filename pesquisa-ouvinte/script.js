@@ -124,11 +124,26 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// NAVEGAÇÃO ENTRE SEÇÕES
+// FUNÇÕES PARA MODAIS
 // ============================================
+function abrirValidacaoModal() {
+    document.getElementById('validacaoModal').style.display = 'flex';
+}
+
+function fecharValidacaoModal() {
+    document.getElementById('validacaoModal').style.display = 'none';
+}
+
+function abrirCpfInvalidoModal() {
+    document.getElementById('cpfInvalidoModal').style.display = 'flex';
+}
+
+function fecharCpfInvalidoModal() {
+    document.getElementById('cpfInvalidoModal').style.display = 'none';
+}
 function nextSection() {
     if (!validateCurrentSection()) {
-        alert('Por favor, responda a pergunta antes de continuar! 😊');
+        abrirValidacaoModal();
         return;
     }
 
@@ -360,7 +375,7 @@ async function handleSubmit(e) {
     }
 
     if (!validarCPF(cpf)) {
-        alert('⚠️ CPF inválido! Por favor, digite um CPF válido para concorrer ao sorteio! 🆔');
+        abrirCpfInvalidoModal();
         return;
     }
 
@@ -400,7 +415,7 @@ async function handleSubmit(e) {
             submitBtn.style.background = '';
             submitBtn.style.cursor = 'pointer';
             submitBtn.disabled = false;
-            alert('❌ Você já respondeu a pesquisa! CPF já cadastrado.');
+            document.getElementById('duplicadoMessage').style.display = 'flex';
             return;
         }
     } catch (error) {
