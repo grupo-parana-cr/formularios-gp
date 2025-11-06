@@ -235,11 +235,11 @@ body {
 }
 
 .btn-sortear {
-    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
     color: white;
     font-size: 1.2em;
     padding: 20px 60px;
-    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+    box-shadow: 0 10px 30px rgba(43, 91, 168, 0.4);
     margin: 30px auto;
     display: block;
 }
@@ -252,6 +252,19 @@ body {
 .btn-sortear:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.btn-resetar {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    color: white;
+    padding: 12px 40px;
+    font-size: 1em;
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+}
+
+.btn-resetar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5);
 }
 
 .btn-primary {
@@ -446,12 +459,12 @@ tbody td {
 }
 
 .sorteio-header-card {
-    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+    background: linear-gradient(135deg, var(--super-dark-blue) 0%, var(--super-blue) 100%);
     color: white;
     padding: 40px;
     border-radius: 20px;
     text-align: center;
-    box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
+    box-shadow: 0 10px 40px rgba(43, 91, 168, 0.3);
     margin-bottom: 30px;
 }
 
