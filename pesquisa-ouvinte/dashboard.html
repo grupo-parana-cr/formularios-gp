@@ -176,13 +176,38 @@
         </div>
 
         <!-- ===================================
-             ABA 2: SORTEIO
+             ABA 2: SORTEIO - NOVA VERSÃO
              =================================== -->
         <div id="tab-sorteio" class="tab-content">
             
             <div class="sorteio-container">
-                <!-- Cabeçalho do Sorteio -->
-                <div class="sorteio-header-card">
+                
+                <!-- TELA INICIAL (Carregar Participantes) -->
+                <div id="telaCarregarParticipantes" class="sorteio-header-card tela-carregamento-inicial">
+                    <div class="sorteio-title-icon">🎁</div>
+                    <h2>Sorteio Alexa Super FM 98.9</h2>
+                    <p class="sorteio-date">📅 Data: 10/12/2025</p>
+                    <p class="mensagem-inicial">Clique abaixo para carregar os participantes da pesquisa</p>
+                    <button onclick="carregarParticipantes()" class="btn btn-sortear" id="btnCarregar">
+                        📥 CARREGAR PARTICIPANTES
+                    </button>
+                </div>
+
+                <!-- TELA DE CARREGAMENTO -->
+                <div id="telaCarregando" class="sorteio-header-card" style="display: none;">
+                    <div class="sorteio-title-icon">📋</div>
+                    <h2>Carregando Participantes...</h2>
+                    
+                    <div class="lista-carregamento">
+                        <div id="listaParticipantesCarregando" class="participantes-lista">
+                            <!-- Nomes aparecem aqui um a um -->
+                        </div>
+                        <div class="loading-spinner-inline"></div>
+                    </div>
+                </div>
+
+                <!-- CABEÇALHO DO SORTEIO (aparece após carregar) -->
+                <div id="sorteioHeaderCard" class="sorteio-header-card" style="display: none;">
                     <div class="sorteio-title-icon">🎁</div>
                     <h2>Sorteio Alexa Super FM 98.9</h2>
                     <p class="sorteio-date">📅 Data: 10/12/2025</p>
@@ -198,8 +223,8 @@
                     </div>
                 </div>
 
-                <!-- Botão Sortear -->
-                <button onclick="iniciarSorteio()" class="btn btn-sortear" id="btnSortear">
+                <!-- Botão Sortear (aparece após carregar) -->
+                <button onclick="iniciarSorteio()" class="btn btn-sortear" id="btnSortear" style="display: none;">
                     🎲 SORTEAR AGORA
                 </button>
 
@@ -246,7 +271,7 @@
                 </div>
 
                 <!-- Histórico de Sorteios -->
-                <div class="sorteio-historico">
+                <div id="historicoSorteiosContainer" class="sorteio-historico" style="display: none;">
                     <h3>📜 Histórico de Sorteios</h3>
                     <div id="historicoLista" class="historico-lista">
                         <p class="historico-vazio">Nenhum sorteio realizado ainda</p>
@@ -254,7 +279,7 @@
                     
                     <!-- Botão Resetar -->
                     <div style="margin-top: 30px; text-align: center;">
-                        <button onclick="resetarSorteios()" class="btn btn-resetar">
+                        <button onclick="abrirModalReset()" class="btn btn-resetar">
                             🔄 RESETAR HISTÓRICO
                         </button>
                     </div>
@@ -264,6 +289,21 @@
 
         </div>
 
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO PARA RESETAR -->
+    <div id="modalReset" class="modal-reset" style="display: none;">
+        <div class="modal-reset-content">
+            <div class="modal-icon">⚠️</div>
+            <h2>Confirmar Reset?</h2>
+            <p>Tem certeza que deseja <strong>RESETAR</strong> o histórico de sorteios?</p>
+            <p class="modal-aviso">⚠️ Isso vai limpar todos os sorteios realizados e permitir que os participantes sejam sorteados novamente.</p>
+            
+            <div class="modal-buttons">
+                <button onclick="fecharModalReset()" class="btn btn-modal-cancel">❌ Cancelar</button>
+                <button onclick="confirmarReset()" class="btn btn-modal-confirm">✅ Sim, Resetar</button>
+            </div>
+        </div>
     </div>
 
     <script src="dashboard-script.js"></script>
