@@ -157,6 +157,7 @@ body {
     font-size: 3em;
     animation: bounce-icon 1s ease-in-out infinite;
     flex-shrink: 0;
+    z-index: 1;
 }
 
 @keyframes bounce-icon {
@@ -186,18 +187,11 @@ body {
     margin: 0;
 }
 
-.cta-sub {
-    font-size: 0.95em;
-    color: #333;
-    margin: 5px 0 0 0;
-    font-weight: 500;
-    opacity: 0.9;
-}
-
 .cta-pulse {
     font-size: 2em;
     animation: pulse-star 1s ease-in-out infinite;
     flex-shrink: 0;
+    z-index: 1;
 }
 
 @keyframes pulse-star {
@@ -215,27 +209,26 @@ body {
 @media (max-width: 768px) {
     .cta-urgency {
         padding: 15px 20px;
-        gap: 15px;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: space-around;
     }
 
     .cta-main {
-        font-size: 1.3em;
+        font-size: 1.2em;
+        margin-bottom: 5px;
     }
 
     .cta-date {
         font-size: 1em;
     }
 
-    .cta-sub {
-        font-size: 0.85em;
-    }
-
     .cta-icon {
-        font-size: 2.2em;
+        font-size: 2.5em;
     }
 
     .cta-pulse {
-        font-size: 1.5em;
+        font-size: 1.8em;
     }
 }
 
@@ -243,7 +236,8 @@ body {
     .cta-urgency {
         flex-direction: column;
         padding: 12px 15px;
-        gap: 10px;
+        gap: 8px;
+        align-items: center;
     }
 
     .cta-icon {
@@ -251,7 +245,9 @@ body {
     }
 
     .cta-main {
-        font-size: 1.1em;
+        font-size: 1em;
+        margin-bottom: 3px;
+        line-height: 1.1;
     }
 
     .cta-date {
@@ -260,13 +256,10 @@ body {
 
     .cta-text {
         text-align: center;
+        width: 100%;
     }
 
-    .music-toggle {
-        width: 50px;
-        height: 50px;
-        bottom: 15px;
-        right: 15px;
+    .cta-pulse {
         font-size: 1.5em;
     }
 }
