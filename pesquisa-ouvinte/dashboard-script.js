@@ -14,6 +14,7 @@ let chartInstances = {};
 let respostasData = [];
 let historicoSorteios = [];
 let cpfsSorteados = [];
+let participantesCarregados = false;
 
 // ============================================
 // INICIALIZAÇÃO
@@ -48,9 +49,9 @@ function switchTab(tabName) {
     btnTabs.forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
 
-    // Se for aba de sorteio, carregar dados
+    // Se for aba de sorteio, reinicializar
     if (tabName === 'sorteio') {
-        atualizarDadosSorteio();
+        reinicializarTelaSorteio();
     }
 }
 
@@ -461,8 +462,77 @@ function fillTable() {
 }
 
 // ============================================
-// SORTEIO - FUNÇÕES
+// SORTEIO - FUNÇÕES NOVAS
 // ============================================
+
+function reinicializarTelaSorteio() {
+    if (!participantesCarregados) {
+        // Mostrar tela de carregar participantes
+        document.getElementById('telaCarregarParticipantes').style.display = 'block';
+        document.getElementById('telaCarregando').style.display = 'none';
+        document.getElementById('sorteioHeaderCard').style.display = 'none';
+        document.getElementById('btnSortear').style.display = 'none';
+        document.getElementById('sorteioArea').style.display = 'none';
+        document.getElementById('historicoSorteiosContainer').style.display = 'none';
+    } else {
+        // Mostrar dashboard de sorteio
+        document.getElementById('telaCarregarParticipantes').style.display = 'none';
+        document.getElementById('telaCarregando').style.display = 'none';
+        document.getElementById('sorteioHeaderCard').style.display = 'block';
+        document.getElementById('btnSortear').style.display = 'block';
+        document.getElementById('historicoSorteiosContainer').style.display = 'block';
+        atualizarDadosSorteio();
+        atualizarHistoricoUI();
+    }
+}
+
+async function carregarParticipantes() {
+    // Desabilitar botão
+    document.getElementById('btnCarregar').disabled = true;
+    document.getElementById('btnCarregar').style.opacity = '0.6';
+    
+    // Transição para tela de carregamento
+    document.getElementById('telaCarregarParticipantes').style.display = 'none';
+    document.getElementById('telaCarregando').style.display = 'block';
+    
+    const listaParticipantes = document.getElementById('listaParticipantesCarregando');
+    listaParticipantes.innerHTML = '';
+    
+    if (!respostasData || respostasData.length === 0) {
+        await loadData();
+    }
+    
+    // Simular carregamento com nomes aparecendo um a um
+    for (let i = 0; i < respostasData.length; i++) {
+        const resposta = respostasData[i];
+        const nome = resposta['Nome'] || 'Participante ' + (i + 1);
+        
+        const item = document.createElement('div');
+        item.className = 'participante-item';
+        item.innerHTML = `
+            <span class="participante-check">✓</span>
+            <span>${nome}</span>
+        `;
+        listaParticipantes.appendChild(item);
+        
+        // Delay entre cada nome
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Aguardar um pouco mais
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Transição para tela de sorteio
+    participantesCarregados = true;
+    document.getElementById('telaCarregando').style.display = 'none';
+    document.getElementById('sorteioHeaderCard').style.display = 'block';
+    document.getElementById('btnSortear').style.display = 'block';
+    document.getElementById('historicoSorteiosContainer').style.display = 'block';
+    
+    atualizarDadosSorteio();
+    atualizarHistoricoUI();
+}
+
 function atualizarDadosSorteio() {
     document.getElementById('totalParticipantes').textContent = respostasData.length;
     document.getElementById('totalSorteados').textContent = historicoSorteios.length;
@@ -508,6 +578,9 @@ async function iniciarSorteio() {
     document.getElementById('resultadoTelefone').textContent = vencedor.telefone;
     document.getElementById('resultadoHora').textContent = new Date().toLocaleString('pt-BR');
 
+    // Confetti 🎉
+    lancarConfetti();
+
     // Salvar no histórico
     salvarSorteio(vencedor);
 
@@ -543,6 +616,7 @@ function salvarSorteio(vencedor) {
     historicoSorteios.push(vencedor);
     localStorage.setItem('superfm_sorteios', JSON.stringify(historicoSorteios));
     atualizarHistoricoUI();
+    atualizarDadosSorteio();
 }
 
 function carregarHistoricoSorteios() {
@@ -591,22 +665,57 @@ function fecharResultado() {
 }
 
 // ============================================
-// RESETAR SORTEIOS
+// MODAL DE RESET
 // ============================================
-function resetarSorteios() {
-    if (confirm('⚠️ Tem certeza que deseja RESETAR o histórico de sorteios?\n\nIsso vai limpar todos os sorteios realizados e permitir que os participantes sejam sorteados novamente.')) {
-        // Limpar tudo
-        historicoSorteios = [];
-        cpfsSorteados = [];
+function abrirModalReset() {
+    document.getElementById('modalReset').style.display = 'flex';
+}
+
+function fecharModalReset() {
+    document.getElementById('modalReset').style.display = 'none';
+}
+
+function confirmarReset() {
+    // Limpar tudo
+    historicoSorteios = [];
+    cpfsSorteados = [];
+    
+    // Remover do localStorage
+    localStorage.removeItem('superfm_sorteios');
+    
+    // Atualizar UI
+    atualizarHistoricoUI();
+    atualizarDadosSorteio();
+    
+    // Fechar modal
+    fecharModalReset();
+    
+    // Feedback visual
+    alert('✅ Histórico de sorteios resetado com sucesso!\n\nTodos os participantes podem ser sorteados novamente.');
+}
+
+// ============================================
+// CONFETTI EFFECT
+// ============================================
+function lancarConfetti() {
+    const confettiCount = 50;
+    const colors = ['#2B5BA8', '#FFD700', '#4CAF50', '#FF5722', '#9C27B0'];
+    
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'fixed';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-10px';
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.borderRadius = '50%';
+        confetti.style.pointerEvents = 'none';
+        confetti.style.zIndex = '1000';
+        confetti.style.animation = `confetti-fall ${Math.random() * 2 + 2}s linear forwards`;
         
-        // Remover do localStorage
-        localStorage.removeItem('superfm_sorteios');
+        document.body.appendChild(confetti);
         
-        // Atualizar UI
-        atualizarHistoricoUI();
-        atualizarDadosSorteio();
-        
-        // Feedback visual
-        alert('✅ Histórico de sorteios resetado com sucesso!\n\nTodos os participantes podem ser sorteados novamente.');
+        setTimeout(() => confetti.remove(), 4000);
     }
 }
