@@ -18,6 +18,10 @@
             <img src="Super_FM.png" alt="Super FM" class="logo">
             <h1 class="title">Pesquisa de Opinião</h1>
             <p class="subtitle">Sua opinião é nossa sintonia! 🎵</p>
+            <!-- Badge do sorteio -->
+            <div class="sorteio-badge">
+                🎁 <strong>Concorra a uma Alexa!</strong> Sorteio: 10/12/2025
+            </div>
         </div>
         <!-- Ondas sonoras animadas -->
         <div class="sound-waves">
@@ -428,24 +432,35 @@
                 </div>
             </div>
 
-            <!-- Seção 11: Informações Pessoais -->
+            <!-- Seção 11: Informações Pessoais - NOVA VERSÃO COM CONFETTI -->
             <div class="section" data-section="11">
-                <div class="question-card">
-                    <div class="question-number">11</div>
-                    <h2 class="question-title">👤 Informações sobre o ouvinte <small>(opcional)</small></h2>
+                <!-- Canvas para confetti -->
+                <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+                <!-- Título motivador -->
+                <div class="sorteio-header">
+                    <div class="sorteio-icon">🎉</div>
+                    <h2 class="sorteio-title">PARABÉNS! FALTAM SEUS DADOS!</h2>
+                    <p class="sorteio-subtitle">Você já respondeu todas as perguntas! Agora complete com seus dados para concorrer à <strong>Alexa Super FM!</strong></p>
+                </div>
+
+                <div class="question-card sorteio-card">
+                    <h2 class="question-title">👤 Informações para o Sorteio</h2>
+                    <p class="sorteio-descricao">Estes dados são obrigatórios para você concorrer ao sorteio 🎁</p>
+                    
                     <div class="form-group">
-                        <label>Nome:</label>
-                        <input type="text" name="nome" class="input-text" placeholder="Digite seu nome">
+                        <label>📝 Nome: <span class="obrigatorio">*</span></label>
+                        <input type="text" name="nome" class="input-text" placeholder="Digite seu nome completo" required>
                     </div>
                     <div class="form-group">
-                        <label>Telefone:</label>
-                        <input type="tel" name="telefone" id="telefone" class="input-text" placeholder="(00) 00000-0000">
+                        <label>📞 Telefone: <span class="obrigatorio">*</span></label>
+                        <input type="tel" name="telefone" id="telefone" class="input-text" placeholder="(00) 00000-0000" required>
                     </div>
                     <div class="form-group">
-                        <label>Sexo:</label>
+                        <label>👥 Sexo: <span class="obrigatorio">*</span></label>
                         <div class="options">
                             <label class="option">
-                                <input type="radio" name="sexo" value="Masculino">
+                                <input type="radio" name="sexo" value="Masculino" required>
                                 <span class="option-text">Masculino</span>
                             </label>
                             <label class="option">
@@ -459,10 +474,10 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Faixa etária:</label>
+                        <label>📅 Faixa etária: <span class="obrigatorio">*</span></label>
                         <div class="options">
                             <label class="option">
-                                <input type="radio" name="idade" value="Até 17 anos">
+                                <input type="radio" name="idade" value="Até 17 anos" required>
                                 <span class="option-text">Até 17 anos</span>
                             </label>
                             <label class="option">
@@ -488,9 +503,10 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="navigation">
                     <button type="button" class="btn btn-prev" onclick="prevSection()">← Anterior</button>
-                    <button type="submit" class="btn btn-submit">✅ Enviar Pesquisa</button>
+                    <button type="submit" class="btn btn-submit btn-sorteio">✅ PARTICIPAR DO SORTEIO</button>
                 </div>
             </div>
 
@@ -503,6 +519,7 @@
             <div class="success-icon">🎉</div>
             <h2>Obrigado por participar!</h2>
             <p>Sua opinião foi registrada com sucesso na Super FM 98.9!</p>
+            <p class="success-alexa">Boa sorte no sorteio da Alexa! 🎁 Resultado: 10/12/2025</p>
             <button onclick="window.location.reload()" class="btn btn-primary">Fazer nova pesquisa</button>
         </div>
     </div>
