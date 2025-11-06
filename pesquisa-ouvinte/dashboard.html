@@ -43,125 +43,222 @@
             </div>
         </header>
 
-        <!-- Controles -->
-        <div class="controls">
-            <button onclick="refreshData()" class="btn btn-refresh">🔄 Atualizar Dados</button>
-            <div class="last-update" id="lastUpdate">Última atualização: --</div>
+        <!-- Navegação das Abas -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('respostas')">📊 Respostas</button>
+            <button class="tab-btn" onclick="switchTab('sorteio')">🎲 Sorteio</button>
         </div>
 
-        <!-- Estatísticas Rápidas -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-info">
-                    <div class="stat-value" id="totalRespostas">0</div>
-                    <div class="stat-label">Total de Respostas</div>
+        <!-- ===================================
+             ABA 1: RESPOSTAS
+             =================================== -->
+        <div id="tab-respostas" class="tab-content active">
+            
+            <!-- Controles -->
+            <div class="controls">
+                <button onclick="refreshData()" class="btn btn-refresh">🔄 Atualizar Dados</button>
+                <div class="last-update" id="lastUpdate">Última atualização: --</div>
+            </div>
+
+            <!-- Estatísticas Rápidas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalRespostas">0</div>
+                        <div class="stat-label">Total de Respostas</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🕐</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="horarioFavorito">--</div>
+                        <div class="stat-label">Horário Mais Ouvido</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎵</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="estiloFavorito">--</div>
+                        <div class="stat-label">Estilo Mais Popular</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="programaFavorito">--</div>
+                        <div class="stat-label">Programa Favorito</div>
+                    </div>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">🕐</div>
-                <div class="stat-info">
-                    <div class="stat-value" id="horarioFavorito">--</div>
-                    <div class="stat-label">Horário Mais Ouvido</div>
+
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <!-- Gráfico 1: Horários -->
+                <div class="chart-card">
+                    <h2>📅 Horários de Audiência</h2>
+                    <canvas id="chartHorarios"></canvas>
+                </div>
+
+                <!-- Gráfico 2: Estilos Musicais -->
+                <div class="chart-card">
+                    <h2>🎵 Estilos Musicais Preferidos</h2>
+                    <canvas id="chartEstilos"></canvas>
+                </div>
+
+                <!-- Gráfico 3: Locutores -->
+                <div class="chart-card">
+                    <h2>🎙️ Locutores Favoritos</h2>
+                    <canvas id="chartLocutores"></canvas>
+                </div>
+
+                <!-- Gráfico 4: Programas -->
+                <div class="chart-card">
+                    <h2>📺 Programas Favoritos</h2>
+                    <canvas id="chartProgramas"></canvas>
+                </div>
+
+                <!-- Gráfico 5: Plataformas -->
+                <div class="chart-card">
+                    <h2>📱 Como Ouvem</h2>
+                    <canvas id="chartPlataformas"></canvas>
+                </div>
+
+                <!-- Gráfico 6: Faixa Etária -->
+                <div class="chart-card">
+                    <h2>👥 Faixa Etária dos Ouvintes</h2>
+                    <canvas id="chartIdade"></canvas>
+                </div>
+
+                <!-- Gráfico 7: Motivos -->
+                <div class="chart-card full-width">
+                    <h2>💙 Motivos para Ouvir a Super FM</h2>
+                    <canvas id="chartMotivos"></canvas>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">🎵</div>
-                <div class="stat-info">
-                    <div class="stat-value" id="estiloFavorito">--</div>
-                    <div class="stat-label">Estilo Mais Popular</div>
+
+            <!-- Tabela de Respostas -->
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <h2>📋 Respostas Detalhadas</h2>
+                    <div class="table-scroll">
+                        <table id="respostasTable">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Horário</th>
+                                    <th>Estilo</th>
+                                    <th>Locutor</th>
+                                    <th>Programa</th>
+                                    <th>Muda Rádio</th>
+                                    <th>Companhia</th>
+                                    <th>Motivos</th>
+                                    <th>Plataforma</th>
+                                    <th>Novo Conteúdo</th>
+                                    <th>Anúncios</th>
+                                    <th>Nome</th>
+                                    <th>CPF</th>
+                                    <th>Telefone</th>
+                                    <th>Sexo</th>
+                                    <th>Idade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="respostasBody">
+                                <tr>
+                                    <td colspan="16" class="no-data">Carregando dados...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">⭐</div>
-                <div class="stat-info">
-                    <div class="stat-value" id="programaFavorito">--</div>
-                    <div class="stat-label">Programa Favorito</div>
-                </div>
-            </div>
+
         </div>
 
-        <!-- Gráficos -->
-        <div class="charts-grid">
-            <!-- Gráfico 1: Horários -->
-            <div class="chart-card">
-                <h2>📅 Horários de Audiência</h2>
-                <canvas id="chartHorarios"></canvas>
-            </div>
-
-            <!-- Gráfico 2: Estilos Musicais -->
-            <div class="chart-card">
-                <h2>🎵 Estilos Musicais Preferidos</h2>
-                <canvas id="chartEstilos"></canvas>
-            </div>
-
-            <!-- Gráfico 3: Locutores -->
-            <div class="chart-card">
-                <h2>🎙️ Locutores Favoritos</h2>
-                <canvas id="chartLocutores"></canvas>
-            </div>
-
-            <!-- Gráfico 4: Programas -->
-            <div class="chart-card">
-                <h2>📺 Programas Favoritos</h2>
-                <canvas id="chartProgramas"></canvas>
-            </div>
-
-            <!-- Gráfico 5: Plataformas -->
-            <div class="chart-card">
-                <h2>📱 Como Ouvem</h2>
-                <canvas id="chartPlataformas"></canvas>
-            </div>
-
-            <!-- Gráfico 6: Faixa Etária -->
-            <div class="chart-card">
-                <h2>👥 Faixa Etária dos Ouvintes</h2>
-                <canvas id="chartIdade"></canvas>
-            </div>
-
-            <!-- Gráfico 7: Motivos -->
-            <div class="chart-card full-width">
-                <h2>💙 Motivos para Ouvir a Super FM</h2>
-                <canvas id="chartMotivos"></canvas>
-            </div>
-        </div>
-
-        <!-- Tabela de Respostas -->
-        <div class="table-container">
-            <div class="table-wrapper">
-                <h2>📋 Respostas Detalhadas</h2>
-                <div class="table-scroll">
-                    <table id="respostasTable">
-                        <thead>
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Horário</th>
-                                <th>Estilo</th>
-                                <th>Locutor</th>
-                                <th>Programa</th>
-                                <th>Muda Rádio</th>
-                                <th>Companhia</th>
-                                <th>Motivos</th>
-                                <th>Plataforma</th>
-                                <th>Novo Conteúdo</th>
-                                <th>Anúncios</th>
-                                <th>Nome</th>
-                                <th>Telefone</th>
-                                <th>Sexo</th>
-                                <th>Idade</th>
-                            </tr>
-                        </thead>
-                        <tbody id="respostasBody">
-                            <tr>
-                                <td colspan="15" class="no-data">Carregando dados...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- ===================================
+             ABA 2: SORTEIO
+             =================================== -->
+        <div id="tab-sorteio" class="tab-content">
+            
+            <div class="sorteio-container">
+                <!-- Cabeçalho do Sorteio -->
+                <div class="sorteio-header-card">
+                    <div class="sorteio-title-icon">🎁</div>
+                    <h2>Sorteio Alexa Super FM 98.9</h2>
+                    <p class="sorteio-date">📅 Data: 10/12/2025</p>
+                    <div class="sorteio-stats">
+                        <div class="sorteio-stat">
+                            <span class="sorteio-stat-label">Participantes:</span>
+                            <span class="sorteio-stat-value" id="totalParticipantes">0</span>
+                        </div>
+                        <div class="sorteio-stat">
+                            <span class="sorteio-stat-label">Já Sorteados:</span>
+                            <span class="sorteio-stat-value" id="totalSorteados">0</span>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Botão Sortear -->
+                <button onclick="iniciarSorteio()" class="btn btn-sortear" id="btnSortear">
+                    🎲 SORTEAR AGORA
+                </button>
+
+                <!-- Área de Sorteio (animação) -->
+                <div id="sorteioArea" class="sorteio-area" style="display: none;">
+                    <!-- Mensagem de carregamento -->
+                    <div id="carregando" class="sorteio-loading">
+                        <div class="loading-spinner"></div>
+                        <p id="mensagemCarregamento">Carregando participantes...</p>
+                    </div>
+
+                    <!-- Contagem -->
+                    <div id="contagem" class="sorteio-contagem" style="display: none;">
+                        <div class="contagem-numero" id="numeroContagem">10</div>
+                        <p>Preparando sorteio...</p>
+                    </div>
+
+                    <!-- Resultado -->
+                    <div id="resultado" class="sorteio-resultado" style="display: none;">
+                        <div class="resultado-confetti">🎉 🎉 🎉</div>
+                        <h3>VENCEDOR!</h3>
+                        <div class="resultado-card">
+                            <div class="resultado-dados">
+                                <div class="resultado-item">
+                                    <span class="resultado-label">👤 Nome:</span>
+                                    <span class="resultado-valor" id="resultadoNome">--</span>
+                                </div>
+                                <div class="resultado-item">
+                                    <span class="resultado-label">🆔 CPF:</span>
+                                    <span class="resultado-valor" id="resultadoCPF">--</span>
+                                </div>
+                                <div class="resultado-item">
+                                    <span class="resultado-label">📞 Telefone:</span>
+                                    <span class="resultado-valor" id="resultadoTelefone">--</span>
+                                </div>
+                                <div class="resultado-item">
+                                    <span class="resultado-label">🕐 Hora:</span>
+                                    <span class="resultado-valor" id="resultadoHora">--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="fecharResultado()" class="btn btn-primary">Novo Sorteio</button>
+                    </div>
+                </div>
+
+                <!-- Histórico de Sorteios -->
+                <div class="sorteio-historico">
+                    <h3>📜 Histórico de Sorteios</h3>
+                    <div id="historicoLista" class="historico-lista">
+                        <p class="historico-vazio">Nenhum sorteio realizado ainda</p>
+                    </div>
+                </div>
+
             </div>
+
         </div>
+
     </div>
 
-    <script src="dashboard-script.js"></script>
+    <script src="dashboard-script-novo.js"></script>
 </body>
 </html>
