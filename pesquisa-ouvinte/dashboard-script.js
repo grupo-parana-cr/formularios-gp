@@ -230,6 +230,7 @@ function generateCharts() {
     createDoughnutChart('chartPlataformas', 'Plataforma', 'Plataformas');
     createBarChart('chartIdade', 'Idade', 'Idade');
     createMotivosChart();
+    createAnunciosChart();
 }
 
 function createBarChart(canvasId, field, label) {
@@ -411,6 +412,48 @@ function createMotivosChart() {
                     ticks: {
                         stepSize: 1
                     }
+                }
+            }
+        }
+    });
+}
+
+function createAnunciosChart() {
+    const ctx = document.getElementById('chartAnuncios');
+    if (!ctx) return;
+    
+    const data = countOccurrences(respostasData, 'Anúncios');
+    
+    if (Object.keys(data).length === 0) {
+        ctx.parentElement.innerHTML = `<p style="text-align: center; padding: 40px; color: #999;">Sem dados para exibir</p>`;
+        return;
+    }
+    
+    const colors = [
+        'rgba(43, 91, 168, 0.8)',
+        'rgba(255, 215, 0, 0.8)',
+        'rgba(76, 175, 80, 0.8)',
+        'rgba(244, 67, 54, 0.8)',
+        'rgba(156, 39, 176, 0.8)'
+    ];
+    
+    chartInstances['chartAnuncios'] = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                data: Object.values(data),
+                backgroundColor: colors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'right'
                 }
             }
         }
