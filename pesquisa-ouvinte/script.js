@@ -8,6 +8,7 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw28DjwSek59
 // ============================================
 let currentSection = 1;
 const totalSections = 11;
+let confettiInstance = null;
 
 // ============================================
 // INICIALIZAÇÃO
@@ -87,11 +88,23 @@ function nextSection() {
         document.querySelector(`.section[data-section="${currentSection}"]`).classList.add('active');
         updateProgress();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Iniciar confetti na seção 11
+        if (currentSection === 11) {
+            setTimeout(() => {
+                startConfetti();
+            }, 300);
+        }
     }
 }
 
 function prevSection() {
     if (currentSection > 1) {
+        // Parar confetti se voltar da seção 11
+        if (currentSection === 11 && confettiInstance) {
+            stopConfetti();
+        }
+
         document.querySelector(`.section[data-section="${currentSection}"]`).classList.remove('active');
         currentSection--;
         document.querySelector(`.section[data-section="${currentSection}"]`).classList.add('active');
@@ -111,8 +124,9 @@ function validateCurrentSection() {
         return checkedCount >= 1 && checkedCount <= 2;
     }
     
+    // Seção 11 - validação especial
     if (currentSection === 11) {
-        return true;
+        return true; // Validar no handleSubmit
     }
     
     const requiredInputs = currentSectionElement.querySelectorAll('input[required]');
@@ -139,6 +153,105 @@ function updateProgress() {
 }
 
 // ============================================
+// CONFETTI EFFECT
+// ============================================
+class ConfettiEffect {
+    constructor() {
+        this.canvas = document.getElementById('confetti-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.animationId = null;
+
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+        });
+    }
+
+    createParticles() {
+        const colors = ['#2B5BA8', '#FFD700', '#FFFFFF', '#1B3A6B', '#E3F2FD'];
+        const particleCount = 100;
+
+        for (let i = 0; i < particleCount; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height - this.canvas.height,
+                vx: (Math.random() - 0.5) * 4,
+                vy: Math.random() * 3 + 2,
+                size: Math.random() * 10 + 5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                rotation: Math.random() * 360,
+                rotationVel: (Math.random() - 0.5) * 10
+            });
+        }
+    }
+
+    animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.particles = this.particles.filter(p => p.y < this.canvas.height);
+
+        this.particles.forEach((p, index) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.1; // Gravidade
+            p.rotation += p.rotationVel;
+
+            // Desenhar confetti
+            this.ctx.save();
+            this.ctx.translate(p.x, p.y);
+            this.ctx.rotate((p.rotation * Math.PI) / 180);
+            this.ctx.fillStyle = p.color;
+            this.ctx.globalAlpha = Math.max(0, 1 - p.y / this.canvas.height);
+            this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            this.ctx.restore();
+        });
+
+        if (this.particles.length > 0) {
+            this.animationId = requestAnimationFrame(() => this.animate());
+        }
+    }
+
+    start() {
+        this.createParticles();
+        this.animate();
+    }
+
+    stop() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+        this.particles = [];
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+}
+
+function startConfetti() {
+    if (confettiInstance) {
+        confettiInstance.stop();
+    }
+    confettiInstance = new ConfettiEffect();
+    confettiInstance.start();
+
+    // Parar após 3 segundos
+    setTimeout(() => {
+        if (confettiInstance) {
+            confettiInstance.stop();
+        }
+    }, 3000);
+}
+
+function stopConfetti() {
+    if (confettiInstance) {
+        confettiInstance.stop();
+        confettiInstance = null;
+    }
+}
+
+// ============================================
 // ENVIO DO FORMULÁRIO
 // ============================================
 async function handleSubmit(e) {
@@ -146,6 +259,32 @@ async function handleSubmit(e) {
     
     if (currentSection !== totalSections) {
         alert('Por favor, complete todas as perguntas!');
+        return;
+    }
+
+    // Validar seção 11 (campos obrigatórios)
+    const nome = document.querySelector('input[name="nome"]').value.trim();
+    const telefone = document.querySelector('input[name="telefone"]').value.trim();
+    const sexo = document.querySelector('input[name="sexo"]:checked');
+    const idade = document.querySelector('input[name="idade"]:checked');
+
+    if (!nome || nome.length < 3) {
+        alert('⚠️ Por favor, digite seu nome completo para concorrer ao sorteio! 🎁');
+        return;
+    }
+
+    if (!telefone || telefone.replace(/\D/g, '').length < 10) {
+        alert('⚠️ Por favor, digite um telefone válido para concorrer ao sorteio! 📱');
+        return;
+    }
+
+    if (!sexo) {
+        alert('⚠️ Por favor, selecione seu sexo para concorrer ao sorteio! 👥');
+        return;
+    }
+
+    if (!idade) {
+        alert('⚠️ Por favor, selecione sua faixa etária para concorrer ao sorteio! 📅');
         return;
     }
 
@@ -170,10 +309,10 @@ async function handleSubmit(e) {
         plataforma: formData.get('plataforma'),
         novoConteudo: formData.get('novoConteudo'),
         anuncio: formData.get('anuncio'),
-        nome: formData.get('nome') || '',
-        telefone: formData.get('telefone') || '',
-        sexo: formData.get('sexo') || '',
-        idade: formData.get('idade') || ''
+        nome: nome,
+        telefone: telefone,
+        sexo: formData.get('sexo'),
+        idade: formData.get('idade')
     };
 
     if (data.estilo === 'Outro') {
@@ -191,11 +330,14 @@ async function handleSubmit(e) {
         // Limpar localStorage antigo (dados com erro)
         localStorage.removeItem('superfm_respostas');
         
+        // Parar confetti e mostrar sucesso
+        stopConfetti();
         document.getElementById('successMessage').style.display = 'flex';
         
     } catch (error) {
         console.error('Erro ao enviar dados:', error);
         saveLocalBackup(data);
+        stopConfetti();
         alert('✅ Pesquisa registrada com sucesso! Obrigado por participar! 🎵');
         document.getElementById('successMessage').style.display = 'flex';
     } finally {
