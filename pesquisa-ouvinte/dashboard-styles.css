@@ -134,6 +134,55 @@ body {
 }
 
 /* ============================================
+   NAVEGAÇÃO DE ABAS
+   ============================================ */
+.tabs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 20px 0;
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.tab-btn {
+    padding: 12px 30px;
+    background: white;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--gray);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1em;
+}
+
+.tab-btn:hover {
+    color: var(--super-blue);
+    border-bottom-color: var(--super-yellow);
+}
+
+.tab-btn.active {
+    color: var(--super-blue);
+    border-bottom-color: var(--super-blue);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================
    BOTÕES
    ============================================ */
 .btn {
@@ -179,6 +228,37 @@ body {
 .btn-refresh:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.btn-sortear {
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+    color: white;
+    font-size: 1.2em;
+    padding: 20px 60px;
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+    margin: 30px auto;
+    display: block;
+}
+
+.btn-sortear:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+}
+
+.btn-sortear:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
+    color: white;
+    margin-top: 30px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(43, 91, 168, 0.4);
 }
 
 /* ============================================
@@ -353,6 +433,273 @@ tbody td {
 }
 
 /* ============================================
+   SORTEIO
+   ============================================ */
+.sorteio-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.sorteio-header-card {
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
+    margin-bottom: 30px;
+}
+
+.sorteio-title-icon {
+    font-size: 4em;
+    margin-bottom: 15px;
+    animation: bounce-sorteio 1s ease-in-out infinite;
+}
+
+@keyframes bounce-sorteio {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.sorteio-header-card h2 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.sorteio-date {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    opacity: 0.95;
+}
+
+.sorteio-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.sorteio-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sorteio-stat-label {
+    font-size: 0.95em;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.sorteio-stat-value {
+    font-size: 2.5em;
+    font-weight: 800;
+}
+
+/* ============================================
+   ÁREA DE SORTEIO
+   ============================================ */
+.sorteio-area {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sorteio-loading {
+    text-align: center;
+    width: 100%;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--light-gray);
+    border-top: 4px solid var(--super-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.sorteio-loading p {
+    font-size: 1.2em;
+    color: var(--gray);
+}
+
+.sorteio-contagem {
+    text-align: center;
+    width: 100%;
+}
+
+.contagem-numero {
+    font-size: 10em;
+    font-weight: 800;
+    color: var(--super-blue);
+    line-height: 1;
+    margin: 20px 0;
+    transition: all 0.1s ease;
+}
+
+.sorteio-contagem p {
+    font-size: 1.5em;
+    color: var(--gray);
+    margin-top: 20px;
+}
+
+.sorteio-resultado {
+    text-align: center;
+    width: 100%;
+    animation: slideInResult 0.5s ease;
+}
+
+@keyframes slideInResult {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.resultado-confetti {
+    font-size: 3em;
+    margin-bottom: 20px;
+    animation: confetti-fall 1s ease-out;
+}
+
+@keyframes confetti-fall {
+    from {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.sorteio-resultado h3 {
+    font-size: 3em;
+    color: var(--super-blue);
+    font-weight: 800;
+    margin: 30px 0;
+}
+
+.resultado-card {
+    background: linear-gradient(135deg, var(--super-light-blue) 0%, #BBDEFB 100%);
+    padding: 30px;
+    border-radius: 15px;
+    margin: 30px 0;
+    border: 3px solid var(--super-blue);
+}
+
+.resultado-dados {
+    text-align: left;
+}
+
+.resultado-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.resultado-label {
+    font-weight: 700;
+    color: var(--super-blue);
+    min-width: 150px;
+}
+
+.resultado-valor {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 1.1em;
+}
+
+/* ============================================
+   HISTÓRICO
+   ============================================ */
+.sorteio-historico {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.sorteio-historico h3 {
+    color: var(--super-blue);
+    font-size: 1.4em;
+    margin-bottom: 20px;
+}
+
+.historico-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.historico-vazio {
+    text-align: center;
+    color: var(--gray);
+    padding: 20px;
+    font-style: italic;
+}
+
+.historico-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: var(--light-gray);
+    border-radius: 10px;
+    border-left: 4px solid var(--super-yellow);
+}
+
+.historico-numero {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--super-blue) 0%, var(--super-dark-blue) 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.historico-info {
+    flex: 1;
+    font-size: 0.9em;
+}
+
+.historico-info strong {
+    color: var(--dark);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.historico-info small {
+    color: var(--gray);
+}
+
+/* ============================================
    RESPONSIVO
    ============================================ */
 @media (max-width: 768px) {
@@ -386,5 +733,50 @@ tbody td {
 
     .table-scroll {
         overflow-x: scroll;
+    }
+
+    .tabs-container {
+        flex-wrap: wrap;
+    }
+
+    .sorteio-stats {
+        gap: 20px;
+    }
+
+    .contagem-numero {
+        font-size: 6em;
+    }
+
+    .sorteio-resultado h3 {
+        font-size: 2em;
+    }
+
+    .btn-sortear {
+        font-size: 1em;
+        padding: 15px 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contagem-numero {
+        font-size: 4em;
+    }
+
+    .sorteio-resultado h3 {
+        font-size: 1.5em;
+    }
+
+    .resultado-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .resultado-label {
+        margin-bottom: 5px;
+    }
+
+    .sorteio-stats {
+        flex-direction: column;
+        gap: 15px;
     }
 }
