@@ -8,9 +8,14 @@
 </head>
 <body>
     <!-- Música ambiente (toca automaticamente) -->
-    <audio id="backgroundMusic" autoplay loop>
+    <audio id="backgroundMusic" autoplay loop volume="0.15">
         <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_4a480c37e7.mp3" type="audio/mpeg">
     </audio>
+    
+    <!-- Toggle Música -->
+    <div class="music-toggle" id="musicToggle" title="Clique para ligar/desligar música">
+        <span class="music-icon">🔊</span>
+    </div>
 
     <!-- Header -->
     <header class="header">
@@ -18,9 +23,18 @@
             <img src="Super_FM.png" alt="Super FM" class="logo">
             <h1 class="title">Pesquisa de Opinião</h1>
             <p class="subtitle">Sua opinião é nossa sintonia! 🎵</p>
-            <!-- Badge do sorteio -->
-            <div class="sorteio-badge">
-                🎁 <strong>Concorra a uma Alexa!</strong> Sorteio: 10/12/2025
+            
+            <!-- CTA Principal - Marketing Strategy -->
+            <div class="cta-sorteio">
+                <div class="cta-urgency">
+                    <span class="cta-icon">🎁</span>
+                    <div class="cta-text">
+                        <h2 class="cta-main">Responda a Pesquisa e Concorra a uma Alexa!</h2>
+                        <p class="cta-date">📅 Sorteio: 10/12/2025</p>
+                        <p class="cta-sub">Todos que responderem participam automaticamente</p>
+                    </div>
+                    <span class="cta-pulse">✨</span>
+                </div>
             </div>
         </div>
         <!-- Ondas sonoras animadas -->
