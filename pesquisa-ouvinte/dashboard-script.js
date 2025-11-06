@@ -548,8 +548,19 @@ function salvarSorteio(vencedor) {
 function carregarHistoricoSorteios() {
     const salvo = localStorage.getItem('superfm_sorteios');
     if (salvo) {
-        historicoSorteios = JSON.parse(salvo);
-        cpfsSorteados = historicoSorteios.map(s => s.cpf);
+        try {
+            historicoSorteios = JSON.parse(salvo);
+            cpfsSorteados = historicoSorteios.map(s => s.cpf);
+            console.log('Histórico carregado:', historicoSorteios.length, 'sorteios');
+        } catch (error) {
+            console.error('Erro ao carregar histórico:', error);
+            historicoSorteios = [];
+            cpfsSorteados = [];
+            localStorage.removeItem('superfm_sorteios');
+        }
+    } else {
+        historicoSorteios = [];
+        cpfsSorteados = [];
     }
 }
 
@@ -584,11 +595,18 @@ function fecharResultado() {
 // ============================================
 function resetarSorteios() {
     if (confirm('⚠️ Tem certeza que deseja RESETAR o histórico de sorteios?\n\nIsso vai limpar todos os sorteios realizados e permitir que os participantes sejam sorteados novamente.')) {
+        // Limpar tudo
         historicoSorteios = [];
         cpfsSorteados = [];
+        
+        // Remover do localStorage
         localStorage.removeItem('superfm_sorteios');
+        
+        // Atualizar UI
         atualizarHistoricoUI();
         atualizarDadosSorteio();
-        alert('✅ Histórico de sorteios resetado com sucesso!');
+        
+        // Feedback visual
+        alert('✅ Histórico de sorteios resetado com sucesso!\n\nTodos os participantes podem ser sorteados novamente.');
     }
 }
