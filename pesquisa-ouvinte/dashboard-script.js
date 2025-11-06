@@ -578,3 +578,17 @@ function fecharResultado() {
     document.getElementById('resultado').style.display = 'none';
     atualizarDadosSorteio();
 }
+
+// ============================================
+// RESETAR SORTEIOS
+// ============================================
+function resetarSorteios() {
+    if (confirm('⚠️ Tem certeza que deseja RESETAR o histórico de sorteios?\n\nIsso vai limpar todos os sorteios realizados e permitir que os participantes sejam sorteados novamente.')) {
+        historicoSorteios = [];
+        cpfsSorteados = [];
+        localStorage.removeItem('superfm_sorteios');
+        atualizarHistoricoUI();
+        atualizarDadosSorteio();
+        alert('✅ Histórico de sorteios resetado com sucesso!');
+    }
+}
