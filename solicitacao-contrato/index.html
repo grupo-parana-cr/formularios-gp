@@ -1982,7 +1982,7 @@
       
       // Partes
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="Contratante" data-target="contratante"></div>
+        <div class="pfpj-mount" data-role="👤 Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
       `;
       
       // Objeto
@@ -2076,7 +2076,7 @@
       $('#prazosDescription').textContent = 'Defina os prazos do contrato.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="Vendedor(a)" data-target="vendedor"></div>
+        <div class="pfpj-mount" data-role="👤 Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
       `;
       
       objetoC.innerHTML = `
@@ -2131,7 +2131,7 @@
       $('#prazosDescription').textContent = 'Defina os prazos do contrato.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="Locador(a)/Arrendador(a)" data-target="locador"></div>
+        <div class="pfpj-mount" data-role="👤 Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
       `;
       
       objetoC.innerHTML = `
@@ -2251,7 +2251,7 @@
       $('#prazosDescription').textContent = 'Defina os prazos de início e término da parceria.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="Parceiro 01" data-target="parceiro01"></div>
+        <div class="pfpj-mount" data-role="👤 Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
       `;
       
       objetoC.innerHTML = `
@@ -2301,7 +2301,7 @@
       $('#prazosDescription').textContent = 'Defina os prazos do contrato.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="Parte 01" data-target="parte01"></div>
+        <div class="pfpj-mount" data-role="👤 Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
       `;
       
       objetoC.innerHTML = `
@@ -2841,6 +2841,31 @@
       try {
         const formData = new FormData(this);
         
+        // 🔥 NOVO: Coletar dados estruturados da outra parte envolvida
+        const tipoRadio = document.querySelector(`input[name="outraParteEnvolvida_tipo"]:checked`);
+        if (tipoRadio) {
+          const pessoaTipo = tipoRadio.value; // 'pf' ou 'pj'
+          const outraParteData = {};
+          
+          // Coletar todos os campos data-field
+          document.querySelectorAll(`[data-field^="outraParteEnvolvida_"]`).forEach(field => {
+            const fieldName = field.dataset.field;
+            const value = field.value;
+            
+            // Extrair chave do campo: outraParteEnvolvida_pj_razao -> razao
+            const subKey = fieldName.replace(`outraParteEnvolvida_${pessoaTipo}_`, '');
+            outraParteData[subKey] = value;
+          });
+          
+          // Adicionar tipo de pessoa (pf/pj)
+          outraParteData.tipo = pessoaTipo;
+          
+          // Se tem dados, enviar como JSON
+          if (Object.keys(outraParteData).length > 1) {
+            formData.append('outraParteEnvolvida', JSON.stringify(outraParteData));
+          }
+        }
+        
         // Adicionar arquivos
         uploadedFiles.forEach((file, index) => {
                   
@@ -2852,7 +2877,7 @@
         formData.append(`documento_${index}`, file);
         });
         
-        const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/solicitacao-contrato', {
+        const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook/solicitacao-contrato', {
           method: 'POST',
           body: formData
         });
