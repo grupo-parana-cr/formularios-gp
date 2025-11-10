@@ -1592,6 +1592,23 @@ function showCNPJSuccessModal(data) {
       try {
         const formData = new FormData(this);
         
+        // 🔥 Construir objeto ordenado
+        const bodyData = {};
+        
+        // Adicionar campos na ordem correta
+        for (let [key, value] of formData.entries()) {
+          // Pular empresasSelecionadas do FormData (será adicionada depois)
+          if (key !== 'empresasSelecionadas' && key !== 'outraParteEnvolvida' && !key.startsWith('documento_')) {
+            bodyData[key] = value;
+          }
+        }
+        
+        // Adicionar tipoContrato (já está em bodyData)
+        // Adicionar empresasSelecionadas LOGO APÓS tipoContrato
+        if (window.selectedEmpresas && window.selectedEmpresas.length > 0) {
+          bodyData.empresasSelecionadas = JSON.stringify(window.selectedEmpresas);
+        }
+        
         // 🔥 NOVO: Coletar dados estruturados da outra parte envolvida
         const tipoRadio = document.querySelector(`input[name="outraParteEnvolvida_tipo"]:checked`);
         if (tipoRadio) {
@@ -1611,25 +1628,28 @@ function showCNPJSuccessModal(data) {
           // Adicionar tipo de pessoa (pf/pj)
           outraParteData.tipo = pessoaTipo;
           
-          // Se tem dados, enviar como JSON
+          // Se tem dados, adicionar como JSON
           if (Object.keys(outraParteData).length > 1) {
-            formData.append('outraParteEnvolvida', JSON.stringify(outraParteData));
+            bodyData.outraParteEnvolvida = JSON.stringify(outraParteData);
           }
         }
-                          
-        // Adicionar empresas selecionadas
-        if (window.selectedEmpresas && window.selectedEmpresas.length > 0) {
-            formData.append('empresasSelecionadas', JSON.stringify(window.selectedEmpresas));
-          }
 
+        // Preparar FormData final
+        const finalFormData = new FormData();
+        
+        // Adicionar dados no objeto ordenado
+        for (let [key, value] of Object.entries(bodyData)) {
+          finalFormData.append(key, value);
+        }
+        
         // Adicionar arquivos
         uploadedFiles.forEach((file, index) => {                
-        formData.append(`documento_${index}`, file);
+          finalFormData.append(`documento_${index}`, file);
         });
         
         const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/solicitacao-contrato', {
           method: 'POST',
-          body: formData
+          body: finalFormData
         });
         
         // 🔥 CORREÇÃO: Melhor tratamento de erro com detalhes do servidor
