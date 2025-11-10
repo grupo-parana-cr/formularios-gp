@@ -1291,15 +1291,14 @@
             formData.append('outraParteEnvolvida', JSON.stringify(outraParteData));
           }
         }
-        
-        // Adicionar arquivos
-        uploadedFiles.forEach((file, index) => {
-                  
+                          
         // Adicionar empresas selecionadas
         if (selectedEmpresas && selectedEmpresas.length > 0) {
           formData.append('empresasSelecionadas', JSON.stringify(selectedEmpresas));
         }
-        
+
+        // Adicionar arquivos
+        uploadedFiles.forEach((file, index) => {                
         formData.append(`documento_${index}`, file);
         });
         
