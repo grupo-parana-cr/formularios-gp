@@ -22,7 +22,7 @@ function maskPhone(v) {
 }
 
 function maskCPF(v) {
-  let digits = v.replace(/\D/g, '');
+  let digits = v.replace(/\D/g, '').slice(0, 11); // Limita a 11 dígitos
   if (digits.length <= 3) return digits;
   if (digits.length <= 6) return digits.replace(/(\d{3})(\d+)/, '$1.$2');
   if (digits.length <= 9) return digits.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
@@ -420,10 +420,6 @@ function showCNPJSuccessModal(data) {
       if (!v) return '';
       
       // Garante sempre 2 casas decimais
-      // Ex: 1 → 001 → 0,01
-      // Ex: 12 → 012 → 0,12
-      // Ex: 123 → 123 → 1,23
-      // Ex: 1234 → 1234 → 12,34
       v = v.padStart(3, '0'); // Adiciona zeros à esquerda até ter no mínimo 3 dígitos
       
       // Coloca a vírgula 2 dígitos do final
@@ -432,7 +428,13 @@ function showCNPJSuccessModal(data) {
       // Remove zeros à esquerda (mas mantém pelo menos um dígito antes da vírgula)
       v = v.replace(/^0+(?=\d)/, '');
       
-      return v;
+      // Adiciona separador de milhares (ponto)
+      // Ex: 1000,00 → 1.000,00
+      // Ex: 1234567,89 → 1.234.567,89
+      let parts = v.split(',');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      
+      return parts.join(',');
     }
 
     // 🔥 NOVO: Função para mostrar/esconder campo de detalhe de pagamento
@@ -1753,7 +1755,7 @@ function showCNPJSuccessModal(data) {
       const search = $('#empresasSearch');
       const optionsDiv = $('#empresasOptions');
       const display = $('#empresasDisplay');
-      const selectedDiv = $('#window.selectedEmpresas');
+      const selectedDiv = $('#selectedEmpresas');
       const dataDiv = $('#empresasDataDisplay');
 
       // Preencher opções
