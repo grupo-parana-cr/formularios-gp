@@ -2,6 +2,9 @@
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+console.log('✓ Script carregando...');
+alert('Script.js foi carregado com sucesso!');
+
 // ====== VARIÁVEIS GLOBAIS ======
 window.selectedEmpresas = [];
 const PRODUCTION_MODE = false;
