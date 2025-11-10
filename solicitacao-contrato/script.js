@@ -46,6 +46,128 @@ function closeModalCNPJ() {
   }
 }
 
+function preencherCamposComAPI(data) {
+  // Razão Social - Normalizar para Title Case
+  const razaoField = document.getElementById('razaoSocial');
+  if (razaoField) razaoField.value = toTitleCase(data.razao_social);
+  
+  // Nome Fantasia
+  const fantField = document.getElementById('nomeFantasia');
+  if (fantField) fantField.value = toTitleCase(data.nome_fantasia);
+  
+  // Email - Procurar em todos os possíveis campos de email na seção
+  const emailSelectors = [
+    'email',
+    '[data-field*="_email"]',
+    '[data-field*="_pj_email"]',
+    '[data-field*="_pf_email"]'
+  ];
+  
+  for (let selector of emailSelectors) {
+    const emailField = document.querySelector(selector);
+    if (emailField) {
+      emailField.value = data.email || '';
+      break;
+    }
+  }
+  
+  // Telefone
+  const telefSelectors = [
+    'telefone',
+    '[data-field*="_telefone"]',
+    '[data-field*="_phone"]'
+  ];
+  
+  for (let selector of telefSelectors) {
+    const telefField = document.querySelector(selector);
+    if (telefField) {
+      let tel = data.ddd_telefone_1 || data.ddd_telefone_2 || '';
+      telefField.value = tel ? normalizeTelefoneAPI(tel) : '';
+      break;
+    }
+  }
+  
+  // CEP
+  const cepSelectors = [
+    'cep',
+    '[data-field*="_cep"]',
+    '[data-field*="_postal"]'
+  ];
+  
+  for (let selector of cepSelectors) {
+    const cepField = document.querySelector(selector);
+    if (cepField) {
+      cepField.value = data.cep ? formatarCEP(data.cep) : '';
+      break;
+    }
+  }
+  
+  // Endereço
+  const endSelectors = [
+    'endereco',
+    '[data-field*="_endereco"]',
+    '[data-field*="_address"]',
+    '[data-field*="_logradouro"]'
+  ];
+  
+  for (let selector of endSelectors) {
+    const endField = document.querySelector(selector);
+    if (endField) {
+      let endereco = `${toTitleCase(data.descricao_tipo_de_logradouro)} ${toTitleCase(data.logradouro)}, ${data.numero}`;
+      if (data.complemento) endereco += ` - ${toTitleCase(data.complemento)}`;
+      endField.value = endereco;
+      break;
+    }
+  }
+  
+  // Bairro
+  const bairroSelectors = [
+    'bairro',
+    '[data-field*="_bairro"]',
+    '[data-field*="_neighborhood"]'
+  ];
+  
+  for (let selector of bairroSelectors) {
+    const bairroField = document.querySelector(selector);
+    if (bairroField) {
+      bairroField.value = toTitleCase(data.bairro);
+      break;
+    }
+  }
+  
+  // Cidade
+  const cidadeSelectors = [
+    'cidade',
+    '[data-field*="_cidade"]',
+    '[data-field*="_municipio"]',
+    '[data-field*="_city"]'
+  ];
+  
+  for (let selector of cidadeSelectors) {
+    const cidadeField = document.querySelector(selector);
+    if (cidadeField) {
+      cidadeField.value = toTitleCase(data.municipio);
+      break;
+    }
+  }
+  
+  // Estado
+  const estadoSelectors = [
+    'estado',
+    '[data-field*="_estado"]',
+    '[data-field*="_uf"]',
+    '[data-field*="_state"]'
+  ];
+  
+  for (let selector of estadoSelectors) {
+    const estadoField = document.querySelector(selector);
+    if (estadoField) {
+      estadoField.value = data.uf || '';
+      break;
+    }
+  }
+}
+
 function showCNPJSuccessModal(data) {
   // Criar HTML do modal se não existir
   if (!document.getElementById('cnpjSuccessModal')) {
@@ -117,12 +239,12 @@ function showCNPJSuccessModal(data) {
   // Normalizar município
   document.getElementById('modalMunicipio').textContent = toTitleCase(data.municipio) || 'N/A';
   
+  // ✅ Preencher campos da seção também
+  preencherCamposComAPI(data);
+  
   // Mostrar modal
   const modal = document.getElementById('cnpjSuccessModal');
   modal.classList.add('show');
-  
-  // ✅ Preencher campos da seção também
-  preencherCamposComAPI(data);
 }
 
 // 🔥 FUNÇÃO ESPECIAL: Normalizar telefone recebido da API
