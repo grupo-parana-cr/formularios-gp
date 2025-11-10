@@ -1255,6 +1255,12 @@ formatted += `) ${digits.slice(2, 6)}`;
     $('#contratoForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
+      console.log('=== SUBMIT INICIADO ===');
+      console.log('window.selectedEmpresas:', window.selectedEmpresas);
+      console.log('Tipo:', typeof window.selectedEmpresas);
+      console.log('É array?:', Array.isArray(window.selectedEmpresas));
+      console.log('Tamanho:', window.selectedEmpresas ? window.selectedEmpresas.length : 'null');
+      
       if (!validateCurrentSection()) {
         alert('Por favor, revise e preencha todos os campos obrigatórios.');
         return;
