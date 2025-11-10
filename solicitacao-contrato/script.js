@@ -3,7 +3,6 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 console.log('✓ Script carregando...');
-alert('Script.js foi carregado com sucesso!');
 
 // ====== VARIÁVEIS GLOBAIS ======
 window.selectedEmpresas = [];
@@ -37,6 +36,14 @@ function maskCNPJ(v) {
   if (digits.length <= 8) return digits.replace(/(\d{2})(\d{3})(\d+)/, '$1.$2.$3');
   if (digits.length <= 12) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d+)/, '$1.$2.$3/$4');
   return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d+)/, '$1.$2.$3/$4-$5');
+}
+
+// Fechar modal do CNPJ
+function closeModalCNPJ() {
+  const modal = document.getElementById('cnpjSuccessModal');
+  if (modal) {
+    modal.classList.remove('show');
+  }
 }
 
 // 🔥 FUNÇÃO ESPECIAL: Normalizar telefone recebido da API
