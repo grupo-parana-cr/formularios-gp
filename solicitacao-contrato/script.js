@@ -1293,8 +1293,8 @@
         }
                           
         // Adicionar empresas selecionadas
-        if (selectedEmpresas && selectedEmpresas.length > 0) {
-            formData.append('empresasSelecionadas', JSON.stringify(selectedEmpresas));
+        if (window.selectedEmpresas && window.selectedEmpresas.length > 0) {
+            formData.append('empresasSelecionadas', JSON.stringify(window.selectedEmpresas));
           }
 
         // Adicionar arquivos
