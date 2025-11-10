@@ -1479,21 +1479,6 @@ formatted += `) ${digits.slice(2, 6)}`;
             </label>
           `;
           
-          const checkbox = item.querySelector('input[type="checkbox"]');
-          checkbox.addEventListener('change', () => {
-            if (checkbox.checked) {
-              window.selectedEmpresas.push(empresa);
-              console.log('✓ EMPRESA ADICIONADA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
-              alert('✓ EMPRESA ADICIONADA: ' + empresa.nome + '\nTotal selecionadas: ' + window.selectedEmpresas.length);
-            } else {
-              window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
-              console.log('✗ EMPRESA REMOVIDA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
-              alert('✗ EMPRESA REMOVIDA: ' + empresa.nome + '\nTotal selecionadas: ' + window.selectedEmpresas.length);
-            }
-            updateDisplay();
-            renderOptions(search.value);
-          });
-          
           optionsDiv.appendChild(item);
         });
       }
@@ -1554,6 +1539,36 @@ formatted += `) ${digits.slice(2, 6)}`;
       // Busca
       search.addEventListener('input', (e) => {
         renderOptions(e.target.value);
+      });
+
+      // Event delegation para checkboxes (funciona com elementos dinâmicos)
+      optionsDiv.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox') {
+          const checkbox = e.target;
+          const label = checkbox.closest('.multiselect-option')?.querySelector('label');
+          const empresaNome = label ? label.querySelector('strong').textContent : 'Desconhecida';
+          
+          // Achar a empresa baseado no checkbox ID
+          const checkboxId = checkbox.id; // empresa_CNPJ_sem_caracteres
+          const empresa = EMPRESAS_GRUPO.find(e => {
+            const cleanCNPJ = e.cnpj.replace(/[^0-9]/g, '');
+            return checkboxId === `empresa_${cleanCNPJ}`;
+          });
+          
+          if (empresa) {
+            if (checkbox.checked) {
+              window.selectedEmpresas.push(empresa);
+              console.log('✓ EMPRESA ADICIONADA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
+              console.log('Array agora:', window.selectedEmpresas);
+            } else {
+              window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
+              console.log('✗ EMPRESA REMOVIDA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
+              console.log('Array agora:', window.selectedEmpresas);
+            }
+            updateDisplay();
+            renderOptions(search.value);
+          }
+        }
       });
 
       // Fechar dropdown ao clicar fora
