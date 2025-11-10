@@ -1293,9 +1293,14 @@
         }
                           
         // Adicionar empresas selecionadas
-        if (selectedEmpresas && selectedEmpresas.length > 0) {
-          formData.append('empresasSelecionadas', JSON.stringify(selectedEmpresas));
-        }
+          console.log('DEBUG - selectedEmpresas:', selectedEmpresas);
+          console.log('DEBUG - length:', selectedEmpresas ? selectedEmpresas.length : 0);
+          if (selectedEmpresas && selectedEmpresas.length > 0) {
+            console.log('✅ Adicionando empresas ao FormData');
+            formData.append('empresasSelecionadas', JSON.stringify(selectedEmpresas));
+          } else {
+            console.log('❌ selectedEmpresas vazio ou undefined');
+          }
 
         // Adicionar arquivos
         uploadedFiles.forEach((file, index) => {                
