@@ -14,7 +14,7 @@ let uploadedFiles = [];
 
 // ====== FUNÇÕES AUXILIARES ======
 function maskPhone(v) {
-  let digits = v.replace(/\D/g, '');
+  let digits = v.replace(/\D/g, '').slice(0, 11); // Limita a 11 dígitos
   if (!digits) return '';
   if (digits.length <= 2) return digits;
   if (digits.length <= 7) return digits.replace(/(\d{2})(\d+)/, '($1) $2');
