@@ -1299,10 +1299,12 @@ formatted += `) ${digits.slice(2, 6)}`;
         
         if (window.selectedEmpresas && window.selectedEmpresas.length > 0) {
             console.log('SUCCESS: Adicionando', window.selectedEmpresas.length, 'empresa(s) ao FormData');
+            alert('SUCCESS: Adicionando ' + window.selectedEmpresas.length + ' empresa(s) ao FormData\n\nEmpresas: ' + window.selectedEmpresas.map(e => e.nome).join(', '));
             formData.append('empresasSelecionadas', JSON.stringify(window.selectedEmpresas));
             console.log('SUCCESS: empresasSelecionadas adicionado ao formData');
           } else {
             console.log('WARNING: Nenhuma empresa para enviar');
+            alert('WARNING: Nenhuma empresa selecionada para enviar!');
           }
 
         // Adicionar arquivos
@@ -1482,9 +1484,11 @@ formatted += `) ${digits.slice(2, 6)}`;
             if (checkbox.checked) {
               window.selectedEmpresas.push(empresa);
               console.log('✓ EMPRESA ADICIONADA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
+              alert('✓ EMPRESA ADICIONADA: ' + empresa.nome + '\nTotal selecionadas: ' + window.selectedEmpresas.length);
             } else {
               window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
               console.log('✗ EMPRESA REMOVIDA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
+              alert('✗ EMPRESA REMOVIDA: ' + empresa.nome + '\nTotal selecionadas: ' + window.selectedEmpresas.length);
             }
             updateDisplay();
             renderOptions(search.value);
