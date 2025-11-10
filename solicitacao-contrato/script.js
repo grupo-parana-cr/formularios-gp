@@ -6,73 +6,73 @@ formatted += `) ${digits.slice(2, 6)}`;
       return formatted;
     }
 
-    // ðŸ”¥ FUNÃ‡ÃƒO ESPECIAL: Normalizar telefone recebido da API
-    // âœ… VERSÃƒO CORRIGIDA: Detecta quando falta 9 no mÃ³vel e adiciona dinamicamente
+
+
     function normalizeTelefoneAPI(v) {
       let digits = v.replace(/\D/g, '');
       
       if (!digits) return '';
       
-      // Se comeÃ§a com 0, remover
+
       if (digits.startsWith('0')) {
         digits = digits.substring(1);
       }
       
-      // PadrÃ£o brasileiro:
-      // Fixo: (XX) XXXX-XXXX = 10 dÃ­gitos totais
-      // Celular: (XX) 9XXXX-XXXX = 11 dÃ­gitos totais
+
+      // Fixo: (XX) XXXX-XXXX = 10 d?-gitos totais
+      // Celular: (XX) 9XXXX-XXXX = 11 d?-gitos totais
       
       if (digits.length === 8) {
-        // SÃ³ nÃºmero sem DDD - formato 4x4 (fixo sem DDD)
+
         return digits.replace(/(\d{4})(\d{4})/, '$1-$2');
       } else if (digits.length === 9) {
-        // IMPORTANTE: 9 dÃ­gitos pode ser:
+        // IMPORTANTE: 9 d?-gitos pode ser:
         // A) Celular sem DDD (9XXXX-XXXX) - ADICIONAR 9 na frente
-        // B) Fixo sem DDD (XXXX-XXXX) - formatado como 4x4 com um dÃ­gito extra
+        // B) Fixo sem DDD (XXXX-XXXX) - formatado como 4x4 com um d?-gito extra
         
-        // Se comeÃ§a com 9, Ã© celular sem DDD
+
         if (digits.startsWith('9')) {
           return digits.replace(/(\d)(\d{4})(\d{4})/, '9$1$2-$3');
         } else {
-          // Ã‰ fixo com um dÃ­gito extra, formatar como celular com 9 adicionado
+
           return digits.replace(/(\d)(\d{4})(\d{4})/, '9$1$2-$3');
         }
       } else if (digits.length === 10) {
-        // 10 dÃ­gitos: XX + XXXXXXXX
+        // 10 d?-gitos: XX + XXXXXXXX
         let ddd = digits.substring(0, 2);
         let numero = digits.substring(2);
         
-        // Se comeÃ§a com 9, Ã© celular incompleto (faltando um 9)
-        // Exemplo: 1123851939 = DDD 11 + 23851939 (sÃ³ 8 dÃ­gitos, faltando 9)
+
+
         // Deve ficar: (11) 92385-1939
         if (numero.startsWith('2') || numero.startsWith('3') || numero.startsWith('4') || 
             numero.startsWith('5') || numero.startsWith('6') || numero.startsWith('7') || 
             numero.startsWith('8')) {
-          // Ã‰ fixo: (XX) XXXX-XXXX
+
           return `(${ddd}) ${numero.substring(0, 4)}-${numero.substring(4)}`;
         } else if (numero.startsWith('9')) {
-          // ComeÃ§a com 9 mas sÃ³ tem 8 dÃ­gitos - Ã© celular incompleto
-          // Adicionar 9 no inÃ­cio: (XX) 9XXXX-XXXX
+
+          // Adicionar 9 no in?-cio: (XX) 9XXXX-XXXX
           return `(${ddd}) 9${numero.substring(0, 4)}-${numero.substring(4)}`;
         }
       } else if (digits.length === 11) {
-        // 11 dÃ­gitos: celular completo (XX) 9XXXX-XXXX
+        // 11 d?-gitos: celular completo (XX) 9XXXX-XXXX
         let ddd = digits.substring(0, 2);
         let numero = digits.substring(2);
         
         if (numero.startsWith('9')) {
           return `(${ddd}) ${numero.substring(0, 5)}-${numero.substring(5)}`;
         } else {
-          // 11 dÃ­gitos mas nÃ£o comeÃ§a com 9 - adicionar 9
+
           return `(${ddd}) 9${numero.substring(0, 4)}-${numero.substring(4)}`;
         }
       } else if (digits.length === 12) {
-        // 12 dÃ­gitos - provavelmente DDD + 10 dÃ­gitos
+        // 12 d?-gitos - provavelmente DDD + 10 d?-gitos
         let ddd = digits.substring(0, 2);
         let numero = digits.substring(2);
         return `(${ddd}) ${numero.substring(0, 5)}-${numero.substring(5)}`;
       } else {
-        // Tamanho inesperado - tentar formatar genÃ©rico
+        // Tamanho inesperado - tentar formatar gen?(C)rico
         if (digits.length > 10) {
           let ddd = digits.substring(0, 2);
           let numero = digits.substring(2);
@@ -85,29 +85,29 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
 
     function maskMoney(v) {
-      // Remove tudo que nÃ£o Ã© nÃºmero
+
       v = v.replace(/\D/g, '');
       
       // Se vazio, retorna vazio
       if (!v) return '';
       
       // Garante sempre 2 casas decimais
-      // Ex: 1 â†’ 001 â†’ 0,01
-      // Ex: 12 â†’ 012 â†’ 0,12
-      // Ex: 123 â†’ 123 â†’ 1,23
-      // Ex: 1234 â†’ 1234 â†’ 12,34
-      v = v.padStart(3, '0'); // Adiciona zeros Ã  esquerda atÃ© ter no mÃ­nimo 3 dÃ­gitos
+      // Ex: 1 ?+' 001 ?+' 0,01
+      // Ex: 12 ?+' 012 ?+' 0,12
+      // Ex: 123 ?+' 123 ?+' 1,23
+      // Ex: 1234 ?+' 1234 ?+' 12,34
+      v = v.padStart(3, '0'); // Adiciona zeros ?  esquerda at?(C) ter no m?-nimo 3 d?-gitos
       
-      // Coloca a vÃ­rgula 2 dÃ­gitos do final
+      // Coloca a v?-rgula 2 d?-gitos do final
       v = v.slice(0, -2) + ',' + v.slice(-2);
       
-      // Remove zeros Ã  esquerda (mas mantÃ©m pelo menos um dÃ­gito antes da vÃ­rgula)
+      // Remove zeros ?  esquerda (mas mant?(C)m pelo menos um d?-gito antes da v?-rgula)
       v = v.replace(/^0+(?=\d)/, '');
       
       return v;
     }
 
-    // ðŸ”¥ NOVO: FunÃ§Ã£o para mostrar/esconder campo de detalhe de pagamento
+
     function togglePaymentDetail(type) {
       const detailField = $(`#paymentDetail_${type}`);
       const selectField = $(`#formaPagamento${type === 'compravenda' ? '' : type === 'imovel' ? 'CV' : type === 'locacao' ? 'Loc' : ''}`);
@@ -123,7 +123,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       }
     }
 
-    // ðŸ”¥ NOVO: ValidaÃ§Ã£o de CPF
+
     function isValidCPF(cpf) {
       cpf = cpf.replace(/\D/g, '');
       if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
@@ -143,7 +143,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       return true;
     }
 
-    // ðŸ”¥ NOVO: ValidaÃ§Ã£o de CNPJ
+
     function isValidCNPJ(cnpj) {
       cnpj = cnpj.replace(/\D/g, '');
       if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
@@ -178,9 +178,9 @@ formatted += `) ${digits.slice(2, 6)}`;
       return true;
     }
 
-    // ====== NAVEGAÃ‡ÃƒO ======
-    // ðŸ”¥ MODO PRODUÃ‡ÃƒO - Alterar para true em produÃ§Ã£o e false em testes
-    const PRODUCTION_MODE = false; // true = valida campos obrigatÃ³rios | false = permite avanÃ§ar sem validar
+
+
+
     
     let currentSection = 1;
     const totalSections = 8;
@@ -213,16 +213,16 @@ formatted += `) ${digits.slice(2, 6)}`;
       }
 
       const percentage = (currentSection / totalSections) * 100;
-      $('#progressText').textContent = `SeÃ§Ã£o ${currentSection} de ${totalSections}`;
+
       $('#progressFill').style.width = `${percentage}%`;
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function validateCurrentSection() {
-      // ðŸ”¥ EM MODO TESTE, IGNORAR VALIDAÃ‡ÃƒO
+
       if (!PRODUCTION_MODE) {
-        console.log('âœ… Modo teste: validaÃ§Ã£o desativada');
+
         return true;
       }
 
@@ -233,7 +233,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       const requiredFields = activeSection.querySelectorAll('input[required], select[required], textarea[required]');
 
       requiredFields.forEach(field => {
-        // ðŸ”¥ CORREÃ‡ÃƒO: Verificar se o campo estÃ¡ visÃ­vel antes de validar
+
         const parent = field.closest('.form-group, .pfpj-grid, .subsection');
         const isVisible = parent && !parent.classList.contains('hidden') && 
                          window.getComputedStyle(parent).display !== 'none';
@@ -244,12 +244,12 @@ formatted += `) ${digits.slice(2, 6)}`;
         const value = (field.value || '').trim();
         const dataField = (field.dataset.field || '').toLowerCase();
         
-        // ðŸ”¥ VALIDAÃ‡ÃƒO DE CPF
+
         if ((dataField.includes('_cpf') || field.id.toLowerCase().includes('cpf')) && value) {
           if (!isValidCPF(value)) {
             field.classList.add('error');
             if (errorMsg) {
-              errorMsg.textContent = 'CPF invÃ¡lido';
+
               errorMsg.style.display = 'block';
             }
             isValid = false;
@@ -257,12 +257,12 @@ formatted += `) ${digits.slice(2, 6)}`;
           }
         }
         
-        // ðŸ”¥ VALIDAÃ‡ÃƒO DE CNPJ
+
         if ((dataField.includes('_cnpj') || field.id.toLowerCase().includes('cnpj')) && value) {
           if (!isValidCNPJ(value)) {
             field.classList.add('error');
             if (errorMsg) {
-              errorMsg.textContent = 'CNPJ invÃ¡lido';
+
               errorMsg.style.display = 'block';
             }
             isValid = false;
@@ -301,7 +301,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       });
 
       
-      // ðŸ”¥ ValidaÃ§Ã£o de empresas selecionadas (seÃ§Ã£o 3)
+
       if (currentSection === 3) {
         const empresasError = $('#empresasError');
         if (window.selectedEmpresas && window.selectedEmpresas.length === 0) {
@@ -322,7 +322,7 @@ formatted += `) ${digits.slice(2, 6)}`;
           updateSection();
         }
       } else {
-        alert('Por favor, preencha todos os campos obrigatÃ³rios desta seÃ§Ã£o.');
+
       }
     });
 
@@ -338,13 +338,13 @@ formatted += `) ${digits.slice(2, 6)}`;
       radio.addEventListener('change', function() {
         selectedContractType = this.value;
         
-        // ðŸ”¥ NOVO: Atualizar badge de tipo de contrato abaixo da barra com emojis corretos
+
         const typeLabelMap = {
-          'prestacao': { label: 'PrestaÃ§Ã£o de ServiÃ§os', emoji: 'ðŸ“' },
-          'compraVenda': { label: 'Compra e Venda', emoji: 'ðŸ·ï¸' },
-          'locacao': { label: 'LocaÃ§Ã£o/Arrendamento', emoji: 'ðŸ ' },
-          'parceria': { label: 'Parceria AgrÃ­cola/PecuÃ¡ria', emoji: 'ðŸ¤' },
-          'outros': { label: 'Outros Contratos', emoji: 'ðŸ“„' }
+
+
+
+
+
         };
         
         const badge = document.getElementById('contractTypeBadge');
@@ -358,18 +358,18 @@ formatted += `) ${digits.slice(2, 6)}`;
           badge.classList.add('show');
         }
         
-        // ðŸ”¥ NOVO: Limpar empresas selecionadas ao mudar de contrato
+
         const empresasCheckboxes = $$('[name="empresas"]');
         empresasCheckboxes.forEach(checkbox => {
           checkbox.checked = false;
         });
-        console.log('âœ… Empresas limpas ao mudar de contrato');
+        console.log('?oe... Empresas limpas ao mudar de contrato');
         
-        // Atualiza seleÃ§Ã£o visual
+
         $$('.radio-item[data-type]').forEach(item => item.classList.remove('selected'));
         this.closest('.radio-item').classList.add('selected');
         
-        // Limpa e reconstrÃ³i seÃ§Ãµes dinÃ¢micas
+
         buildDynamicSections(selectedContractType);
       });
     });
@@ -402,53 +402,53 @@ formatted += `) ${digits.slice(2, 6)}`;
     // ====== BUILDERS POR TIPO DE CONTRATO ======
 
     function buildPrestacaoServicos(partesC, objetoC, valoresC, prazosC) {
-      // Restaurar tÃ­tulo padrÃ£o da seÃ§Ã£o 6
+
       $('#prazosTitle').textContent = '6. Prazos';
       $('#prazosDescription').textContent = 'Defina os prazos do contrato.';
       
       // Partes
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="ðŸ‘¤ Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
+
       `;
       
       // Objeto
       objetoC.innerHTML = `
         <div class="form-group">
-          <label for="objetoServico" class="required">DescriÃ§Ã£o detalhada do serviÃ§o</label>
-          <textarea id="objetoServico" name="objetoServico" placeholder="Descreva detalhadamente o serviÃ§o a ser prestado..." required></textarea>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
+
+
         </div>
         <div class="form-group">
-          <label for="localExecucao" class="required">Local da execuÃ§Ã£o do serviÃ§o</label>
-          <input type="text" id="localExecucao" name="localExecucao" placeholder="EndereÃ§o onde o serviÃ§o serÃ¡ executado" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
+
+
         </div>
       `;
       
       // Valores
       valoresC.innerHTML = `
         <div class="form-group">
-          <label for="valorContrato" class="required">Valor total da negociaÃ§Ã£o</label>
+
           <input type="text" id="valorContrato" name="valorContrato" placeholder="R$ 0,00" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
           <label for="formaPagamento" class="required">Forma de pagamento</label>
           <select id="formaPagamento" name="formaPagamento" required onchange="togglePaymentDetail('compravenda')">
             <option value="">Selecione...</option>
-            <option value="vista">Ã€ vista</option>
+            <option value="vista">?EUR vista</option>
             <option value="parcelado">Parcelado</option>
             <option value="mensalidade">Mensalidade</option>
             <option value="etapas">Por etapas</option>
           </select>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div id="paymentDetail_compravenda" class="payment-detail-field form-group" style="grid-column: 1 / -1;">
           <label for="detalheFormaPagamento">Detalhe da forma de pagamento</label>
-          <textarea id="detalheFormaPagamento" name="detalheFormaPagamento" placeholder="Insira informaÃ§Ãµes e detalhes da forma de pagamento"></textarea>
+
         </div>
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>Dados bancÃ¡rios para recebimento (opcional)</label>
+
           <div style="background: var(--light-gray); padding: 16px; border-radius: 10px; border-left: 3px solid var(--primary-blue);">
             <div class="form-group">
               <label for="bankAccountOwner">Titular da conta</label>
@@ -459,11 +459,11 @@ formatted += `) ${digits.slice(2, 6)}`;
               <input type="text" id="bankName" name="bankName" placeholder="Ex: Banco do Brasil">
             </div>
             <div class="form-group">
-              <label for="bankAgency">AgÃªncia (com dÃ­gito)</label>
+
               <input type="text" id="bankAgency" name="bankAgency" placeholder="Ex: 0001-2">
             </div>
             <div class="form-group">
-              <label for="bankAccount">Conta (com dÃ­gito)</label>
+              <label for="bankAccount">Conta (com d?-gito)</label>
               <input type="text" id="bankAccount" name="bankAccount" placeholder="Ex: 123456-7">
             </div>
             <div class="form-group">
@@ -471,7 +471,7 @@ formatted += `) ${digits.slice(2, 6)}`;
               <select id="bankAccountType" name="bankAccountType">
                 <option value="">Selecione...</option>
                 <option value="corrente">Corrente</option>
-                <option value="poupanca">PoupanÃ§a</option>
+
               </select>
             </div>
           </div>
@@ -481,14 +481,14 @@ formatted += `) ${digits.slice(2, 6)}`;
       // Prazos
       prazosC.innerHTML = `
         <div class="form-group">
-          <label for="dataInicio" class="required">Data de inÃ­cio</label>
+          <label for="dataInicio" class="required">Data de in?-cio</label>
           <input type="date" id="dataInicio" name="dataInicio" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
-          <label for="dataFim" class="required">Data de tÃ©rmino</label>
+          <label for="dataFim" class="required">Data de t?(C)rmino</label>
           <input type="date" id="dataFim" name="dataFim" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
       `;
       
@@ -497,19 +497,19 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
 
     function buildCompraVenda(partesC, objetoC, valoresC, prazosC) {
-      // Restaurar tÃ­tulo padrÃ£o da seÃ§Ã£o 6
+
       $('#prazosTitle').textContent = '6. Prazos';
       $('#prazosDescription').textContent = 'Defina os prazos do contrato.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="ðŸ‘¤ Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
+
       `;
       
       objetoC.innerHTML = `
         <div class="form-group">
-          <label for="objetoBem" class="required">DescriÃ§Ã£o detalhada do bem (imÃ³vel, veÃ­culo, mercadoria, etc.)</label>
+
           <textarea id="objetoBem" name="objetoBem" placeholder="Descreva detalhadamente o objeto da compra e venda..." required></textarea>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
           <label for="garantias">Garantias (se houver)</label>
@@ -519,31 +519,31 @@ formatted += `) ${digits.slice(2, 6)}`;
       
       valoresC.innerHTML = `
         <div class="form-group">
-          <label for="valorTotal" class="required">Valor total da negociaÃ§Ã£o</label>
+
           <input type="text" id="valorTotal" name="valorTotal" placeholder="R$ 0,00" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
           <label for="formaPagamentoCV" class="required">Forma de pagamento</label>
           <select id="formaPagamentoCV" name="formaPagamentoCV" required onchange="togglePaymentDetail('imovel')">
             <option value="">Selecione...</option>
-            <option value="vista">Ã€ vista</option>
+            <option value="vista">?EUR vista</option>
             <option value="financiamento">Financiamento</option>
             <option value="parcelado">Parcelado</option>
           </select>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div id="paymentDetail_imovel" class="payment-detail-field form-group" style="grid-column: 1 / -1;">
           <label for="detalheFormaPagamentoCV">Detalhe da forma de pagamento</label>
-          <textarea id="detalheFormaPagamentoCV" name="detalheFormaPagamentoCV" placeholder="Insira informaÃ§Ãµes e detalhes da forma de pagamento"></textarea>
+
         </div>
       `;
       
       prazosC.innerHTML = `
         <div class="form-group">
-          <label for="prazoEntrega" class="required">Prazo de entrega/transferÃªncia</label>
+
           <input type="date" id="prazoEntrega" name="prazoEntrega" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
       `;
       
@@ -552,19 +552,19 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
 
     function buildLocacao(partesC, objetoC, valoresC, prazosC) {
-      // Restaurar tÃ­tulo padrÃ£o da seÃ§Ã£o 6
+
       $('#prazosTitle').textContent = '6. Prazos';
       $('#prazosDescription').textContent = 'Defina os prazos do contrato.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="ðŸ‘¤ Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
+
       `;
       
       objetoC.innerHTML = `
         <div class="form-group">
-          <label for="enderecoImovel" class="required">EndereÃ§o completo do imÃ³vel</label>
-          <input type="text" id="enderecoImovel" name="enderecoImovel" placeholder="EndereÃ§o completo" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
+
+
         </div>
         <div class="form-group">
           <label for="finalidade" class="required">Finalidade</label>
@@ -574,12 +574,12 @@ formatted += `) ${digits.slice(2, 6)}`;
             <option value="comercial">Comercial</option>
             <option value="rural">Rural</option>
           </select>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
-          <label for="objetoLocacao" class="required">DescriÃ§Ã£o do objeto do contrato</label>
-          <textarea id="objetoLocacao" name="objetoLocacao" placeholder="Descreva detalhadamente o imÃ³vel, suas caracterÃ­sticas, dependÃªncias, condiÃ§Ãµes e especificaÃ§Ãµes..." required></textarea>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
+
+
         </div>
       `;
       
@@ -587,44 +587,44 @@ formatted += `) ${digits.slice(2, 6)}`;
         <div class="form-group">
           <label for="valorAluguel" class="required">Valor mensal do aluguel/arrendamento</label>
           <input type="text" id="valorAluguel" name="valorAluguel" placeholder="R$ 0,00" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
           <label for="formaPagamentoLoc" class="required">Forma de pagamento</label>
           <select id="formaPagamentoLoc" name="formaPagamentoLoc" required onchange="togglePaymentDetail('locacao')">
             <option value="">Selecione...</option>
             <option value="boleto">Boleto</option>
-            <option value="deposito">DepÃ³sito</option>
+
             <option value="pix">PIX</option>
-            <option value="transferencia">TransferÃªncia bancÃ¡ria</option>
+
           </select>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div id="paymentDetail_locacao" class="payment-detail-field form-group" style="grid-column: 1 / -1;">
           <label for="detalheFormaPagamentoLoc">Detalhe da forma de pagamento</label>
-          <textarea id="detalheFormaPagamentoLoc" name="detalheFormaPagamentoLoc" placeholder="Insira informaÃ§Ãµes e detalhes da forma de pagamento"></textarea>
+
         </div>
         <div class="form-group">
           <label for="diaVencimento" class="required">Data de vencimento mensal</label>
           <input type="number" id="diaVencimento" name="diaVencimento" placeholder="Ex: 10" min="1" max="31" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
-          <label for="reajuste">Reajuste (Ã­ndice e periodicidade)</label>
+          <label for="reajuste">Reajuste (?-ndice e periodicidade)</label>
           <input type="text" id="reajuste" name="reajuste" placeholder="Ex: IGPM anual">
         </div>
         <div class="form-group">
-          <label for="garantia">Garantia locatÃ­cia</label>
+          <label for="garantia">Garantia locat?-cia</label>
           <select id="garantia" name="garantia">
             <option value="">Selecione...</option>
-            <option value="caucao">CauÃ§Ã£o</option>
+
             <option value="fiador">Fiador</option>
-            <option value="seguro">Seguro fianÃ§a</option>
+
             <option value="sem">Sem garantia</option>
           </select>
         </div>
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>Dados bancÃ¡rios para recebimento (opcional)</label>
+
           <div style="background: var(--light-gray); padding: 16px; border-radius: 10px; border-left: 3px solid var(--primary-blue);">
             <div class="form-group">
               <label for="bankAccountOwnerLoc">Titular da conta</label>
@@ -635,11 +635,11 @@ formatted += `) ${digits.slice(2, 6)}`;
               <input type="text" id="bankNameLoc" name="bankNameLoc" placeholder="Ex: Banco do Brasil">
             </div>
             <div class="form-group">
-              <label for="bankAgencyLoc">AgÃªncia (com dÃ­gito)</label>
+
               <input type="text" id="bankAgencyLoc" name="bankAgencyLoc" placeholder="Ex: 0001-2">
             </div>
             <div class="form-group">
-              <label for="bankAccountLoc">Conta (com dÃ­gito)</label>
+              <label for="bankAccountLoc">Conta (com d?-gito)</label>
               <input type="text" id="bankAccountLoc" name="bankAccountLoc" placeholder="Ex: 123456-7">
             </div>
             <div class="form-group">
@@ -647,7 +647,7 @@ formatted += `) ${digits.slice(2, 6)}`;
               <select id="bankAccountTypeLoc" name="bankAccountTypeLoc">
                 <option value="">Selecione...</option>
                 <option value="corrente">Corrente</option>
-                <option value="poupanca">PoupanÃ§a</option>
+
               </select>
             </div>
           </div>
@@ -656,14 +656,14 @@ formatted += `) ${digits.slice(2, 6)}`;
       
       prazosC.innerHTML = `
         <div class="form-group">
-          <label for="inicioLocacao" class="required">InÃ­cio da locaÃ§Ã£o/arrendamento</label>
+
           <input type="date" id="inicioLocacao" name="inicioLocacao" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
-          <label for="terminoLocacao" class="required">TÃ©rmino da locaÃ§Ã£o/arrendamento</label>
+
           <input type="date" id="terminoLocacao" name="terminoLocacao" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
       `;
       
@@ -672,49 +672,49 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
 
     function buildParceria(partesC, objetoC, valoresC, prazosC) {
-      // Atualizar tÃ­tulo da seÃ§Ã£o 6
+
       $('#prazosTitle').textContent = '6. Prazos da Parceria';
-      $('#prazosDescription').textContent = 'Defina os prazos de inÃ­cio e tÃ©rmino da parceria.';
+      $('#prazosDescription').textContent = 'Defina os prazos de in?-cio e t?(C)rmino da parceria.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="ðŸ‘¤ Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
+
       `;
       
       objetoC.innerHTML = `
         <div class="form-group">
-          <label for="objetoParceria" class="required">DescriÃ§Ã£o detalhada da parceria</label>
-          <textarea id="objetoParceria" name="objetoParceria" placeholder="Descreva o objeto da parceria agrÃ­cola/pecuÃ¡ria..." required></textarea>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
+
+
         </div>
         <div class="form-group">
-          <label for="responsabilidades" class="required">Responsabilidades de cada parte (insumos, maquinÃ¡rio, mÃ£o de obra)</label>
+
           <textarea id="responsabilidades" name="responsabilidades" placeholder="Descreva as responsabilidades de cada parceiro..." required></textarea>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
-          <label for="obrigacoesAmbientais" class="required">ObrigaÃ§Ãµes ambientais e legais</label>
-          <textarea id="obrigacoesAmbientais" name="obrigacoesAmbientais" placeholder="Descreva as obrigaÃ§Ãµes ambientais e legais..." required></textarea>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
+
+
         </div>
       `;
       
       valoresC.innerHTML = `
         <div class="form-group">
-          <label>DivisÃ£o de custos e receitas</label>
-          <textarea name="divisaoCustos" placeholder="Descreva como serÃ£o divididos os custos e as receitas da parceria..."></textarea>
+
+
         </div>
       `;
       
       prazosC.innerHTML = `
         <div class="form-group">
-          <label for="prazoInicioParceria" class="required">InÃ­cio da parceria</label>
+          <label for="prazoInicioParceria" class="required">In?-cio da parceria</label>
           <input type="date" id="prazoInicioParceria" name="prazoInicioParceria" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
-          <label for="prazoTerminoParceria" class="required">TÃ©rmino da parceria</label>
+          <label for="prazoTerminoParceria" class="required">T?(C)rmino da parceria</label>
           <input type="date" id="prazoTerminoParceria" name="prazoTerminoParceria" required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
       `;
       
@@ -722,33 +722,33 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
 
     function buildOutros(partesC, objetoC, valoresC, prazosC) {
-      // Restaurar tÃ­tulo padrÃ£o da seÃ§Ã£o 6
+
       $('#prazosTitle').textContent = '6. Prazos';
       $('#prazosDescription').textContent = 'Defina os prazos do contrato.';
       
       partesC.innerHTML = `
-        <div class="pfpj-mount" data-role="ðŸ‘¤ Outra Parte Envolvida" data-target="outraParteEnvolvida"></div>
+
       `;
       
       objetoC.innerHTML = `
         <div class="form-group">
-          <label for="objetoOutros" class="required">DescriÃ§Ã£o detalhada do objeto do contrato</label>
+
           <textarea id="objetoOutros" name="objetoOutros" placeholder="Descreva o objeto do contrato..." required></textarea>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
         <div class="form-group">
-          <label for="informacoesComplementares">InformaÃ§Ãµes complementares</label>
-          <textarea id="informacoesComplementares" name="informacoesComplementares" placeholder="Outras informaÃ§Ãµes relevantes..."></textarea>
+
+
         </div>
       `;
       
       valoresC.innerHTML = `
         <div class="form-group">
-          <label for="valorOutros">Valor (se aplicÃ¡vel)</label>
+
           <input type="text" id="valorOutros" name="valorOutros" placeholder="R$ 0,00">
         </div>
         <div class="form-group">
-          <label for="formaPagamentoOutros">Forma de pagamento (se aplicÃ¡vel)</label>
+
           <input type="text" id="formaPagamentoOutros" name="formaPagamentoOutros" placeholder="Descreva a forma de pagamento">
         </div>
       `;
@@ -757,7 +757,7 @@ formatted += `) ${digits.slice(2, 6)}`;
         <div class="form-group">
           <label for="prazoOutros" class="required">Prazo do contrato</label>
           <input type="text" id="prazoOutros" name="prazoOutros" placeholder="Ex: 12 meses, indeterminado, etc." required>
-          <div class="error-message">Campo obrigatÃ³rio</div>
+
         </div>
       `;
       
@@ -765,7 +765,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       applyMoneyMask('#valorOutros');
     }
 
-    // ====== PESSOA FÃSICA / JURÃDICA ======
+
     function initPessoaBlocks() {
       $$('.pfpj-mount').forEach(el => {
         if (el.dataset.initialized) return;
@@ -781,11 +781,11 @@ formatted += `) ${digits.slice(2, 6)}`;
           <div class="pfpj-toggle">
             <div class="radio-item selected" data-pessoa="pf">
               <input type="radio" name="${targetId}_tipo" value="pf" checked>
-              <label>ðŸ‘¤ Pessoa FÃ­sica (PF)</label>
+
             </div>
             <div class="radio-item" data-pessoa="pj">
               <input type="radio" name="${targetId}_tipo" value="pj">
-              <label>ðŸ¢ Pessoa JurÃ­dica (PJ)</label>
+
             </div>
           </div>
           <div class="pfpj-grid" data-grid="pf">
@@ -802,7 +802,7 @@ formatted += `) ${digits.slice(2, 6)}`;
               <input type="text" data-field="${targetId}_pf_estado_civil" required>
             </div>
             <div class="form-group">
-              <label class="required">RG/Ã“rgÃ£o emissor</label>
+
               <input type="text" data-field="${targetId}_pf_rg" required>
             </div>
             <div class="form-group">
@@ -810,11 +810,11 @@ formatted += `) ${digits.slice(2, 6)}`;
               <input type="text" data-field="${targetId}_pf_cpf" placeholder="999.999.999-99" required>
             </div>
             <div class="form-group">
-              <label class="required">ProfissÃ£o</label>
+
               <input type="text" data-field="${targetId}_pf_profissao" required>
             </div>
             <div class="form-group">
-              <label class="required">EndereÃ§o completo</label>
+
               <input type="text" data-field="${targetId}_pf_endereco" required>
             </div>
             <div class="form-group">
@@ -828,7 +828,7 @@ formatted += `) ${digits.slice(2, 6)}`;
           </div>
           <div class="pfpj-grid hidden" data-grid="pj">
             <div class="form-group">
-              <label class="required">RazÃ£o social</label>
+
               <input type="text" data-field="${targetId}_pj_razao">
             </div>
             <div class="form-group">
@@ -836,12 +836,12 @@ formatted += `) ${digits.slice(2, 6)}`;
               <div style="display: flex; gap: 8px; align-items: flex-end;">
                 <input type="text" data-field="${targetId}_pj_cnpj" placeholder="99.999.999/9999-99" style="flex: 1;">
                 <button type="button" class="btn-buscar-cnpj" data-target="${targetId}" style="padding: 10px 16px; background: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                  ðŸ” Buscar
+
                 </button>
               </div>
             </div>
             <div class="form-group">
-              <label class="required">EndereÃ§o comercial</label>
+
               <input type="text" data-field="${targetId}_pj_endereco">
             </div>
             <div class="form-group">
@@ -870,11 +870,11 @@ formatted += `) ${digits.slice(2, 6)}`;
               <input type="text" data-field="${targetId}_pj_rep_estado_civil">
             </div>
             <div class="form-group">
-              <label class="required">ProfissÃ£o</label>
+
               <input type="text" data-field="${targetId}_pj_rep_profissao">
             </div>
             <div class="form-group">
-              <label class="required">RG/Ã“rgÃ£o emissor</label>
+
               <input type="text" data-field="${targetId}_pj_rep_rg">
             </div>
             <div class="form-group">
@@ -882,7 +882,7 @@ formatted += `) ${digits.slice(2, 6)}`;
               <input type="text" data-field="${targetId}_pj_rep_cpf" placeholder="999.999.999-99">
             </div>
             <div class="form-group">
-              <label class="required">EndereÃ§o</label>
+
               <input type="text" data-field="${targetId}_pj_rep_endereco">
             </div>
             <div class="form-group">
@@ -921,12 +921,12 @@ formatted += `) ${digits.slice(2, 6)}`;
           });
         });
         
-        // MÃ¡scaras
+
         wrap.querySelectorAll('input[data-field*="_cpf"]').forEach(inp => {
           inp.addEventListener('input', e => {
             e.target.value = maskCPF(e.target.value);
           });
-          // ðŸ”¥ NOVO: Validar CPF ao sair do campo
+
           inp.addEventListener('blur', e => {
             const cpfValue = e.target.value.replace(/\D/g, '');
             if (cpfValue.length === 11 && !isValidCPF(cpfValue)) {
@@ -935,11 +935,11 @@ formatted += `) ${digits.slice(2, 6)}`;
               if (!errorMsg) {
                 errorMsg = document.createElement('div');
                 errorMsg.className = 'error-message';
-                errorMsg.textContent = 'CPF invÃ¡lido';
+
                 e.target.parentNode.appendChild(errorMsg);
               }
               errorMsg.style.display = 'block';
-              errorMsg.textContent = 'CPF invÃ¡lido';
+
             } else {
               e.target.classList.remove('error');
               const errorMsg = e.target.parentNode.querySelector('.error-message');
@@ -951,7 +951,7 @@ formatted += `) ${digits.slice(2, 6)}`;
           inp.addEventListener('input', e => {
             e.target.value = maskCNPJ(e.target.value);
           });
-          // ðŸ”¥ NOVO: Validar CNPJ ao sair do campo
+
           inp.addEventListener('blur', e => {
             const cnpjValue = e.target.value.replace(/\D/g, '');
             if (cnpjValue.length === 14 && !isValidCNPJ(cnpjValue)) {
@@ -960,11 +960,11 @@ formatted += `) ${digits.slice(2, 6)}`;
               if (!errorMsg) {
                 errorMsg = document.createElement('div');
                 errorMsg.className = 'error-message';
-                errorMsg.textContent = 'CNPJ invÃ¡lido';
+
                 e.target.parentNode.appendChild(errorMsg);
               }
               errorMsg.style.display = 'block';
-              errorMsg.textContent = 'CNPJ invÃ¡lido';
+
             } else {
               e.target.classList.remove('error');
               const errorMsg = e.target.parentNode.querySelector('.error-message');
@@ -987,16 +987,16 @@ formatted += `) ${digits.slice(2, 6)}`;
 
     function updatePessoaData(wrap, targetId) {
       const radioChecked = wrap.querySelector(`input[name="${targetId}_tipo"]:checked`);
-      const tipo = radioChecked?.value || 'pf'; // ðŸ”¥ CORREÃ‡ÃƒO: ProteÃ§Ã£o contra null
+
       const hiddenInput = $(`#${targetId}`);
       
-      if (!hiddenInput) return; // ðŸ”¥ CORREÃ‡ÃƒO: ProteÃ§Ã£o adicional
+
       
       let data = {};
       
       if (tipo === 'pf') {
         data = {
-          tipo: 'Pessoa FÃ­sica',
+          tipo: 'Pessoa F?-sica',
           nome: wrap.querySelector(`[data-field="${targetId}_pf_nome"]`)?.value || '',
           nacionalidade: wrap.querySelector(`[data-field="${targetId}_pf_nacionalidade"]`)?.value || '',
           estadoCivil: wrap.querySelector(`[data-field="${targetId}_pf_estado_civil"]`)?.value || '',
@@ -1009,7 +1009,7 @@ formatted += `) ${digits.slice(2, 6)}`;
         };
       } else {
         data = {
-          tipo: 'Pessoa JurÃ­dica',
+          tipo: 'Pessoa Jur?-dica',
           razaoSocial: wrap.querySelector(`[data-field="${targetId}_pj_razao"]`)?.value || '',
           cnpj: wrap.querySelector(`[data-field="${targetId}_pj_cnpj"]`)?.value || '',
           endereco: wrap.querySelector(`[data-field="${targetId}_pj_endereco"]`)?.value || '',
@@ -1071,17 +1071,17 @@ formatted += `) ${digits.slice(2, 6)}`;
         
         Array.from(files).forEach(file => {
           if (uploadedFiles.length >= maxFiles) {
-            alert(`MÃ¡ximo de ${maxFiles} arquivos permitidos.`);
+
             return;
           }
           
           if (file.size > maxSize) {
-            alert(`Arquivo muito grande: ${file.name}. MÃ¡ximo 10MB.`);
+
             return;
           }
           
           if (uploadedFiles.find(f => f.name === file.name && f.size === file.size)) {
-            alert(`Arquivo jÃ¡ adicionado: ${file.name}`);
+
             return;
           }
           
@@ -1094,9 +1094,9 @@ formatted += `) ${digits.slice(2, 6)}`;
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
         
-        // ðŸ”¥ CORREÃ‡ÃƒO: Usar createElement ao invÃ©s de innerHTML para evitar XSS
+
         const fileSpan = document.createElement('span');
-        fileSpan.textContent = `ðŸ“Ž ${file.name} (${formatFileSize(file.size)})`;
+
         
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
@@ -1123,17 +1123,17 @@ formatted += `) ${digits.slice(2, 6)}`;
       }
     }
 
-    // ====== ðŸ”¥ BUSCA CNPJ REMOVIDA (USAR SOMENTE BRASILAPI COM BOTÃƒO) ======
-    // Comentado pois a busca Ã© feita via BrasilAPI ao clicar no botÃ£o
+
+
     /*
     function setupCNPJLookup() {
-      // Removido - usar apenas BrasilAPI com botÃ£o de busca
+
     }
     */
     
-    // FunÃ§Ã£o vazia para manter compatibilidade
+
     function setupCNPJLookup() {
-      // Busca de CNPJ agora Ã© feita via BrasilAPI com clique no botÃ£o
+
     }
 
     // ====== WHATSAPP ======
@@ -1152,9 +1152,9 @@ formatted += `) ${digits.slice(2, 6)}`;
       e.target.value = maskPhone(e.target.value);
     });
 
-    // Removido: telefoneSolicitante jÃ¡ Ã© tratado por applyGenericPhone()
 
-    // ====== HELPER: APLICAR MÃSCARA DE DINHEIRO ======
+
+
     function applyMoneyMask(selector) {
       const input = $(selector);
       if (input) {
@@ -1181,13 +1181,13 @@ formatted += `) ${digits.slice(2, 6)}`;
         const cnpj = cnpjInput.value.replace(/[^0-9]/g, '');
         
         if (cnpj.length !== 14) {
-          alert('CNPJ deve conter 14 dÃ­gitos');
+          alert('CNPJ deve conter 14 d?-gitos');
           return;
         }
         
         btn.disabled = true;
         const originalText = btn.textContent;
-        btn.textContent = 'â³ Buscando...';
+
         btn.classList.add('loading');
         
         try {
@@ -1195,7 +1195,7 @@ formatted += `) ${digits.slice(2, 6)}`;
           const data = await response.json();
           
           if (!response.ok || data.status === 404 || data.message) {
-            alert('âŒ CNPJ nÃ£o encontrado na base de dados.\n\nPreencha os dados manualmente.');
+
             return;
           }
           
@@ -1204,7 +1204,7 @@ formatted += `) ${digits.slice(2, 6)}`;
             const enderecoInput = document.querySelector(`input[data-field="${targetId}_pj_endereco"]`);
             const telefoneInput = document.querySelector(`input[data-field="${targetId}_pj_telefone"]`);
             
-            // FunÃ§Ã£o toTitleCase local para normalizar texto
+
             const toTitleCase = (texto) => {
               if (!texto) return '';
               return texto.toLowerCase().split(/(\s+)/).map(p => !p || /^\s+$/.test(p) ? p : p.charAt(0).toUpperCase() + p.slice(1)).join('');
@@ -1223,7 +1223,7 @@ formatted += `) ${digits.slice(2, 6)}`;
               enderecoInput.value = endereco;
             }
             
-            // ðŸ”¥ Processar telefone - usar funÃ§Ã£o especial para API
+
             let telefoneBruto = data.ddd_telefone_1 || data.ddd_telefone_2 || '';
             
             if (telefoneInput && telefoneBruto) {
@@ -1233,14 +1233,14 @@ formatted += `) ${digits.slice(2, 6)}`;
             const situacaoMap = {1: 'Nula', 2: 'Ativa', 3: 'Suspensa', 4: 'Inapta', 8: 'Desativada'};
             const situacao = situacaoMap[data.situacao_cadastral] || 'Desconhecida';
             
-            // ðŸ”¥ Chamar modal moderno com OBJETO COMPLETO DA API
+
             showCNPJSuccessModal(data);
           } else {
-            alert('âŒ Erro ao processar dados da API.\n\nPreencha os dados manualmente.');
+
           }
         } catch (error) {
           console.error('Erro na busca CNPJ:', error);
-          alert('âš ï¸ Erro ao buscar dados (verifique sua conexÃ£o).\n\nPreencha os dados manualmente.');
+
         } finally {
           btn.disabled = false;
           btn.textContent = originalText;
@@ -1249,25 +1249,25 @@ formatted += `) ${digits.slice(2, 6)}`;
       }
     });
 
-    // ====== SUBMISSÃƒO ======
+
     $('#dataSolicitacao').valueAsDate = new Date();
 
     $('#contratoForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       if (!validateCurrentSection()) {
-        alert('Por favor, revise e preencha todos os campos obrigatÃ³rios.');
+
         return;
       }
       
       const submitBtn = $('#submitBtn');
-      submitBtn.textContent = 'ðŸš€ Enviando... Aguarde atÃ© finalizaÃ§Ã£o';
+
       submitBtn.disabled = true;
       
       try {
         const formData = new FormData(this);
         
-        // ðŸ”¥ NOVO: Coletar dados estruturados da outra parte envolvida
+
         const tipoRadio = document.querySelector(`input[name="outraParteEnvolvida_tipo"]:checked`);
         if (tipoRadio) {
           const pessoaTipo = tipoRadio.value; // 'pf' ou 'pj'
@@ -1293,8 +1293,18 @@ formatted += `) ${digits.slice(2, 6)}`;
         }
                           
         // Adicionar empresas selecionadas
+        console.log('DEBUG: Checando selectedEmpresas antes de enviar');
+        console.log('DEBUG: window.selectedEmpresas =', window.selectedEmpresas);
+        console.log('DEBUG: typeof window.selectedEmpresas =', typeof window.selectedEmpresas);
+        console.log('DEBUG: Array.isArray(window.selectedEmpresas) =', Array.isArray(window.selectedEmpresas));
         if (window.selectedEmpresas && window.selectedEmpresas.length > 0) {
-            formData.append('empresasSelecionadas', JSON.stringify(window.selectedEmpresas));
+            console.log('SUCESSO: Empresas encontradas:', window.selectedEmpresas);
+            const empresasJSON = JSON.stringify(window.selectedEmpresas);
+            console.log('SUCESSO: JSON pronto:', empresasJSON);
+            formData.append('empresasSelecionadas', empresasJSON);
+            console.log('SUCESSO: Adicionado ao formData');
+          } else {
+            console.log('AVISO: Nenhuma empresa selecionada. window.selectedEmpresas:', window.selectedEmpresas);
           }
 
         // Adicionar arquivos
@@ -1302,18 +1312,29 @@ formatted += `) ${digits.slice(2, 6)}`;
         formData.append(`documento_${index}`, file);
         });
         
+        // DEBUG: Listar o que vai ser enviado
+        console.log('ENVIANDO: Conteúdo do FormData:');
+        for (let [key, value] of formData.entries()) {
+          if (key.startsWith('documento_')) {
+            console.log(`  ${key}: [File object]`);
+          } else {
+            console.log(`  ${key}: ${typeof value === 'string' && value.length > 100 ? value.substring(0, 100) + '...' : value}`);
+          }
+        }
+        
         const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/solicitacao-contrato', {
           method: 'POST',
           body: formData
         });
         
-        // ðŸ”¥ CORREÃ‡ÃƒO: Melhor tratamento de erro com detalhes do servidor
+        console.log('ENVIADO: Status da resposta:', resp.status);
+
         if (!resp.ok) {
           const errorData = await resp.text().catch(() => 'Erro desconhecido');
           throw new Error(`Erro ${resp.status}: ${errorData}`);
         }
 
-        // ðŸ”¥ Parse da resposta
+
         let responseData;
         try {
           responseData = await resp.json();
@@ -1321,14 +1342,14 @@ formatted += `) ${digits.slice(2, 6)}`;
           responseData = { success: true };
         }
 
-        // ðŸ”¥ Mostrar modal de sucesso com os dados
+
         showSuccessModal(responseData);
         
         this.reset();
         uploadedFiles = [];
         $('#documentosList').innerHTML = '';
         
-        // ðŸ”¥ CORREÃ‡ÃƒO: Limpar campos PF/PJ dinÃ¢micos
+
         $$('[data-pessoa-picker]').forEach(picker => {
           const wrap = picker.querySelector('.pfpj-wrap, .pessoa-picker-wrapper');
           if (wrap) {
@@ -1336,7 +1357,7 @@ formatted += `) ${digits.slice(2, 6)}`;
               input.value = '';
               input.classList.remove('error');
             });
-            // Resetar para PF por padrÃ£o
+
             const pfRadio = wrap.querySelector('input[value="pf"]');
             if (pfRadio) {
               pfRadio.checked = true;
@@ -1359,12 +1380,12 @@ formatted += `) ${digits.slice(2, 6)}`;
         console.error('Erro no envio:', err);
         showErrorModal(err.message);
       } finally {
-        submitBtn.textContent = 'Enviar SolicitaÃ§Ã£o';
+
         submitBtn.disabled = false;
       }
     });
 
-    // ðŸ”¥ NOVO: FunÃ§Ã£o para mostrar modal de sucesso
+
     function showSuccessModal(data) {
       const modal = document.getElementById('successModal');
       const successId = document.getElementById('successId');
@@ -1372,7 +1393,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       
       // Extrair dados da resposta
       const id = data?.id || data?.data?.id || 'N/A';
-      const tipo = selectedContractType || data?.type || 'NÃ£o especificado';
+
       
       successId.textContent = id;
       successType.textContent = tipo;
@@ -1380,12 +1401,12 @@ formatted += `) ${digits.slice(2, 6)}`;
       modal.classList.add('show');
     }
 
-    // ðŸ”¥ NOVO: FunÃ§Ã£o para mostrar modal de erro
+
     function showErrorModal(errorMessage) {
       const modal = document.getElementById('errorModal');
       const errorMessageEl = document.getElementById('errorMessage');
       
-      errorMessageEl.textContent = errorMessage || 'NÃ£o foi possÃ­vel enviar a solicitaÃ§Ã£o. Verifique sua conexÃ£o e tente novamente.';
+
       
       modal.classList.add('show');
     }
@@ -1417,12 +1438,13 @@ formatted += `) ${digits.slice(2, 6)}`;
       { cnpj: '06.088.542/0003-06', nome: 'VT PARANA SUPERMERCADO LTDA', tipo: 'CNPJ' },
       { cnpj: '06.088.542/0004-97', nome: 'VT PARANA SUPERMERCADO LTDA', tipo: 'CNPJ' },
       { cnpj: '900.552.331-04', nome: 'ELIZANDRA THAIS FREZARIN ROSA MATSUMOTO', tipo: 'CPF' },
-      { cnpj: '241.163.439-00', nome: 'ÃUREA MARIA FREZARIN ROSA', tipo: 'CPF' },
+
       { cnpj: '326.120.019-72', nome: 'WALDELI DOS SANTOS ROSA', tipo: 'CPF' },
       { cnpj: '012.377.901-40', nome: 'MARCOS VINICIUS FREZARIN ROSA', tipo: 'CPF' }
     ];
 
     window.selectedEmpresas = [];
+    console.log('INIT: window.selectedEmpresas inicializado como array vazio:', window.selectedEmpresas);
 
     function initMultiSelect() {
       const toggle = $('#empresasToggle');
@@ -1433,7 +1455,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       const selectedDiv = $('#selectedEmpresas');
       const dataDiv = $('#empresasDataDisplay');
 
-      // Preencher opÃ§Ãµes
+
       function renderOptions(filter = '') {
         optionsDiv.innerHTML = '';
         const filtered = EMPRESAS_GRUPO.filter(e => 
@@ -1462,8 +1484,10 @@ formatted += `) ${digits.slice(2, 6)}`;
           checkbox.addEventListener('change', () => {
             if (checkbox.checked) {
               window.selectedEmpresas.push(empresa);
+              console.log('✓ EMPRESA ADICIONADA:', empresa.nome, '| Total:', window.selectedEmpresas.length, '| Array:', window.selectedEmpresas);
             } else {
               window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
+              console.log('✗ EMPRESA REMOVIDA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
             }
             updateDisplay();
             renderOptions(search.value);
@@ -1488,7 +1512,7 @@ formatted += `) ${digits.slice(2, 6)}`;
           tag.className = 'selected-item';
           tag.innerHTML = `
             <span>${empresa.nome.substring(0, 30)}...</span>
-            <button type="button" onclick="removeEmpresa('${empresa.cnpj}')">Ã—</button>
+            <button type="button" onclick="removeEmpresa('${empresa.cnpj}')">?--</button>
           `;
           selectedDiv.appendChild(tag);
         });
@@ -1510,7 +1534,7 @@ formatted += `) ${digits.slice(2, 6)}`;
           dataDiv.innerHTML = '';
         }
         
-        // ValidaÃ§Ã£o
+
         const errorDiv = $('#empresasError');
         if (window.selectedEmpresas.length > 0) {
           errorDiv.style.display = 'none';
@@ -1605,7 +1629,7 @@ formatted += `) ${digits.slice(2, 6)}`;
           tag.className = 'selected-item';
           tag.innerHTML = `
             <span>${empresa.nome.substring(0, 30)}...</span>
-            <button type="button" onclick="removeEmpresa('${empresa.cnpj}')">Ã—</button>
+            <button type="button" onclick="removeEmpresa('${empresa.cnpj}')">?--</button>
           `;
           selectedDiv.appendChild(tag);
         });
@@ -1636,7 +1660,7 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
 
 
-        // ====== INICIALIZAÃ‡ÃƒO ======
+
     updateSection();
     setupFileUpload();
     document.addEventListener("DOMContentLoaded", initMultiSelect);
@@ -1668,14 +1692,14 @@ formatted += `) ${digits.slice(2, 6)}`;
     el.autocomplete = 'email';
     el.spellcheck = false;
     el.setAttribute('pattern', EMAIL_RE.source);
-    el.setAttribute('title', 'Informe um e-mail vÃ¡lido (ex.: nome@empresa.com.br)');
+
     if (!el.placeholder) el.placeholder = 'nome@empresa.com.br';
     var msg = makeMsgEl(); ensureAfter(el, msg); msg.textContent = 'Ex.: nome@empresa.com.br';
     function validate(){
       var v = (el.value || '').trim();
       if (v && !EMAIL_RE.test(v)){
-        el.setCustomValidity('E-mail invÃ¡lido. Use algo como nome@empresa.com.br');
-        msg.className = 'field-msg error'; msg.textContent = 'E-mail invÃ¡lido. Ex.: nome@empresa.com.br';
+
+
       } else {
         el.setCustomValidity(''); msg.className = 'field-msg hint'; msg.textContent = v ? '' : 'Ex.: nome@empresa.com.br';
       }
@@ -1696,7 +1720,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       }
       if (invalid){
         msg.className = 'field-msg error';
-        msg.textContent = 'Preenchimento obrigatÃ³rio para prosseguir.';
+
       } else {
         if (el.type !== 'email'){
           msg.className = 'field-msg hint';
@@ -1726,10 +1750,10 @@ formatted += `) ${digits.slice(2, 6)}`;
 <script>
 (function(){
   function onlyDigits(s){ return (s || '').replace(/\D+/g,''); }
-  // FunÃ§Ãµes removidas - usando maskPhone diretamente
-  // FunÃ§Ã£o removida - usando maskPhone diretamente como na seÃ§Ã£o 3
+
+
   document.addEventListener('DOMContentLoaded', function(){
-    // Aplicar maskPhone ao telefoneSolicitante (igual Ã  seÃ§Ã£o 3)
+
     const telInput = document.getElementById('telefoneSolicitante');
     if (telInput) {
       telInput.addEventListener('input', function(e) {
@@ -1770,11 +1794,11 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
     return null;
   }
-  // ðŸ”¥ VALIDAÃ‡ÃƒO BLOQUEADORA DE CPF/CNPJ
+
   function validateDocumentsBeforeAdvance() {
-    console.log('ðŸ” Validando CPF/CNPJ antes de avanÃ§ar...');
+
     
-    // Procurar campos por data-field (que Ã© o padrÃ£o do seu formulÃ¡rio)
+
     var allInputs = document.querySelectorAll('input[data-field], input[type="text"], input[type="tel"]');
     var hasError = false;
     var errorMsg = '';
@@ -1787,16 +1811,16 @@ formatted += `) ${digits.slice(2, 6)}`;
       var dataField = (input.dataset.field || '').toLowerCase();
       var value = (input.value || '').trim();
       
-      // Se o campo estÃ¡ vazio, pula
+
       if (!value) return;
       
       // Validar CPF por data-field ou id/name
       if ((dataField.includes('_cpf') || id.includes('cpf') || name.includes('cpf')) && value) {
-        console.log('ðŸ“‹ Validando CPF:', value, 'data-field:', dataField);
+
         if (!isValidCPFValue(value)) {
-          console.log('âŒ CPF INVÃLIDO:', value);
+
           hasError = true;
-          errorMsg = window._lastCPFError || 'CPF invÃ¡lido. Verifique os dÃ­gitos.';
+
           input.classList.add('error');
           input.focus();
           input.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1808,11 +1832,11 @@ formatted += `) ${digits.slice(2, 6)}`;
       
       // Validar CNPJ por data-field ou id/name
       if ((dataField.includes('_cnpj') || id.includes('cnpj') || name.includes('cnpj')) && value) {
-        console.log('ðŸ“‹ Validando CNPJ:', value, 'data-field:', dataField);
+
         if (!isValidCNPJValue(value)) {
-          console.log('âŒ CNPJ INVÃLIDO:', value);
+
           hasError = true;
-          errorMsg = window._lastCNPJError || 'CNPJ invÃ¡lido. Verifique os dÃ­gitos.';
+
           input.classList.add('error');
           input.focus();
           input.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1824,10 +1848,10 @@ formatted += `) ${digits.slice(2, 6)}`;
     });
     
     if (hasError) {
-      alert('âŒ Erro: ' + errorMsg);
+
       return false;
     }
-    console.log('âœ… CPF/CNPJ validados com sucesso!');
+    console.log('?oe... CPF/CNPJ validados com sucesso!');
     return true;
   }
   
@@ -1836,18 +1860,18 @@ formatted += `) ${digits.slice(2, 6)}`;
     var btn = ev.target.closest(nextSel);
     if (!btn) return;
     
-    // ðŸ”¥ BLOQUEAR COM VALIDAÃ‡ÃƒO DE CPF/CNPJ
+
     if (!validateDocumentsBeforeAdvance()) {
       ev.preventDefault();
       ev.stopImmediatePropagation();
-      console.log('ðŸ›‘ BLOQUEADO! CPF/CNPJ invÃ¡lido');
+
       return false;
     }
     
-    // ðŸ”¥ PRODUCTION_MODE: Verificar se deve validar
+
     if (!PRODUCTION_MODE) {
-      console.log('âœ… MODO TESTE: ValidaÃ§Ã£o desativada - AvanÃ§ando livremente');
-      return true; // Permite avanÃ§ar sem validar
+
+
     }
     
     var active = document.querySelector('[data-section].active') || document;
@@ -1911,15 +1935,15 @@ formatted += `) ${digits.slice(2, 6)}`;
   // === Hard validation on Next (visible fields only) with explicit CPF/CNPJ checks ===
   function onlyDigits(s){ return (s || '').replace(/\D+/g,''); }
   
-  // ðŸ”¥ VALIDAÃ‡ÃƒO ROBUSTA DE CPF COM MENSAGENS
+
   function isValidCPFValue(v){
     var s = onlyDigits(v);
     if (s.length !== 11) {
-      window._lastCPFError = 'CPF deve conter 11 dÃ­gitos.';
+      window._lastCPFError = 'CPF deve conter 11 d?-gitos.';
       return false;
     }
     if (/^(\d)\1{10}$/.test(s)) {
-      window._lastCPFError = 'CPF invÃ¡lido (dÃ­gitos repetidos).';
+
       return false;
     }
     var n = s.split('').map(function(x){return parseInt(x,10);});
@@ -1927,29 +1951,29 @@ formatted += `) ${digits.slice(2, 6)}`;
     for (var i=0;i<9;i++) sum += n[i]*(10-i);
     var d1 = 11 - (sum % 11); if (d1 >= 10) d1 = 0;
     if (d1 !== n[9]) {
-      window._lastCPFError = 'CPF com dÃ­gito verificador invÃ¡lido.';
+
       return false;
     }
     sum=0;
     for (i=0;i<10;i++) sum += n[i]*(11-i);
     var d2 = 11 - (sum % 11); if (d2 >= 10) d2 = 0;
     if (d2 !== n[10]) {
-      window._lastCPFError = 'CPF com dÃ­gito verificador invÃ¡lido.';
+
       return false;
     }
     window._lastCPFError = '';
     return true;
   }
   
-  // ðŸ”¥ VALIDAÃ‡ÃƒO ROBUSTA DE CNPJ COM MENSAGENS
+
   function isValidCNPJValue(v){
     var s = onlyDigits(v);
     if (s.length !== 14) {
-      window._lastCNPJError = 'CNPJ deve conter 14 dÃ­gitos.';
+      window._lastCNPJError = 'CNPJ deve conter 14 d?-gitos.';
       return false;
     }
     if (/^(\d)\1{13}$/.test(s)) {
-      window._lastCNPJError = 'CNPJ invÃ¡lido (dÃ­gitos repetidos).';
+
       return false;
     }
     var calc=function(digs){
@@ -1965,14 +1989,14 @@ formatted += `) ${digits.slice(2, 6)}`;
     var d1=calc(n12);
     var d2=calc(n12 + String(d1));
     if (s !== n12 + String(d1) + String(d2)) {
-      window._lastCNPJError = 'CNPJ com dÃ­gito verificador invÃ¡lido.';
+
       return false;
     }
     window._lastCNPJError = '';
     return true;
   }
   
-  // ðŸ”¥ VALIDAÃ‡ÃƒO EM TEMPO REAL PARA CPF/CNPJ
+
   function setupDocFieldValidation(){
     var cpfFields = Array.prototype.slice.call(document.querySelectorAll('input[id*="cpf" i], input[name*="cpf" i]'));
     var cnpjFields = Array.prototype.slice.call(document.querySelectorAll('input[id*="cnpj" i], input[name*="cnpj" i]'));
@@ -1983,7 +2007,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       el.addEventListener('input', function(){
         if (this.value.trim()) {
           if (!isValidCPFValue(this.value)) {
-            this.setCustomValidity(window._lastCPFError || 'CPF invÃ¡lido');
+
             this.classList.add('error');
           } else {
             this.setCustomValidity('');
@@ -1994,7 +2018,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       el.addEventListener('blur', function(){
         if (this.value.trim()) {
           if (!isValidCPFValue(this.value)) {
-            this.setCustomValidity(window._lastCPFError || 'CPF invÃ¡lido');
+
             this.classList.add('error');
           } else {
             this.setCustomValidity('');
@@ -2010,7 +2034,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       el.addEventListener('input', function(){
         if (this.value.trim()) {
           if (!isValidCNPJValue(this.value)) {
-            this.setCustomValidity(window._lastCNPJError || 'CNPJ invÃ¡lido');
+
             this.classList.add('error');
           } else {
             this.setCustomValidity('');
@@ -2021,7 +2045,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       el.addEventListener('blur', function(){
         if (this.value.trim()) {
           if (!isValidCNPJValue(this.value)) {
-            this.setCustomValidity(window._lastCNPJError || 'CNPJ invÃ¡lido');
+
             this.classList.add('error');
           } else {
             this.setCustomValidity('');
@@ -2045,12 +2069,12 @@ formatted += `) ${digits.slice(2, 6)}`;
       if (v){
         if (/\bcpf\b/i.test(nameId)){
           if (!isValidCPFValue(v)){
-            try { el.setCustomValidity && el.setCustomValidity(window._lastCPFError || 'CPF invÃ¡lido. Revise os dÃ­gitos.'); } catch(e){}
+
             el.classList.add('error');
           }
         } else if (/\bcnpj\b/i.test(nameId)){
           if (!isValidCNPJValue(v)){
-            try { el.setCustomValidity && el.setCustomValidity(window._lastCNPJError || 'CNPJ invÃ¡lido. Revise os dÃ­gitos.'); } catch(e){}
+
             el.classList.add('error');
           }
         }
@@ -2072,10 +2096,10 @@ formatted += `) ${digits.slice(2, 6)}`;
     var btn = ev.target.closest(nextSel);
     if (!btn) return;
     
-    // ðŸ”¥ PRODUCTION_MODE: Verificar se deve validar
+
     if (!PRODUCTION_MODE) {
-      console.log('âœ… MODO TESTE: ValidaÃ§Ã£o desativada - AvanÃ§ando livremente');
-      return true; // Permite avanÃ§ar sem validar
+
+
     }
     
     var active = document.querySelector('[data-section].active') || document;
@@ -2091,7 +2115,7 @@ formatted += `) ${digits.slice(2, 6)}`;
 })();
 </script>
 
-<!-- ðŸ”¥ NOVO: Script para inicializar campos de detalhe de pagamento -->
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   // Inicializar listeners para campos de forma de pagamento
@@ -2115,23 +2139,23 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Modal de Sucesso -->
 <div class="success-modal" id="successModal">
   <div class="success-content">
-    <div class="success-icon">âœ…</div>
-    <h2>SolicitaÃ§Ã£o Enviada!</h2>
+    <div class="success-icon">?oe...</div>
+
     <div class="success-meta">
-      <p><span class="label">ID:</span> <span id="successId">â€”</span></p>
-      <p><span class="label">Tipo:</span> <span id="successType">â€”</span></p>
+      <p><span class="label">ID:</span> <span id="successId">?EUR"</span></p>
+      <p><span class="label">Tipo:</span> <span id="successType">?EUR"</span></p>
     </div>
-    <p id="successMessage">Sua solicitaÃ§Ã£o de contrato foi enviada com sucesso. Em breve nossa equipe jurÃ­dica farÃ¡ a anÃ¡lise.</p>
-    <button class="success-btn" onclick="location.reload()">Nova SolicitaÃ§Ã£o</button>
+
+
   </div>
 </div>
 
 <!-- Modal de Erro -->
 <div class="error-modal" id="errorModal">
   <div class="error-content">
-    <div class="error-icon">âŒ</div>
+
     <h2>Erro ao Enviar</h2>
-    <p id="errorMessage">NÃ£o foi possÃ­vel enviar a solicitaÃ§Ã£o. Verifique sua conexÃ£o e tente novamente.</p>
+
     <button class="error-btn" onclick="document.getElementById('errorModal').classList.remove('show')">Tentar Novamente</button>
   </div>
 </div>
@@ -2161,10 +2185,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       /**
-       * ðŸ”¥ NORMALIZAÃ‡ÃƒO DE TEXTOS (RazÃ£o Social, EndereÃ§o, etc)
+
        * 
        * Converte textos em UPPER CASE ou lower case para Title Case
-       * Cada palavra comeÃ§a com maiÃºscula
+
        */
       function normalizeTexto(texto) {
         if (!texto || texto === 'N/A') return 'N/A';
@@ -2173,13 +2197,13 @@ document.addEventListener('DOMContentLoaded', function() {
         texto = String(texto).trim();
         if (!texto) return 'N/A';
         
-        // Se estiver todo em maiÃºscula ou minÃºscula, converter para title case
+
         // Dividir em palavras e capitalizar cada uma
         return texto
-          .toLowerCase() // Primeiro converter tudo para minÃºscula
-          .split(/(\s+)/) // Dividir preservando espaÃ§os
+
+
           .map(palavra => {
-            // Se for espaÃ§o ou vazio, retornar como estÃ¡
+
             if (!palavra || /^\s+$/.test(palavra)) return palavra;
             
             // Capitalizar primeira letra
@@ -2189,7 +2213,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       /**
-       * ðŸ”¥ FORMATAR DATA BRASILEIRA
+
        * 
        * Converte data ISO (2025-01-15) ou timestamp para formato brasileiro (15/01/2025)
        */
@@ -2197,7 +2221,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!data || data === 'N/A') return 'N/A';
         
         try {
-          // Se for timestamp (nÃºmero)
+
           if (typeof data === 'number') {
             data = new Date(data);
           } else if (typeof data === 'string') {
@@ -2206,7 +2230,7 @@ document.addEventListener('DOMContentLoaded', function() {
               // Formato ISO: 2025-01-15
               data = new Date(data + 'T00:00:00');
             } else if (data.includes('/')) {
-              // JÃ¡ estÃ¡ em formato brasileiro? Retornar como estÃ¡
+
               return data;
             } else {
               // Tentar fazer parsing direto
@@ -2214,7 +2238,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           }
           
-          // Se nÃ£o conseguir fazer parsing, retornar N/A
+
           if (isNaN(data.getTime())) return 'N/A';
           
           // Formatar como DD/MM/YYYY
@@ -2229,7 +2253,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       /**
-       * ðŸ”¥ OBTER COR E ESTILO DA SITUAÃ‡ÃƒO
+
        */
       function obterEstiloSituacao(situacao) {
         const sit = String(situacao || '').toLowerCase().trim();
@@ -2246,7 +2270,7 @@ document.addEventListener('DOMContentLoaded', function() {
             backgroundColor: '#f8d7da',
             borderColor: '#d93025'
           };
-        } else if (sit.includes('anÃ¡lise') || sit.includes('analise')) {
+
           return {
             color: '#ff9800',
             backgroundColor: '#fff3cd',
@@ -2262,28 +2286,28 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       /**
-       * ðŸ”¥ NORMALIZAÃ‡ÃƒO CORRETA DE TELEFONE BRASILEIRO
+
        * 
-       * PadrÃ£o Brasileiro:
-       * - MÃ³vel: (XX) 9XXXX-XXXX (11 dÃ­gitos, comeÃ§ando com 9 apÃ³s DDD)
-       * - Fixo:  (XX) XXXX-XXXX  (10 dÃ­gitos, nÃ£o comeÃ§ando com 9)
+
+
+
        * 
        * A API pode retornar:
-       * - Somente nÃºmeros: "11987654321" ou "1133334444"
-       * - Com formataÃ§Ã£o: "(11) 98765-4321" ou "(11) 3333-4444"
-       * - FormataÃ§Ã£o errada: "(67) 9964-1096" (faltando um 9 no mÃ³vel)
-       * - Com espaÃ§os e caracteres
+
+
+
+
        */
       function normalizeTelefoneAPI(telefone) {
         if (!telefone || telefone === 'N/A') return 'N/A';
         
-        // Remover todos os caracteres nÃ£o-numÃ©ricos
+
         let apenasNumeros = telefone.replace(/\D/g, '');
         
-        // Se nÃ£o tiver dÃ­gitos, retornar N/A
+
         if (!apenasNumeros) return 'N/A';
         
-        // Se comeÃ§ar com 0, remover (era cÃ³digo de interurbano antigo)
+
         if (apenasNumeros.startsWith('0')) {
           apenasNumeros = apenasNumeros.substring(1);
         }
@@ -2291,10 +2315,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let ddd = '';
         let numero = '';
         
-        // âœ… NOVA LÃ“GICA: Detectar se Ã© mÃ³vel (tem 9) ou fixo
-        // Se tiver 9 nÃºmeros: pode ser mÃ³vel sem DDD ou fixo sem DDD
-        // Se tiver 10 nÃºmeros: fixo com DDD
-        // Se tiver 11 nÃºmeros: mÃ³vel com DDD
+
+
+
+
         
         if (apenasNumeros.length === 9) {
           numero = apenasNumeros;
@@ -2332,7 +2356,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       /**
-       * ðŸ”¥ TRATAMENTO ROBUSTO DE ERROS DA API
+
        */
       function handleAPIError(error, status) {
         const errorModal = document.getElementById('errorModal');
@@ -2344,31 +2368,31 @@ document.addEventListener('DOMContentLoaded', function() {
           case 400:
             // Bad Request - Problema no CNPJ
             if (error.name === 'BadRequestError') {
-              mensagem = error.message || 'CNPJ invÃ¡lido. Verifique o formato (XX.XXX.XXX/XXXX-XX).';
+
             } else {
-              mensagem = error.message || 'SolicitaÃ§Ã£o invÃ¡lida. Verifique os dados informados.';
+
             }
             break;
             
           case 404:
-            // Not Found - CNPJ nÃ£o encontrado
+
             if (error.name === 'NotFoundError') {
-              mensagem = error.message || 'CNPJ nÃ£o encontrado na base de dados. Verifique o nÃºmero informado.';
+
             } else {
-              mensagem = 'Recurso nÃ£o encontrado. Verifique os dados e tente novamente.';
+
             }
             break;
             
           case 401:
-            mensagem = 'AutenticaÃ§Ã£o falhou. Contate o administrador do sistema.';
+
             break;
             
           case 403:
-            mensagem = 'Acesso negado. VocÃª nÃ£o tem permissÃ£o para esta operaÃ§Ã£o.';
+
             break;
             
           case 429:
-            mensagem = 'Muitas solicitaÃ§Ãµes. Aguarde alguns momentos e tente novamente.';
+
             break;
             
           case 500:
@@ -2379,7 +2403,7 @@ document.addEventListener('DOMContentLoaded', function() {
             break;
             
           default:
-            mensagem = error.message || 'Erro desconhecido ao processar a solicitaÃ§Ã£o.';
+
         }
         
         // Atualizar e mostrar modal de erro
@@ -2388,7 +2412,7 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.style.wordWrap = 'break-word';
         errorModal.classList.add('show');
         
-        // Ativar botÃ£o se estava desativado
+
         const btns = document.querySelectorAll('.btn-buscar-cnpj');
         btns.forEach(btn => {
           btn.disabled = false;
@@ -2400,7 +2424,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       /**
-       * ðŸ”¥ CONVERTER PARA TITLE CASE (Primeira letra maiÃºscula)
+
        */
       function toTitleCase(texto) {
         if (!texto || texto === 'N/A' || texto === null) return 'N/A';
@@ -2419,7 +2443,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       /**
-       * ðŸ”¥ FORMATAR CEP BRASILEIRO
+
        * 12345678 -> 12345-678
        */
       function formatarCEP(cep) {
@@ -2432,10 +2456,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       /**
-       * ðŸ”¥ ATUALIZAR CAMPOS DA SEÃ‡ÃƒO COM DADOS DA API
+
        */
       function preencherCamposComAPI(data) {
-        // RazÃ£o Social - Normalizar para Title Case
+
         const razaoField = document.getElementById('razaoSocial');
         if (razaoField) razaoField.value = toTitleCase(data.razao_social);
         
@@ -2443,7 +2467,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fantField = document.getElementById('nomeFantasia');
         if (fantField) fantField.value = toTitleCase(data.nome_fantasia);
         
-        // Email - Procurar em todos os possÃ­veis campos de email na seÃ§Ã£o
+
         const emailSelectors = [
           'email',
           '[data-field*="_email"]',
@@ -2490,7 +2514,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
         
-        // EndereÃ§o
+
         const endSelectors = [
           'endereco',
           '[data-field*="_endereco"]',
@@ -2557,32 +2581,32 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       /**
-       * ðŸ”¥ MOSTRAR MODAL COM DADOS DA API
+
        */
       function showCNPJSuccessModalV2(data) {
-        // Criar HTML do modal se nÃ£o existir
+
         if (!document.getElementById('cnpjSuccessModal')) {
           const modalHTML = `
             <div class="success-modal" id="cnpjSuccessModal">
               <div class="success-content">
-                <div class="success-icon" style="font-size: 1.6em; margin-bottom: 2px;">âœ…</div>
+                <div class="success-icon" style="font-size: 1.6em; margin-bottom: 2px;">?oe...</div>
                 <h2 style="color: var(--success-green); margin: 2px 0 8px 0; font-size: 1.2em;">Dados Encontrados!</h2>
                 <div class="success-meta" style="padding: 10px 12px; margin: 0; font-size: 0.85em;">
-                  <p style="margin: 4px 0;"><span class="label">RazÃ£o Social:</span> <span id="modalRazaoSocial" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
+
                   
                   <p style="margin: 6px 0 4px 0;"><span class="label">Nome Fantasia:</span> <span id="modalNomeFantasia" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
                   
-                  <p style="margin: 6px 0 4px 0;"><span class="label">SituaÃ§Ã£o:</span> <span id="modalSituacao" style="color: var(--text-primary); font-weight: 500; display: inline-block; font-size: 0.95em; margin-top: 2px; padding: 4px 12px; border-radius: 6px; border-left: 3px solid;"></span></p>
+
                   
-                  <p style="margin: 6px 0 4px 0;"><span class="label">Data de Abertura:</span> <span id="modalDataAbertura" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;">ðŸ“… <span id="dataAberturaValue"></span></span></p>
+
                   
                   <p style="margin: 6px 0 4px 0;"><span class="label">CNAE Principal:</span> <span id="modalCNAE" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
                   
-                  <p style="margin: 6px 0 4px 0;"><span class="label">CNAEs SecundÃ¡rios:</span> <span id="modalCNAEsSecundarios" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 0.9em; margin-top: 2px; max-height: 80px; overflow-y: auto; padding: 6px; background: #f9f9f9; border-radius: 4px; border-left: 2px solid var(--primary-blue);"></span></p>
+
                   
-                  <p style="margin: 6px 0 4px 0;"><span class="label">Telefone:</span> <span id="modalTelefone" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;">ðŸ“± <span id="telefoneValue"></span></span></p>
+
                   
-                  <p style="margin: 6px 0 0 0;"><span class="label">MunicÃ­pio:</span> <span id="modalMunicipio" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
+                  <p style="margin: 6px 0 0 0;"><span class="label">Munic?-pio:</span> <span id="modalMunicipio" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
                 </div>
                 <button class="success-btn" onclick="closeModalCNPJ()" style="padding: 10px 20px; font-size: 0.9em; margin-top: 8px;">Pronto</button>
               </div>
@@ -2591,13 +2615,13 @@ document.addEventListener('DOMContentLoaded', function() {
           document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
         
-        // Preencher dados com normalizaÃ§Ã£o correta
+
         document.getElementById('modalRazaoSocial').textContent = toTitleCase(data.razao_social) || 'N/A';
         
         // Nome Fantasia
-        document.getElementById('modalNomeFantasia').textContent = toTitleCase(data.nome_fantasia) || 'NÃ£o informado';
+
         
-        // SituaÃ§Ã£o com estilo condicional
+
         const situacaoTexto = toTitleCase(data.descricao_situacao_cadastral) || 'N/A';
         const estiloSit = obterEstiloSituacao(data.descricao_situacao_cadastral);
         const elSituacao = document.getElementById('modalSituacao');
@@ -2614,10 +2638,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // CNAE Principal
         document.getElementById('modalCNAE').textContent = toTitleCase(data.cnae_fiscal_descricao) || 'N/A';
         
-        // CNAEs SecundÃ¡rios
+
         if (data.cnaes_secundarios && data.cnaes_secundarios.length > 0) {
-          let cnaesText = data.cnaes_secundarios.map(cnae => toTitleCase(cnae.descricao)).join('<br>â€¢ ');
-          document.getElementById('modalCNAEsSecundarios').innerHTML = 'â€¢ ' + cnaesText;
+          let cnaesText = data.cnaes_secundarios.map(cnae => toTitleCase(cnae.descricao)).join('<br>?EUR? ');
+          document.getElementById('modalCNAEsSecundarios').innerHTML = '?EUR? ' + cnaesText;
         } else {
           document.getElementById('modalCNAEsSecundarios').textContent = 'Nenhum';
         }
@@ -2627,14 +2651,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let telefoneFomatado = telefoneBruto !== 'N/A' ? normalizeTelefoneAPI(telefoneBruto) : 'N/A';
         document.getElementById('telefoneValue').textContent = telefoneFomatado;
         
-        // Normalizar municÃ­pio
+        // Normalizar munic?-pio
         document.getElementById('modalMunicipio').textContent = toTitleCase(data.municipio) || 'N/A';
         
         // Mostrar modal
         const modal = document.getElementById('cnpjSuccessModal');
         modal.classList.add('show');
         
-        // âœ… Preencher campos da seÃ§Ã£o tambÃ©m
+
         preencherCamposComAPI(data);
       }
     </script>
