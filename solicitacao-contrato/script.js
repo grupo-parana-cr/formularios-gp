@@ -46,6 +46,85 @@ function closeModalCNPJ() {
   }
 }
 
+function showCNPJSuccessModal(data) {
+  // Criar HTML do modal se não existir
+  if (!document.getElementById('cnpjSuccessModal')) {
+    const modalHTML = `
+      <div class="success-modal" id="cnpjSuccessModal">
+        <div class="success-content">
+          <div class="success-icon" style="font-size: 1.6em; margin-bottom: 2px;">✅</div>
+          <h2 style="color: var(--success-green); margin: 2px 0 8px 0; font-size: 1.2em;">Dados Encontrados!</h2>
+          <div class="success-meta" style="padding: 10px 12px; margin: 0; font-size: 0.85em;">
+            <p style="margin: 4px 0;"><span class="label">Razão Social:</span> <span id="modalRazaoSocial" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
+            
+            <p style="margin: 6px 0 4px 0;"><span class="label">Nome Fantasia:</span> <span id="modalNomeFantasia" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
+            
+            <p style="margin: 6px 0 4px 0;"><span class="label">Situação:</span> <span id="modalSituacao" style="color: var(--text-primary); font-weight: 500; display: inline-block; font-size: 0.95em; margin-top: 2px; padding: 4px 12px; border-radius: 6px; border-left: 3px solid;"></span></p>
+            
+            <p style="margin: 6px 0 4px 0;"><span class="label">Data de Abertura:</span> <span id="modalDataAbertura" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;">📅 <span id="dataAberturaValue"></span></span></p>
+            
+            <p style="margin: 6px 0 4px 0;"><span class="label">CNAE Principal:</span> <span id="modalCNAE" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
+            
+            <p style="margin: 6px 0 4px 0;"><span class="label">CNAEs Secundários:</span> <span id="modalCNAEsSecundarios" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 0.9em; margin-top: 2px; max-height: 80px; overflow-y: auto; padding: 6px; background: #f9f9f9; border-radius: 4px; border-left: 2px solid var(--primary-blue);"></span></p>
+            
+            <p style="margin: 6px 0 4px 0;"><span class="label">Telefone:</span> <span id="modalTelefone" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;">📱 <span id="telefoneValue"></span></span></p>
+            
+            <p style="margin: 6px 0 0 0;"><span class="label">Município:</span> <span id="modalMunicipio" style="color: var(--text-primary); font-weight: 500; display: block; font-size: 1em; margin-top: 2px;"></span></p>
+          </div>
+          <button class="success-btn" onclick="closeModalCNPJ()" style="padding: 10px 20px; font-size: 0.9em; margin-top: 8px;">Pronto</button>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+  }
+  
+  // Preencher dados com normalização correta
+  document.getElementById('modalRazaoSocial').textContent = toTitleCase(data.razao_social) || 'N/A';
+  
+  // Nome Fantasia
+  document.getElementById('modalNomeFantasia').textContent = toTitleCase(data.nome_fantasia) || 'Não informado';
+  
+  // Situação com estilo condicional
+  const situacaoTexto = toTitleCase(data.descricao_situacao_cadastral) || 'N/A';
+  const estiloSit = obterEstiloSituacao(data.descricao_situacao_cadastral);
+  const elSituacao = document.getElementById('modalSituacao');
+  elSituacao.textContent = situacaoTexto;
+  elSituacao.style.color = estiloSit.color;
+  elSituacao.style.backgroundColor = estiloSit.backgroundColor;
+  elSituacao.style.borderLeftColor = estiloSit.borderColor;
+  
+  // Data de Abertura
+  let dataAbertura = data.data_inicio_atividade || data.data_situacao_cadastral || 'N/A';
+  let dataFormatada = dataAbertura !== 'N/A' ? formatarDataBrasileira(dataAbertura) : 'N/A';
+  document.getElementById('dataAberturaValue').textContent = dataFormatada;
+  
+  // CNAE Principal
+  document.getElementById('modalCNAE').textContent = toTitleCase(data.cnae_fiscal_descricao) || 'N/A';
+  
+  // CNAEs Secundários
+  if (data.cnaes_secundarios && data.cnaes_secundarios.length > 0) {
+    let cnaesText = data.cnaes_secundarios.map(cnae => toTitleCase(cnae.descricao)).join('<br>• ');
+    document.getElementById('modalCNAEsSecundarios').innerHTML = '• ' + cnaesText;
+  } else {
+    document.getElementById('modalCNAEsSecundarios').textContent = 'Nenhum';
+  }
+  
+  // Normalizar telefone
+  let telefoneBruto = data.ddd_telefone_1 || data.ddd_telefone_2 || 'N/A';
+  let telefoneFomatado = telefoneBruto !== 'N/A' ? normalizeTelefoneAPI(telefoneBruto) : 'N/A';
+  document.getElementById('telefoneValue').textContent = telefoneFomatado;
+  
+  // Normalizar município
+  document.getElementById('modalMunicipio').textContent = toTitleCase(data.municipio) || 'N/A';
+  
+  // Mostrar modal
+  const modal = document.getElementById('cnpjSuccessModal');
+  modal.classList.add('show');
+  
+  // ✅ Preencher campos da seção também
+  preencherCamposComAPI(data);
+}
+
 // 🔥 FUNÇÃO ESPECIAL: Normalizar telefone recebido da API
     // ✅ VERSÃO CORRIGIDA: Detecta quando falta 9 no móvel e adiciona dinamicamente
     function normalizeTelefoneAPI(v) {
