@@ -1,4 +1,42 @@
-formatted += `) ${digits.slice(2, 6)}`;
+// ====== UTILIDADES GLOBAIS ======
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+// ====== VARIÁVEIS GLOBAIS ======
+window.selectedEmpresas = [];
+const PRODUCTION_MODE = false;
+let currentSection = 1;
+const totalSections = 8;
+let selectedContractType = null;
+let uploadedFiles = [];
+
+// ====== FUNÇÕES AUXILIARES ======
+function maskPhone(v) {
+  let digits = v.replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7) return digits.replace(/(\d{2})(\d+)/, '($1) $2');
+  return digits.replace(/(\d{2})(\d{5})(\d+)/, '($1) $2-$3');
+}
+
+function maskCPF(v) {
+  let digits = v.replace(/\D/g, '');
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return digits.replace(/(\d{3})(\d+)/, '$1.$2');
+  if (digits.length <= 9) return digits.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
+  return digits.replace(/(\d{3})(\d{3})(\d{3})(\d+)/, '$1.$2.$3-$4');
+}
+
+function maskCNPJ(v) {
+  let digits = v.replace(/\D/g, '');
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 5) return digits.replace(/(\d{2})(\d+)/, '$1.$2');
+  if (digits.length <= 8) return digits.replace(/(\d{2})(\d{3})(\d+)/, '$1.$2.$3');
+  if (digits.length <= 12) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d+)/, '$1.$2.$3/$4');
+  return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d+)/, '$1.$2.$3/$4-$5');
+}
+
+          formatted += `) ${digits.slice(2, 6)}`;
           if (digits.length >= 7) formatted += `-${digits.slice(6, 10)}`;
         }
       }
@@ -1255,12 +1293,6 @@ formatted += `) ${digits.slice(2, 6)}`;
     $('#contratoForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      console.log('=== SUBMIT INICIADO ===');
-      console.log('window.selectedEmpresas:', window.selectedEmpresas);
-      console.log('Tipo:', typeof window.selectedEmpresas);
-      console.log('É array?:', Array.isArray(window.selectedEmpresas));
-      console.log('Tamanho:', window.selectedEmpresas ? window.selectedEmpresas.length : 'null');
-      
       if (!validateCurrentSection()) {
         alert('Por favor, revise e preencha todos os campos obrigatórios.');
         return;
@@ -1299,18 +1331,8 @@ formatted += `) ${digits.slice(2, 6)}`;
         }
                           
         // Adicionar empresas selecionadas
-        console.log('DEBUG: Verificando empresas no submit');
-        console.log('DEBUG: window.selectedEmpresas =', window.selectedEmpresas);
-        console.log('DEBUG: Tamanho:', window.selectedEmpresas ? window.selectedEmpresas.length : 'null');
-        
         if (window.selectedEmpresas && window.selectedEmpresas.length > 0) {
-            console.log('SUCCESS: Adicionando', window.selectedEmpresas.length, 'empresa(s) ao FormData');
-            alert('SUCCESS: Adicionando ' + window.selectedEmpresas.length + ' empresa(s) ao FormData\n\nEmpresas: ' + window.selectedEmpresas.map(e => e.nome).join(', '));
             formData.append('empresasSelecionadas', JSON.stringify(window.selectedEmpresas));
-            console.log('SUCCESS: empresasSelecionadas adicionado ao formData');
-          } else {
-            console.log('WARNING: Nenhuma empresa para enviar');
-            alert('WARNING: Nenhuma empresa selecionada para enviar!');
           }
 
         // Adicionar arquivos
@@ -1318,22 +1340,12 @@ formatted += `) ${digits.slice(2, 6)}`;
         formData.append(`documento_${index}`, file);
         });
         
-        console.log('ENVIANDO: Conteúdo do FormData para N8N:');
-        for (let [key, value] of formData.entries()) {
-          if (key.startsWith('documento_')) {
-            console.log(`  ${key}: [File]`);
-          } else {
-            const valueStr = typeof value === 'string' && value.length > 100 ? value.substring(0, 100) + '...' : value;
-            console.log(`  ${key}:`, valueStr);
-          }
-        }
-        
         const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/solicitacao-contrato', {
           method: 'POST',
           body: formData
         });
         
-        console.log('RESPOSTA N8N: Status', resp.status);
+        // 🔥 CORREÇÃO: Melhor tratamento de erro com detalhes do servidor
         if (!resp.ok) {
           const errorData = await resp.text().catch(() => 'Erro desconhecido');
           throw new Error(`Erro ${resp.status}: ${errorData}`);
@@ -1448,8 +1460,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       { cnpj: '012.377.901-40', nome: 'MARCOS VINICIUS FREZARIN ROSA', tipo: 'CPF' }
     ];
 
-    window.selectedEmpresas = [];
-    console.log('INIT: window.selectedEmpresas inicializado');
+    window.window.selectedEmpresas = [];
 
     function initMultiSelect() {
       const toggle = $('#empresasToggle');
@@ -1457,7 +1468,7 @@ formatted += `) ${digits.slice(2, 6)}`;
       const search = $('#empresasSearch');
       const optionsDiv = $('#empresasOptions');
       const display = $('#empresasDisplay');
-      const selectedDiv = $('#selectedEmpresas');
+      const selectedDiv = $('#window.selectedEmpresas');
       const dataDiv = $('#empresasDataDisplay');
 
       // Preencher opções
@@ -1484,6 +1495,17 @@ formatted += `) ${digits.slice(2, 6)}`;
               <small style="color: var(--text-secondary);">${empresa.tipo}: ${empresa.cnpj}</small>
             </label>
           `;
+          
+          const checkbox = item.querySelector('input[type="checkbox"]');
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+              window.selectedEmpresas.push(empresa);
+            } else {
+              window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
+            }
+            updateDisplay();
+            renderOptions(search.value);
+          });
           
           optionsDiv.appendChild(item);
         });
@@ -1545,36 +1567,6 @@ formatted += `) ${digits.slice(2, 6)}`;
       // Busca
       search.addEventListener('input', (e) => {
         renderOptions(e.target.value);
-      });
-
-      // Event delegation para checkboxes (funciona com elementos dinâmicos)
-      optionsDiv.addEventListener('change', (e) => {
-        if (e.target.type === 'checkbox') {
-          const checkbox = e.target;
-          const label = checkbox.closest('.multiselect-option')?.querySelector('label');
-          const empresaNome = label ? label.querySelector('strong').textContent : 'Desconhecida';
-          
-          // Achar a empresa baseado no checkbox ID
-          const checkboxId = checkbox.id; // empresa_CNPJ_sem_caracteres
-          const empresa = EMPRESAS_GRUPO.find(e => {
-            const cleanCNPJ = e.cnpj.replace(/[^0-9]/g, '');
-            return checkboxId === `empresa_${cleanCNPJ}`;
-          });
-          
-          if (empresa) {
-            if (checkbox.checked) {
-              window.selectedEmpresas.push(empresa);
-              console.log('✓ EMPRESA ADICIONADA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
-              console.log('Array agora:', window.selectedEmpresas);
-            } else {
-              window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
-              console.log('✗ EMPRESA REMOVIDA:', empresa.nome, '| Total:', window.selectedEmpresas.length);
-              console.log('Array agora:', window.selectedEmpresas);
-            }
-            updateDisplay();
-            renderOptions(search.value);
-          }
-        }
       });
 
       // Fechar dropdown ao clicar fora
@@ -1686,11 +1678,9 @@ formatted += `) ${digits.slice(2, 6)}`;
     updateSection();
     setupFileUpload();
     document.addEventListener("DOMContentLoaded", initMultiSelect);
-</script>
 
 
 
-<script>
 (function(){
   function ensureAfter(el, node){
     if (!el || !node) return;
@@ -1760,7 +1750,6 @@ formatted += `) ${digits.slice(2, 6)}`;
     reqNodes.forEach(setupRequired);
   });
 })();
-</script>
 
 
 
@@ -1769,7 +1758,6 @@ formatted += `) ${digits.slice(2, 6)}`;
 
 
 
-<script>
 (function(){
   function onlyDigits(s){ return (s || '').replace(/\D+/g,''); }
   // Funções removidas - usando maskPhone diretamente
@@ -1784,9 +1772,7 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
   });
 })();
-</script>
 
-<script>
 (function(){
   function isVisible(el){
     if (!el) return false;
@@ -1908,9 +1894,7 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
   }, true);
 })();
-</script>
 
-<script>
 (function(){
   // === Visibility helpers ===
   function isVisible(el){
@@ -2135,10 +2119,7 @@ formatted += `) ${digits.slice(2, 6)}`;
     }
   }, true);
 })();
-</script>
 
-<!-- 🔥 NOVO: Script para inicializar campos de detalhe de pagamento -->
-<script>
 document.addEventListener('DOMContentLoaded', function() {
   // Inicializar listeners para campos de forma de pagamento
   const paymentSelects = [
@@ -2156,9 +2137,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
-</script>
 
-<!-- Modal de Sucesso -->
 <div class="success-modal" id="successModal">
   <div class="success-content">
     <div class="success-icon">✅</div>
@@ -2172,7 +2151,6 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
-<!-- Modal de Erro -->
 <div class="error-modal" id="errorModal">
   <div class="error-content">
     <div class="error-icon">❌</div>
@@ -2182,7 +2160,6 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
-    <script>
       // Modal CNPJ Success - Estilo Moderno (igual ao success-modal)
       function closeModalCNPJ() {
         const modal = document.getElementById('cnpjSuccessModal');
@@ -2683,6 +2660,3 @@ document.addEventListener('DOMContentLoaded', function() {
         // ✅ Preencher campos da seção também
         preencherCamposComAPI(data);
       }
-    </script>
-
-    <!-- 🔥 Script para integração com busca CNPJ e tratamento de erros -->
