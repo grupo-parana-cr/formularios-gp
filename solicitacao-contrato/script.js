@@ -1430,7 +1430,7 @@
       const search = $('#empresasSearch');
       const optionsDiv = $('#empresasOptions');
       const display = $('#empresasDisplay');
-      const selectedDiv = $('#empresasSelected');
+      const selectedDiv = $('#window.selectedEmpresas');
       const dataDiv = $('#empresasDataDisplay');
 
       // Preencher opções
@@ -1589,7 +1589,7 @@
       function updateDisplay() {
         const toggle = $('#empresasToggle');
         const display = $('#empresasDisplay');
-        const selectedDiv = $('#empresasSelected');
+        const selectedDiv = $('#window.selectedEmpresas');
         const dataDiv = $('#empresasDataDisplay');
         const errorDiv = $('#empresasError');
 
