@@ -38,6 +38,93 @@ function maskCNPJ(v) {
   return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d+)/, '$1.$2.$3/$4-$5');
 }
 
+// Formatar data para DD/MM/YYYY
+function formatarDataBrasileira(data) {
+  if (!data || data === 'N/A') return 'N/A';
+  
+  try {
+    if (typeof data === 'number') {
+      data = new Date(data);
+    } else if (typeof data === 'string') {
+      if (data.includes('-')) {
+        data = new Date(data + 'T00:00:00');
+      } else if (data.includes('/')) {
+        return data;
+      } else {
+        data = new Date(data);
+      }
+    }
+    
+    if (isNaN(data.getTime())) return 'N/A';
+    
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const ano = data.getFullYear();
+    
+    return `${dia}/${mes}/${ano}`;
+  } catch(e) {
+    return 'N/A';
+  }
+}
+
+// Formatar CEP brasileiro
+function formatarCEP(cep) {
+  if (!cep) return 'N/A';
+  
+  let apenas = cep.replace(/\D/g, '');
+  if (apenas.length !== 8) return cep;
+  
+  return `${apenas.substring(0, 5)}-${apenas.substring(5)}`;
+}
+
+// Obter cor e estilo da situação
+function obterEstiloSituacao(situacao) {
+  const sit = String(situacao || '').toLowerCase().trim();
+  
+  if (sit.includes('ativa') || sit === 'ativa') {
+    return {
+      color: '#27AE60',
+      backgroundColor: '#d4edda',
+      borderColor: '#27AE60'
+    };
+  } else if (sit.includes('inativa') || sit === 'inativa' || sit.includes('baixada')) {
+    return {
+      color: '#d93025',
+      backgroundColor: '#f8d7da',
+      borderColor: '#d93025'
+    };
+  } else if (sit.includes('análise') || sit.includes('analise')) {
+    return {
+      color: '#ff9800',
+      backgroundColor: '#fff3cd',
+      borderColor: '#ff9800'
+    };
+  } else {
+    return {
+      color: '#666',
+      backgroundColor: '#e9ecef',
+      borderColor: '#999'
+    };
+  }
+}
+
+// Converter texto para Title Case
+function toTitleCase(texto) {
+  if (!texto || texto === 'N/A' || texto === null) return 'N/A';
+  
+  texto = String(texto).trim();
+  if (!texto) return 'N/A';
+  
+  return texto
+    .toLowerCase()
+    .split(/(\s+)/)
+    .map(palavra => {
+      if (!palavra || /^\s+$/.test(palavra)) return palavra;
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+    })
+    .join('');
+}
+
 // Fechar modal do CNPJ
 function closeModalCNPJ() {
   const modal = document.getElementById('cnpjSuccessModal');
