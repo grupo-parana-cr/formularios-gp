@@ -1302,7 +1302,7 @@
         formData.append(`documento_${index}`, file);
         });
         
-        const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/solicitacao-contrato', {
+        const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook/solicitacao-contrato', {
           method: 'POST',
           body: formData
         });
@@ -5323,4 +5323,5 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     
+
 /* ==== END INLINE ==== */
