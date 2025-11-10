@@ -304,7 +304,7 @@
       // 🔥 Validação de empresas selecionadas (seção 3)
       if (currentSection === 3) {
         const empresasError = $('#empresasError');
-        if (selectedEmpresas && selectedEmpresas.length === 0) {
+        if (window.selectedEmpresas && window.selectedEmpresas.length === 0) {
           empresasError.style.display = 'block';
           isValid = false;
         } else if (empresasError) {
@@ -1293,13 +1293,8 @@
         }
                           
         // Adicionar empresas selecionadas
-          console.log('DEBUG - selectedEmpresas:', selectedEmpresas);
-          console.log('DEBUG - length:', selectedEmpresas ? selectedEmpresas.length : 0);
-          if (selectedEmpresas && selectedEmpresas.length > 0) {
-            console.log('✅ Adicionando empresas ao FormData');
+        if (selectedEmpresas && selectedEmpresas.length > 0) {
             formData.append('empresasSelecionadas', JSON.stringify(selectedEmpresas));
-          } else {
-            console.log('❌ selectedEmpresas vazio ou undefined');
           }
 
         // Adicionar arquivos
@@ -1427,7 +1422,7 @@
       { cnpj: '012.377.901-40', nome: 'MARCOS VINICIUS FREZARIN ROSA', tipo: 'CPF' }
     ];
 
-    let selectedEmpresas = [];
+    window.window.selectedEmpresas = [];
 
     function initMultiSelect() {
       const toggle = $('#empresasToggle');
@@ -1435,7 +1430,7 @@
       const search = $('#empresasSearch');
       const optionsDiv = $('#empresasOptions');
       const display = $('#empresasDisplay');
-      const selectedDiv = $('#selectedEmpresas');
+      const selectedDiv = $('#window.selectedEmpresas');
       const dataDiv = $('#empresasDataDisplay');
 
       // Preencher opções
@@ -1452,7 +1447,7 @@
         }
 
         filtered.forEach(empresa => {
-          const isSelected = selectedEmpresas.some(e => e.cnpj === empresa.cnpj);
+          const isSelected = window.selectedEmpresas.some(e => e.cnpj === empresa.cnpj);
           const item = document.createElement('div');
           item.className = 'multiselect-option';
           item.innerHTML = `
@@ -1466,9 +1461,9 @@
           const checkbox = item.querySelector('input[type="checkbox"]');
           checkbox.addEventListener('change', () => {
             if (checkbox.checked) {
-              selectedEmpresas.push(empresa);
+              window.selectedEmpresas.push(empresa);
             } else {
-              selectedEmpresas = selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
+              window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
             }
             updateDisplay();
             renderOptions(search.value);
@@ -1480,15 +1475,15 @@
 
       function updateDisplay() {
         // Atualizar toggle display
-        if (selectedEmpresas.length === 0) {
+        if (window.selectedEmpresas.length === 0) {
           display.textContent = 'Selecione as empresas...';
         } else {
-          display.textContent = `${selectedEmpresas.length} empresa(s) selecionada(s)`;
+          display.textContent = `${window.selectedEmpresas.length} empresa(s) selecionada(s)`;
         }
 
         // Atualizar tags
         selectedDiv.innerHTML = '';
-        selectedEmpresas.forEach(empresa => {
+        window.selectedEmpresas.forEach(empresa => {
           const tag = document.createElement('div');
           tag.className = 'selected-item';
           tag.innerHTML = `
@@ -1499,9 +1494,9 @@
         });
 
         // Atualizar dados exibidos
-        if (selectedEmpresas.length > 0) {
+        if (window.selectedEmpresas.length > 0) {
           dataDiv.innerHTML = '<strong style="color: var(--primary-blue); display: block; margin-bottom: 8px;">Empresas selecionadas:</strong>';
-          selectedEmpresas.forEach(empresa => {
+          window.selectedEmpresas.forEach(empresa => {
             const dataItem = document.createElement('div');
             dataItem.className = 'company-data-display';
             dataItem.innerHTML = `
@@ -1517,7 +1512,7 @@
         
         // Validação
         const errorDiv = $('#empresasError');
-        if (selectedEmpresas.length > 0) {
+        if (window.selectedEmpresas.length > 0) {
           errorDiv.style.display = 'none';
         }
       }
@@ -1547,7 +1542,7 @@
     }
 
     function removeEmpresa(cnpj) {
-      selectedEmpresas = selectedEmpresas.filter(e => e.cnpj !== cnpj);
+      window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== cnpj);
       const dropdown = $('#empresasDropdown');
       const search = $('#empresasSearch');
       const optionsDiv = $('#empresasOptions');
@@ -1565,7 +1560,7 @@
         }
 
         filtered.forEach(empresa => {
-          const isSelected = selectedEmpresas.some(e => e.cnpj === empresa.cnpj);
+          const isSelected = window.selectedEmpresas.some(e => e.cnpj === empresa.cnpj);
           const item = document.createElement('div');
           item.className = 'multiselect-option';
           item.innerHTML = `
@@ -1579,9 +1574,9 @@
           const checkbox = item.querySelector('input[type="checkbox"]');
           checkbox.addEventListener('change', () => {
             if (checkbox.checked) {
-              selectedEmpresas.push(empresa);
+              window.selectedEmpresas.push(empresa);
             } else {
-              selectedEmpresas = selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
+              window.selectedEmpresas = window.selectedEmpresas.filter(e => e.cnpj !== empresa.cnpj);
             }
             updateDisplay();
             renderOptions(search.value);
@@ -1594,18 +1589,18 @@
       function updateDisplay() {
         const toggle = $('#empresasToggle');
         const display = $('#empresasDisplay');
-        const selectedDiv = $('#selectedEmpresas');
+        const selectedDiv = $('#window.selectedEmpresas');
         const dataDiv = $('#empresasDataDisplay');
         const errorDiv = $('#empresasError');
 
-        if (selectedEmpresas.length === 0) {
+        if (window.selectedEmpresas.length === 0) {
           display.textContent = 'Selecione as empresas...';
         } else {
-          display.textContent = `${selectedEmpresas.length} empresa(s) selecionada(s)`;
+          display.textContent = `${window.selectedEmpresas.length} empresa(s) selecionada(s)`;
         }
 
         selectedDiv.innerHTML = '';
-        selectedEmpresas.forEach(empresa => {
+        window.selectedEmpresas.forEach(empresa => {
           const tag = document.createElement('div');
           tag.className = 'selected-item';
           tag.innerHTML = `
@@ -1615,9 +1610,9 @@
           selectedDiv.appendChild(tag);
         });
 
-        if (selectedEmpresas.length > 0) {
+        if (window.selectedEmpresas.length > 0) {
           dataDiv.innerHTML = '<strong style="color: var(--primary-blue); display: block; margin-bottom: 8px;">Empresas selecionadas:</strong>';
-          selectedEmpresas.forEach(empresa => {
+          window.selectedEmpresas.forEach(empresa => {
             const dataItem = document.createElement('div');
             dataItem.className = 'company-data-display';
             dataItem.innerHTML = `
@@ -1631,7 +1626,7 @@
           dataDiv.innerHTML = '';
         }
         
-        if (selectedEmpresas.length > 0) {
+        if (window.selectedEmpresas.length > 0) {
           errorDiv.style.display = 'none';
         }
       }
