@@ -6,7 +6,7 @@ console.log('✓ Script carregando...');
 
 // ====== VARIÁVEIS GLOBAIS ======
 window.selectedEmpresas = [];
-const PRODUCTION_MODE = false;
+const PRODUCTION_MODE = true;
 let currentSection = 1;
 const totalSections = 8;
 let selectedContractType = null;
