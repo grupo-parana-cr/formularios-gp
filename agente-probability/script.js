@@ -17,8 +17,7 @@ if (savedTheme === 'dark') {
     document.body.classList.add('dark-theme');
 }
 
-loadConversationsFromStorage();
-loadLastConversation();
+loadData();
 
 inputField.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !isLoading) sendMessage();
@@ -28,7 +27,7 @@ function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-function loadConversationsFromStorage() {
+function loadData() {
     const saved = localStorage.getItem('conversations');
     if (saved) {
         try {
@@ -39,28 +38,17 @@ function loadConversationsFromStorage() {
             conversationCount = 0;
         }
     }
-}
-
-function saveConversationsToStorage() {
-    localStorage.setItem('conversations', JSON.stringify(conversations));
-}
-
-function loadLastConversation() {
-    const lastId = localStorage.getItem('lastConversationId');
     
+    const lastId = localStorage.getItem('lastConversationId');
     if (lastId && conversations[lastId]) {
-        setCurrentConversation(lastId);
+        currentConversationId = lastId;
+        currentMessages = conversations[lastId].messages || [];
     } else {
         createNewConversation();
     }
     
-    renderChatMessages();
-    renderConversationsList();
-}
-
-function setCurrentConversation(id) {
-    currentConversationId = id;
-    currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
+    renderChat();
+    renderList();
 }
 
 function createNewConversation() {
@@ -77,17 +65,20 @@ function createNewConversation() {
     currentMessages = [];
 }
 
+function saveData() {
+    if (currentConversationId && conversations[currentConversationId]) {
+        conversations[currentConversationId].messages = currentMessages;
+        conversations[currentConversationId].timestamp = new Date().toISOString();
+    }
+    localStorage.setItem('conversations', JSON.stringify(conversations));
+    localStorage.setItem('lastConversationId', currentConversationId);
+}
+
 function toggleTheme() {
     document.body.classList.toggle('dark-theme');
     const isDark = document.body.classList.contains('dark-theme');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    const icon = document.querySelector('.theme-icon');
-    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-}
-
-function toggleSidebar() {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('open');
+    document.querySelector('.theme-icon').textContent = isDark ? '☀️' : '🌙';
 }
 
 function closeSidebar() {
@@ -96,22 +87,12 @@ function closeSidebar() {
 }
 
 function startNewConversation() {
-    saveCurrentConversation();
+    saveData();
     createNewConversation();
-    
-    saveConversationsToStorage();
-    localStorage.setItem('lastConversationId', currentConversationId);
-    
-    renderChatMessages();
-    renderConversationsList();
+    saveData();
+    renderChat();
+    renderList();
     closeSidebar();
-}
-
-function saveCurrentConversation() {
-    if (currentConversationId && conversations[currentConversationId]) {
-        conversations[currentConversationId].messages = currentMessages;
-        conversations[currentConversationId].timestamp = new Date().toISOString();
-    }
 }
 
 function loadConversation(id) {
@@ -119,19 +100,16 @@ function loadConversation(id) {
         closeSidebar();
         return;
     }
-    
-    saveCurrentConversation();
-    setCurrentConversation(id);
-    
-    localStorage.setItem('lastConversationId', id);
-    saveConversationsToStorage();
-    
-    renderChatMessages();
-    renderConversationsList();
+    saveData();
+    currentConversationId = id;
+    currentMessages = conversations[id].messages || [];
+    saveData();
+    renderChat();
+    renderList();
     closeSidebar();
 }
 
-function renderConversationsList() {
+function renderList() {
     conversationsList.innerHTML = '';
     const sorted = Object.values(conversations)
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -164,12 +142,12 @@ function renderConversationsList() {
 
 function deleteConversation(id) {
     delete conversations[id];
-    saveConversationsToStorage();
+    localStorage.setItem('conversations', JSON.stringify(conversations));
     
     if (currentConversationId === id) {
         startNewConversation();
     } else {
-        renderConversationsList();
+        renderList();
     }
 }
 
@@ -211,11 +189,11 @@ function sendMessage() {
     })
     .then(r => r.json())
     .then(data => {
-        removeLoadingIfExists();
+        removeLoading();
         displayResponse(data);
     })
     .catch(error => {
-        removeLoadingIfExists();
+        removeLoading();
         addMessage(`❌ Erro: ${error.message}`, 'error');
     })
     .finally(() => {
@@ -243,7 +221,7 @@ function addLoading() {
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-function removeLoadingIfExists() {
+function removeLoading() {
     const msg = document.getElementById('loading-message');
     if (msg) msg.remove();
 }
@@ -285,11 +263,11 @@ function displayResponse(data) {
         timestamp: new Date().toISOString()
     });
 
-    saveCurrentConversation();
-    renderConversationsList();
+    saveData();
+    renderList();
 }
 
-function renderChatMessages() {
+function renderChat() {
     chatArea.innerHTML = '';
     
     if (!currentMessages || currentMessages.length === 0) {
