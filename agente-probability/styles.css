@@ -79,7 +79,7 @@ body.dark-theme .sidebar-header {
 .logo-container {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 8px 12px;
     background: white;
     border-radius: 10px;
@@ -92,18 +92,26 @@ body.dark-theme .logo-container {
 }
 
 .logo {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
 }
 
 .logo-text {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
-    color: var(--primary);
+    color: white;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    background: var(--primary);
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+body.dark-theme .logo-text {
+    color: white;
+    background: var(--primary);
 }
 
 .sidebar-toggle {
@@ -198,7 +206,6 @@ body.dark-theme .conversations-list::-webkit-scrollbar-thumb {
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    group: true;
 }
 
 body.dark-theme .conversation-item {
@@ -692,6 +699,11 @@ body.dark-theme .input-hint {
 
     .logo-container {
         justify-content: center;
+    }
+
+    .logo {
+        width: 32px;
+        height: 32px;
     }
 
     .chat-area {
