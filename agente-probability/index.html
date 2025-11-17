@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente de Análise - Grupo Paraná</title>
-    <link rel="stylesheet" href="styles.css?v=5.0">
+    <link rel="stylesheet" href="styles.css?v=6.0">
 </head>
 <body>
     <div class="app-wrapper">
@@ -14,7 +14,7 @@
                 <span class="logo-text">Grupo Paraná</span>
             </div>
 
-            <button class="new-chat-btn" onclick="startNewConversation()">
+            <button class="new-chat-btn" onclick="createNewChat()">
                 <span class="icon">+</span>
                 <span>Novo chat</span>
             </button>
@@ -32,6 +32,9 @@
 
         <main class="main-content">
             <div class="header">
+                <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" style="display: none;">
+                    ☰
+                </button>
                 <div class="logo-header">
                     <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo" class="logo-small">
                     <span>Grupo Paraná</span>
@@ -56,6 +59,6 @@
         </main>
     </div>
 
-    <script src="script.js?v=5.0"></script>
+    <script src="script.js?v=6.0"></script>
 </body>
 </html>
