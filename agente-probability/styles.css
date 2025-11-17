@@ -48,6 +48,14 @@ body.dark-theme {
     transition: transform 0.3s;
 }
 
+.sidebar.closed {
+    transform: translateX(-100%);
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+}
+
 body.dark-theme .sidebar {
     background: var(--dark-bg);
     border-right-color: var(--dark-border);
