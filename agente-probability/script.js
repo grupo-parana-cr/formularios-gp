@@ -109,7 +109,7 @@ function loadConversation(id) {
     
     currentConversationId = id;
     const conv = conversations[id];
-    currentMessages = [...conv.messages];
+    currentMessages = JSON.parse(JSON.stringify(conv.messages));
     
     localStorage.setItem('lastConversationId', currentConversationId);
     renderChatMessages();
@@ -274,7 +274,7 @@ function displayResponse(data, originalQuestion) {
         conversations[currentConversationId].title = title;
     }
 
-    conversations[currentConversationId].messages = [...currentMessages];
+    conversations[currentConversationId].messages = JSON.parse(JSON.stringify(currentMessages));
     conversations[currentConversationId].timestamp = new Date().toISOString();
     
     saveConversationsToStorage();
