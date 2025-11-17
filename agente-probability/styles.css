@@ -163,11 +163,13 @@ body.dark-theme .conversation-item:hover {
 .conversation-item.active {
     background: var(--light-border);
     color: var(--light-text);
+    font-weight: 600;
 }
 
 body.dark-theme .conversation-item.active {
     background: var(--dark-border);
     color: var(--dark-text);
+    font-weight: 600;
 }
 
 .conversation-title {
