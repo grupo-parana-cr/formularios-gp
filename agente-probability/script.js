@@ -3,20 +3,35 @@ const chatArea = document.getElementById('chatArea');
 const inputField = document.getElementById('inputField');
 const sendBtn = document.getElementById('sendBtn');
 const conversationsList = document.getElementById('conversationsList');
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
 
 let currentConversationId = null;
 let conversations = {};
 let currentMessages = [];
 let isLoading = false;
 
-// Inicializar
+// Inicializar tema
+const savedTheme = localStorage.getItem('theme') || 'light';
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+}
+
+// Carregar dados
 loadConversationsFromStorage();
 startNewConversation();
 
+// Event listeners
 inputField.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !isLoading) {
         sendMessage();
     }
+});
+
+// Auto-resize textarea
+inputField.addEventListener('input', () => {
+    inputField.style.height = 'auto';
+    inputField.style.height = Math.min(inputField.scrollHeight, 100) + 'px';
 });
 
 function generateId() {
@@ -34,6 +49,29 @@ function saveConversationsToStorage() {
     localStorage.setItem('conversations', JSON.stringify(conversations));
 }
 
+function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    const isDark = document.body.classList.contains('dark-theme');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateThemeIcon();
+}
+
+function updateThemeIcon() {
+    const isDark = document.body.classList.contains('dark-theme');
+    const icon = document.querySelector('.theme-icon');
+    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+}
+
+function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    sidebarOverlay.classList.toggle('open');
+}
+
+function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
+}
+
 function startNewConversation() {
     currentConversationId = generateId();
     currentMessages = [];
@@ -47,17 +85,20 @@ function startNewConversation() {
     chatArea.innerHTML = `
         <div class="empty-state">
             <div class="robot-icon">🤖</div>
-            <p>Olá! Faça uma pergunta para começar</p>
+            <h2>Bem-vindo ao Agente de Análise</h2>
+            <p>Faça uma pergunta para começar a análise com distribuição de probabilidades</p>
         </div>
     `;
     
     inputField.value = '';
+    inputField.style.height = 'auto';
     inputField.disabled = false;
     sendBtn.disabled = false;
     isLoading = false;
     
     saveConversationsToStorage();
     renderConversationsList();
+    closeSidebar();
 }
 
 function loadConversation(id) {
@@ -69,6 +110,7 @@ function loadConversation(id) {
     
     renderChatMessages();
     renderConversationsList();
+    closeSidebar();
 }
 
 function renderConversationsList() {
@@ -79,12 +121,23 @@ function renderConversationsList() {
         .forEach(conv => {
             const item = document.createElement('div');
             item.className = `conversation-item ${conv.id === currentConversationId ? 'active' : ''}`;
-            item.innerHTML = `
-                <span class="conversation-title" onclick="loadConversation('${conv.id}')">${conv.title}</span>
-                <button class="conversation-delete" onclick="deleteConversation('${conv.id}', event)">🗑️</button>
-            `;
+            
+            const title = document.createElement('span');
+            title.className = 'conversation-title';
+            title.textContent = conv.title;
+            title.onclick = () => loadConversation(conv.id);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'conversation-delete';
+            deleteBtn.textContent = '🗑️';
+            deleteBtn.onclick = (e) => deleteConversation(conv.id, e);
+            
+            item.appendChild(title);
+            item.appendChild(deleteBtn);
             conversationsList.appendChild(item);
         });
+    
+    updateThemeIcon();
 }
 
 function deleteConversation(id, event) {
@@ -109,6 +162,7 @@ function sendMessage() {
 
     addMessage(message, 'user');
     inputField.value = '';
+    inputField.style.height = 'auto';
     inputField.disabled = true;
     sendBtn.disabled = true;
     isLoading = true;
@@ -122,7 +176,7 @@ function sendMessage() {
 
     // Preparar histórico para o n8n
     const historyContext = currentMessages
-        .map((msg, idx) => `${msg.role === 'user' ? 'Usuário' : 'Agente'}: ${msg.content}`)
+        .map((msg) => `${msg.role === 'user' ? 'Usuário' : 'Agente'}: ${msg.content}`)
         .join('\n\n');
 
     addLoading();
@@ -181,10 +235,12 @@ function addLoading() {
     messageDiv.className = 'message assistant-message';
     messageDiv.id = 'loading-message';
     messageDiv.innerHTML = `
-        <div class="loading">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+        <div class="message-content">
+            <div class="loading">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
         </div>
     `;
     chatArea.appendChild(messageDiv);
@@ -210,7 +266,7 @@ function displayResponse(data, originalQuestion) {
             
             html += `
                 <div class="response-item">
-                    <div class="response-number">${index + 1}. ${escapeHtml(resposta.titulo || 'Resposta')}</div>
+                    <div class="response-number">Resposta ${index + 1}: ${escapeHtml(resposta.titulo || 'Resposta')}</div>
                     <div class="response-text">${escapeHtml(resposta.texto)}</div>
                     <div class="probability-badge">Probabilidade: ${prob}</div>
                 </div>
@@ -220,7 +276,11 @@ function displayResponse(data, originalQuestion) {
         });
     }
 
-    messageDiv.innerHTML = html;
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.innerHTML = html;
+    messageDiv.appendChild(messageContent);
+    
     chatArea.appendChild(messageDiv);
     chatArea.scrollTop = chatArea.scrollHeight;
 
@@ -251,7 +311,8 @@ function renderChatMessages() {
         chatArea.innerHTML = `
             <div class="empty-state">
                 <div class="robot-icon">🤖</div>
-                <p>Olá! Faça uma pergunta para começar</p>
+                <h2>Bem-vindo ao Agente de Análise</h2>
+                <p>Faça uma pergunta para começar a análise com distribuição de probabilidades</p>
             </div>
         `;
         return;
@@ -267,13 +328,13 @@ function renderChatMessages() {
             const lines = msg.content.split('\n').filter(l => l.trim());
             let html = '';
             
-            lines.forEach((line, idx) => {
+            lines.forEach((line) => {
                 if (line.startsWith('Resposta')) {
                     const parts = line.match(/Resposta (\d+): (.*) - ([\d.]+)/);
                     if (parts) {
                         html += `
                             <div class="response-item">
-                                <div class="response-number">${parts[1]}. ${escapeHtml(parts[2])}</div>
+                                <div class="response-number">Resposta ${parts[1]}: ${escapeHtml(parts[2])}</div>
                                 <div class="probability-badge">Probabilidade: ${parts[3]}</div>
                             </div>
                         `;
@@ -281,7 +342,10 @@ function renderChatMessages() {
                 }
             });
             
-            div.innerHTML = html || `<div class="message-content">${escapeHtml(msg.content)}</div>`;
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = html || escapeHtml(msg.content);
+            div.appendChild(messageContent);
             chatArea.appendChild(div);
         }
     });
