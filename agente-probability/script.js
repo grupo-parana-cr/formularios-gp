@@ -48,6 +48,7 @@ function startNewChat() {
 function selectChat(id) {
     currentChatId = id;
     renderChatArea();
+    renderChatList();
     closeSidebar();
 }
 
