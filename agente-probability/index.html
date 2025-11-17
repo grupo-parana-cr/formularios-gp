@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente de Análise - Grupo Paraná</title>
-    <link rel="stylesheet" href="styles.css?v=6.0">
+    <link rel="stylesheet" href="styles.css?v=8.0">
 </head>
 <body>
     <div class="app-wrapper">
@@ -14,7 +14,7 @@
                 <span class="logo-text">Grupo Paraná</span>
             </div>
 
-            <button class="new-chat-btn" onclick="createNewChat()">
+            <button class="new-chat-btn" onclick="startNewChat()">
                 <span class="icon">+</span>
                 <span>Novo chat</span>
             </button>
@@ -32,32 +32,28 @@
 
         <main class="main-content">
             <div class="header">
-                <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" style="display: none;">
+                <button class="menu-btn" onclick="toggleSidebar()" title="Abrir/Fechar menu">
                     ☰
                 </button>
-                <h2 class="current-chat-title" id="currentChatTitle">Agente de Análise</h2>
-                <button class="sidebar-close-btn" id="sidebarCloseBtn" onclick="toggleSidebar()" title="Ocultar sidebar">
-                    ←
-                </button>
+                <div style="flex: 1;"></div>
             </div>
 
             <div class="chat-area" id="chatArea">
                 <div class="empty-state">
-                    <div class="robot-icon">🤖</div>
                     <h1>Agente de Análise</h1>
-                    <p>Faça uma pergunta para começar</p>
+                    <p>No que você está pensando hoje?</p>
                 </div>
             </div>
 
             <div class="input-section">
                 <div class="input-wrapper">
-                    <input type="text" id="inputField" placeholder="Faça uma pergunta..." autocomplete="off">
+                    <input type="text" id="inputField" placeholder="Envie uma mensagem..." autocomplete="off">
                     <button id="sendBtn" onclick="sendMessage()" class="send-btn"><span>↑</span></button>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="script.js?v=6.0"></script>
+    <script src="script.js?v=8.0"></script>
 </body>
 </html>
