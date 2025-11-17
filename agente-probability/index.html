@@ -4,68 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente de Análise - Grupo Paraná</title>
-    <link rel="stylesheet" href="styles.css?v=2.0">
+    <link rel="stylesheet" href="styles.css?v=3.0">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
+    <div class="app-wrapper">
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo Grupo Paraná" class="logo">
-                    <span class="logo-text">Grupo Paraná</span>
-                </div>
-                <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
-                    <span class="toggle-icon">✕</span>
+            <div class="sidebar-top">
+                <button class="new-chat-btn" onclick="startNewConversation()">
+                    <span class="icon">+</span>
+                    <span>Novo chat</span>
                 </button>
             </div>
 
-            <button class="new-chat-btn" onclick="startNewConversation()">
-                <span class="plus-icon">+</span>
-                Nova Conversa
-            </button>
-
             <div class="conversations-list" id="conversationsList"></div>
 
-            <div class="sidebar-footer">
+            <div class="sidebar-bottom">
                 <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
-                    <span class="theme-icon">🌙</span>
+                    <span class="icon">🌙</span>
                 </button>
             </div>
         </aside>
 
-        <!-- Overlay para mobile -->
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+        <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-        <!-- Main Chat -->
-        <div class="main-container">
-            <div class="chat-container">
-                <div class="chat-area" id="chatArea">
-                    <div class="empty-state">
-                        <div class="robot-icon">🤖</div>
-                        <h2>Bem-vindo ao Agente de Análise</h2>
-                        <p>Faça uma pergunta para começar a análise com distribuição de probabilidades</p>
-                    </div>
+        <main class="main-content">
+            <div class="header">
+                <button class="menu-btn" onclick="toggleSidebar()">
+                    <span>☰</span>
+                </button>
+                <div class="logo-header">
+                    <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo" class="logo-small">
+                    <span>Grupo Paraná</span>
                 </div>
+                <div style="width: 40px;"></div>
+            </div>
 
-                <div class="input-area">
-                    <div class="input-wrapper">
-                        <input 
-                            type="text" 
-                            id="inputField" 
-                            placeholder="Faça sua pergunta..." 
-                            autocomplete="off"
-                        >
-                        <button id="sendBtn" onclick="sendMessage()" class="send-btn" title="Enviar">
-                            <span class="send-icon">↑</span>
-                        </button>
-                    </div>
-                    <p class="input-hint">Pressione Enter ou clique no botão para enviar</p>
+            <div class="chat-area" id="chatArea">
+                <div class="empty-state">
+                    <div class="robot-icon">🤖</div>
+                    <h1>Agente de Análise</h1>
+                    <p>Faça uma pergunta para começar</p>
                 </div>
             </div>
-        </div>
+
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <input type="text" id="inputField" placeholder="Faça uma pergunta..." autocomplete="off">
+                    <button id="sendBtn" onclick="sendMessage()" class="send-btn"><span>↑</span></button>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <script src="script.js?v=2.0"></script>
+    <script src="script.js?v=3.0"></script>
 </body>
 </html>
