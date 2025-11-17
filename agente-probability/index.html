@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente de Análise - Grupo Paraná</title>
-    <link rel="stylesheet" href="styles.css?v=3.0">
+    <link rel="stylesheet" href="styles.css?v=4.0">
 </head>
 <body>
     <div class="app-wrapper">
@@ -20,7 +20,7 @@
 
             <div class="sidebar-bottom">
                 <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
-                    <span class="icon">🌙</span>
+                    <span class="theme-icon">🌙</span>
                 </button>
             </div>
         </aside>
@@ -29,8 +29,13 @@
 
         <main class="main-content">
             <div class="header">
-                <button class="menu-btn" onclick="toggleSidebar()">
-                    <span>☰</span>
+                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Abrir/Fechar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
                 </button>
                 <div class="logo-header">
                     <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo" class="logo-small">
@@ -56,6 +61,6 @@
         </main>
     </div>
 
-    <script src="script.js?v=3.0"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 </html>
