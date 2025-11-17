@@ -248,10 +248,26 @@ body.dark-theme .main-content {
     justify-content: space-between;
     padding: 16px 24px;
     border-bottom: 1px solid var(--light-border);
+    gap: 16px;
 }
 
 body.dark-theme .header {
     border-bottom-color: var(--dark-border);
+}
+
+.current-chat-title {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--light-text);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.dark-theme .current-chat-title {
+    color: var(--dark-text);
 }
 
 .menu-toggle {
@@ -261,10 +277,29 @@ body.dark-theme .header {
     cursor: pointer;
     color: var(--light-text);
     padding: 8px;
+    display: none;
 }
 
 body.dark-theme .menu-toggle {
     color: var(--dark-text);
+}
+
+.sidebar-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--light-text);
+    padding: 8px;
+    transition: all 0.2s;
+}
+
+body.dark-theme .sidebar-close-btn {
+    color: var(--dark-text);
+}
+
+.sidebar-close-btn:hover {
+    color: var(--primary);
 }
 
 .logo-header {
@@ -536,12 +571,12 @@ body.dark-theme #inputField::placeholder {
         display: block !important;
     }
 
-    .overlay.open {
-        display: block;
+    #sidebarCloseBtn {
+        display: none;
     }
 
-    .logo-header span {
-        display: none;
+    .overlay.open {
+        display: block;
     }
 
     .chat-area {
