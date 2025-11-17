@@ -34,6 +34,7 @@ function loadConversationsFromStorage() {
         try {
             conversations = JSON.parse(saved);
         } catch (e) {
+            console.error('Erro ao carregar conversas:', e);
             conversations = {};
         }
     }
@@ -45,6 +46,7 @@ function saveConversationsToStorage() {
 
 function loadLastConversation() {
     const lastConvId = localStorage.getItem('lastConversationId');
+    
     if (lastConvId && conversations[lastConvId]) {
         loadConversation(lastConvId);
     } else {
@@ -76,6 +78,14 @@ function closeSidebar() {
 }
 
 function startNewConversation() {
+    // Salvar conversa atual antes de criar nova
+    if (currentConversationId && conversations[currentConversationId]) {
+        conversations[currentConversationId].messages = [...currentMessages];
+        conversations[currentConversationId].timestamp = new Date().toISOString();
+        saveConversationsToStorage();
+    }
+
+    // Criar nova conversa
     currentConversationId = generateId();
     currentMessages = [];
     conversations[currentConversationId] = {
@@ -107,9 +117,17 @@ function startNewConversation() {
 function loadConversation(id) {
     if (!conversations[id]) return;
     
+    // Salvar conversa atual antes de trocar
+    if (currentConversationId && conversations[currentConversationId]) {
+        conversations[currentConversationId].messages = [...currentMessages];
+        conversations[currentConversationId].timestamp = new Date().toISOString();
+        saveConversationsToStorage();
+    }
+
+    // Carregar nova conversa
     currentConversationId = id;
     const conv = conversations[id];
-    currentMessages = JSON.parse(JSON.stringify(conv.messages));
+    currentMessages = conv.messages ? [...conv.messages] : [];
     
     localStorage.setItem('lastConversationId', currentConversationId);
     renderChatMessages();
@@ -269,12 +287,14 @@ function displayResponse(data, originalQuestion) {
         timestamp: new Date().toISOString()
     });
 
+    // Atualizar título se primeira resposta
     if (conversations[currentConversationId].messages.length === 0) {
         const title = originalQuestion.substring(0, 40) + (originalQuestion.length > 40 ? '...' : '');
         conversations[currentConversationId].title = title;
     }
 
-    conversations[currentConversationId].messages = JSON.parse(JSON.stringify(currentMessages));
+    // Salvar conversa
+    conversations[currentConversationId].messages = [...currentMessages];
     conversations[currentConversationId].timestamp = new Date().toISOString();
     
     saveConversationsToStorage();
@@ -284,7 +304,7 @@ function displayResponse(data, originalQuestion) {
 function renderChatMessages() {
     chatArea.innerHTML = '';
     
-    if (currentMessages.length === 0) {
+    if (!currentMessages || currentMessages.length === 0) {
         chatArea.innerHTML = `
             <div class="empty-state">
                 <div class="robot-icon">🤖</div>
