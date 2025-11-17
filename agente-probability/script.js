@@ -6,8 +6,8 @@ const conversationsList = document.getElementById('conversationsList');
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
 
-let currentId = null;
-let allConversations = {};
+let currentChatId = null;
+let allChats = {};
 let isLoading = false;
 
 const theme = localStorage.getItem('theme') || 'light';
@@ -16,17 +16,10 @@ if (theme === 'dark') document.body.classList.add('dark-theme');
 init();
 
 function init() {
-    const saved = localStorage.getItem('conversations');
-    allConversations = saved ? JSON.parse(saved) : {};
-    
-    const lastId = localStorage.getItem('currentId');
-    if (lastId && allConversations[lastId]) {
-        currentId = lastId;
-    } else {
-        createNewChat();
-    }
-    
-    render();
+    const saved = localStorage.getItem('allChats');
+    allChats = saved ? JSON.parse(saved) : {};
+    renderChatList();
+    renderChatArea();
 }
 
 function toggleTheme() {
@@ -46,74 +39,79 @@ function closeSidebar() {
     overlay.classList.remove('open');
 }
 
-function createNewChat() {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    const num = Object.keys(allConversations).length + 1;
-    
-    allConversations[id] = {
-        id: id,
-        title: `Conversa ${num}`,
-        messages: [],
-        created: new Date().toISOString()
-    };
-    
-    currentId = id;
-    save();
-    render();
+function startNewChat() {
+    currentChatId = null;
+    renderChatArea();
     closeSidebar();
 }
 
 function selectChat(id) {
-    if (id === currentId) {
-        closeSidebar();
-        return;
-    }
-    currentId = id;
-    save();
-    render();
+    currentChatId = id;
+    renderChatArea();
     closeSidebar();
 }
 
 function deleteChat(id) {
-    delete allConversations[id];
-    save();
-    
-    if (currentId === id) {
-        if (Object.keys(allConversations).length === 0) {
-            createNewChat();
-        } else {
-            const ids = Object.keys(allConversations);
-            currentId = ids[0];
-        }
+    delete allChats[id];
+    saveChats();
+    if (currentChatId === id) {
+        currentChatId = null;
     }
-    
-    render();
-}
-
-function render() {
-    renderChatArea();
     renderChatList();
-    updateHeader();
+    renderChatArea();
 }
 
-function updateHeader() {
-    const chat = allConversations[currentId];
-    const title = document.getElementById('currentChatTitle');
-    if (chat && title) {
+function saveChats() {
+    localStorage.setItem('allChats', JSON.stringify(allChats));
+}
+
+function renderChatList() {
+    conversationsList.innerHTML = '';
+    const sorted = Object.values(allChats)
+        .sort((a, b) => new Date(b.created) - new Date(a.created));
+    
+    sorted.forEach(chat => {
+        const item = document.createElement('div');
+        item.className = `conversation-item ${chat.id === currentChatId ? 'active' : ''}`;
+        
+        const title = document.createElement('span');
+        title.className = 'conversation-title';
         title.textContent = chat.title;
-    }
+        title.onclick = () => selectChat(chat.id);
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'conversation-delete';
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteChat(chat.id);
+        };
+        
+        item.appendChild(title);
+        item.appendChild(deleteBtn);
+        conversationsList.appendChild(item);
+    });
 }
 
 function renderChatArea() {
     chatArea.innerHTML = '';
-    const chat = allConversations[currentId];
     
+    if (!currentChatId) {
+        chatArea.innerHTML = `
+            <div class="empty-state">
+                <h1>Agente de Análise</h1>
+                <p>No que você está pensando hoje?</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const chat = allChats[currentChatId];
     if (!chat || !chat.messages || chat.messages.length === 0) {
         chatArea.innerHTML = `
             <div class="empty-state">
-                <div class="robot-icon">🤖</div>
                 <h1>Agente de Análise</h1>
-                <p>Faça uma pergunta para começar</p>
+                <p>No que você está pensando hoje?</p>
             </div>
         `;
         return;
@@ -152,39 +150,8 @@ function renderChatArea() {
             chatArea.appendChild(div);
         }
     });
-}
-
-function renderChatList() {
-    conversationsList.innerHTML = '';
-    const sorted = Object.values(allConversations)
-        .sort((a, b) => new Date(b.created) - new Date(a.created));
     
-    sorted.forEach(chat => {
-        const item = document.createElement('div');
-        item.className = `conversation-item ${chat.id === currentId ? 'active' : ''}`;
-        
-        const title = document.createElement('span');
-        title.className = 'conversation-title';
-        title.textContent = chat.title;
-        title.onclick = () => selectChat(chat.id);
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'conversation-delete';
-        deleteBtn.textContent = '🗑️';
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            deleteChat(chat.id);
-        };
-        
-        item.appendChild(title);
-        item.appendChild(deleteBtn);
-        conversationsList.appendChild(item);
-    });
-}
-
-function save() {
-    localStorage.setItem('conversations', JSON.stringify(allConversations));
-    localStorage.setItem('currentId', currentId);
+    chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 inputField.addEventListener('keypress', (e) => {
@@ -199,13 +166,18 @@ function sendMessage() {
         chatArea.innerHTML = '';
     }
     
-    addMsg(msg, 'user');
+    if (!currentChatId) {
+        createNewChatFromMessage(msg);
+    }
+    
+    const chat = allChats[currentChatId];
+    
+    addMessage(msg, 'user');
     inputField.value = '';
     inputField.disabled = true;
     sendBtn.disabled = true;
     isLoading = true;
     
-    const chat = allConversations[currentId];
     chat.messages.push({ role: 'user', content: msg });
     
     const history = chat.messages
@@ -221,7 +193,7 @@ function sendMessage() {
             question: msg,
             num_respostas: 5,
             historico: history,
-            conversation_id: currentId
+            conversation_id: currentChatId
         })
     })
     .then(r => r.json())
@@ -250,14 +222,13 @@ function sendMessage() {
             content.innerHTML = html;
             div.appendChild(content);
             chatArea.appendChild(div);
-            chatArea.scrollTop = chatArea.scrollHeight;
             
             chat.messages.push({ role: 'assistant', content: responseText.trim() });
         }
     })
-    .catch(e => addMsg(`❌ Erro: ${e.message}`, 'error'))
+    .catch(e => addMessage(`❌ Erro: ${e.message}`, 'error'))
     .finally(() => {
-        save();
+        saveChats();
         renderChatList();
         inputField.disabled = false;
         sendBtn.disabled = false;
@@ -266,7 +237,18 @@ function sendMessage() {
     });
 }
 
-function addMsg(text, type) {
+function createNewChatFromMessage(firstMsg) {
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    allChats[id] = {
+        id: id,
+        title: firstMsg.substring(0, 40) + (firstMsg.length > 40 ? '...' : ''),
+        messages: [],
+        created: new Date().toISOString()
+    };
+    currentChatId = id;
+}
+
+function addMessage(text, type) {
     const div = document.createElement('div');
     div.className = `message ${type}-message`;
     div.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
