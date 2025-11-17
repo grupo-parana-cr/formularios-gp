@@ -59,6 +59,7 @@ body.dark-theme .sidebar {
     display: flex;
     align-items: center;
     gap: 12px;
+    height: 64px;
 }
 
 body.dark-theme .sidebar-header {
@@ -248,9 +249,9 @@ body.dark-theme .main-content {
 .header {
     display: flex;
     align-items: center;
-    padding: 12px 24px;
+    padding: 0 24px;
     border-bottom: 1px solid var(--light-border);
-    height: 56px;
+    height: 64px;
 }
 
 body.dark-theme .header {
@@ -305,6 +306,16 @@ body.dark-theme .chat-area::-webkit-scrollbar-thumb {
     height: 100%;
     text-align: center;
     gap: 16px;
+}
+
+.robot-icon {
+    font-size: 48px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
 }
 
 .empty-state h1 {
