@@ -10,9 +10,8 @@ let currentConversationId = null;
 let conversations = {};
 let currentMessages = [];
 let isLoading = false;
-let conversationCounter = 0;
+let conversationCount = 0;
 
-// Init
 const savedTheme = localStorage.getItem('theme') || 'light';
 if (savedTheme === 'dark') {
     document.body.classList.add('dark-theme');
@@ -34,11 +33,10 @@ function loadConversationsFromStorage() {
     if (saved) {
         try {
             conversations = JSON.parse(saved);
-            // Contar conversas para numeração
-            conversationCounter = Object.keys(conversations).length;
+            conversationCount = Object.keys(conversations).length;
         } catch (e) {
             conversations = {};
-            conversationCounter = 0;
+            conversationCount = 0;
         }
     }
 }
@@ -48,40 +46,41 @@ function saveConversationsToStorage() {
 }
 
 function loadLastConversation() {
-    const lastConvId = localStorage.getItem('lastConversationId');
+    const lastId = localStorage.getItem('lastConversationId');
     
-    if (lastConvId && conversations[lastConvId]) {
-        currentConversationId = lastConvId;
-        currentMessages = conversations[lastConvId].messages ? [...conversations[lastConvId].messages] : [];
+    if (lastId && conversations[lastId]) {
+        setCurrentConversation(lastId);
     } else {
-        // Criar primeira conversa
-        currentConversationId = generateId();
-        conversationCounter = 1;
-        currentMessages = [];
-        conversations[currentConversationId] = {
-            id: currentConversationId,
-            title: `Conversa ${conversationCounter}`,
-            messages: [],
-            timestamp: new Date().toISOString(),
-            number: conversationCounter
-        };
-        saveConversationsToStorage();
-        localStorage.setItem('lastConversationId', currentConversationId);
+        createNewConversation();
     }
     
     renderChatMessages();
     renderConversationsList();
 }
 
+function setCurrentConversation(id) {
+    currentConversationId = id;
+    currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
+}
+
+function createNewConversation() {
+    conversationCount++;
+    const newId = generateId();
+    conversations[newId] = {
+        id: newId,
+        title: `Conversa ${conversationCount}`,
+        messages: [],
+        timestamp: new Date().toISOString(),
+        number: conversationCount
+    };
+    currentConversationId = newId;
+    currentMessages = [];
+}
+
 function toggleTheme() {
     document.body.classList.toggle('dark-theme');
     const isDark = document.body.classList.contains('dark-theme');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeIcon();
-}
-
-function updateThemeIcon() {
-    const isDark = document.body.classList.contains('dark-theme');
     const icon = document.querySelector('.theme-icon');
     if (icon) icon.textContent = isDark ? '☀️' : '🌙';
 }
@@ -97,33 +96,11 @@ function closeSidebar() {
 }
 
 function startNewConversation() {
-    // Salvar conversa ATUAL
-    if (currentConversationId && conversations[currentConversationId]) {
-        conversations[currentConversationId].messages = [...currentMessages];
-        conversations[currentConversationId].timestamp = new Date().toISOString();
-    }
-
-    // Incrementar contador
-    conversationCounter++;
-
-    // Criar nova com ID único e timestamp distinto
-    const newId = generateId();
-    const newTimestamp = new Date(Date.now() + conversationCounter).toISOString();
-    
-    conversations[newId] = {
-        id: newId,
-        title: `Conversa ${conversationCounter}`,
-        messages: [],
-        timestamp: newTimestamp,
-        number: conversationCounter
-    };
-    
-    // Trocar para nova
-    currentConversationId = newId;
-    currentMessages = [];
+    saveCurrentConversation();
+    createNewConversation();
     
     saveConversationsToStorage();
-    localStorage.setItem('lastConversationId', newId);
+    localStorage.setItem('lastConversationId', currentConversationId);
     
     renderChatMessages();
     renderConversationsList();
@@ -132,33 +109,22 @@ function startNewConversation() {
 
 function saveCurrentConversation() {
     if (currentConversationId && conversations[currentConversationId]) {
-        conversations[currentConversationId].messages = [...currentMessages];
+        conversations[currentConversationId].messages = currentMessages;
         conversations[currentConversationId].timestamp = new Date().toISOString();
-        saveConversationsToStorage();
     }
 }
 
 function loadConversation(id) {
-    // Se já é a conversa atual, só fechar sidebar
     if (id === currentConversationId) {
         closeSidebar();
         return;
     }
     
-    // Validar se ID existe
-    if (!conversations[id]) {
-        console.error('Conversa não encontrada:', id);
-        return;
-    }
-    
-    // Salvar conversa atual
     saveCurrentConversation();
-
-    // Carregar nova
-    currentConversationId = id;
-    currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
+    setCurrentConversation(id);
     
     localStorage.setItem('lastConversationId', id);
+    saveConversationsToStorage();
     
     renderChatMessages();
     renderConversationsList();
@@ -167,22 +133,16 @@ function loadConversation(id) {
 
 function renderConversationsList() {
     conversationsList.innerHTML = '';
-    
-    // Ordenar por timestamp DESC (mais recente primeiro)
     const sorted = Object.values(conversations)
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
     sorted.forEach(conv => {
         const item = document.createElement('div');
-        
-        // Comparação direta e clara
-        const isActive = String(conv.id) === String(currentConversationId);
-        item.className = `conversation-item ${isActive ? 'active' : ''}`;
+        item.className = `conversation-item ${conv.id === currentConversationId ? 'active' : ''}`;
         
         const title = document.createElement('span');
         title.className = 'conversation-title';
         title.textContent = conv.title;
-        title.style.cursor = 'pointer';
         title.onclick = (e) => {
             e.stopPropagation();
             loadConversation(conv.id);
@@ -200,8 +160,6 @@ function renderConversationsList() {
         item.appendChild(deleteBtn);
         conversationsList.appendChild(item);
     });
-    
-    updateThemeIcon();
 }
 
 function deleteConversation(id) {
@@ -254,7 +212,7 @@ function sendMessage() {
     .then(r => r.json())
     .then(data => {
         removeLoadingIfExists();
-        displayResponse(data, message);
+        displayResponse(data);
     })
     .catch(error => {
         removeLoadingIfExists();
@@ -269,31 +227,31 @@ function sendMessage() {
 }
 
 function addMessage(text, type) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}-message`;
-    messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
-    chatArea.appendChild(messageDiv);
+    const div = document.createElement('div');
+    div.className = `message ${type}-message`;
+    div.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+    chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 function addLoading() {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message assistant-message';
-    messageDiv.id = 'loading-message';
-    messageDiv.innerHTML = `<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-    chatArea.appendChild(messageDiv);
+    const div = document.createElement('div');
+    div.className = 'message assistant-message';
+    div.id = 'loading-message';
+    div.innerHTML = `<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 function removeLoadingIfExists() {
-    const loadingMsg = document.getElementById('loading-message');
-    if (loadingMsg) loadingMsg.remove();
+    const msg = document.getElementById('loading-message');
+    if (msg) msg.remove();
 }
 
-function displayResponse(data, originalQuestion) {
+function displayResponse(data) {
     let responseText = '';
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message assistant-message';
+    const div = document.createElement('div');
+    div.className = 'message assistant-message';
     let html = '';
 
     if (data.respostas && data.respostas.length > 0) {
@@ -309,17 +267,16 @@ function displayResponse(data, originalQuestion) {
                     <div class="probability-badge">Probabilidade: ${prob}</div>
                 </div>
             `;
-            
             responseText += `Resposta ${index + 1}: ${resposta.titulo} - ${prob}\n`;
         });
     }
 
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-content';
-    messageContent.innerHTML = html;
-    messageDiv.appendChild(messageContent);
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    content.innerHTML = html;
+    div.appendChild(content);
     
-    chatArea.appendChild(messageDiv);
+    chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
 
     currentMessages.push({
@@ -328,13 +285,6 @@ function displayResponse(data, originalQuestion) {
         timestamp: new Date().toISOString()
     });
 
-    // Atualizar título se primeira resposta
-    if (conversations[currentConversationId].messages.length === 0) {
-        const firstMsg = originalQuestion.substring(0, 30) + (originalQuestion.length > 30 ? '...' : '');
-        conversations[currentConversationId].title = `Conversa ${conversations[currentConversationId].number}`;
-    }
-
-    // Salvar
     saveCurrentConversation();
     renderConversationsList();
 }
@@ -377,10 +327,10 @@ function renderChatMessages() {
                 }
             });
             
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-            messageContent.innerHTML = html;
-            div.appendChild(messageContent);
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = html;
+            div.appendChild(content);
             chatArea.appendChild(div);
         }
     });
