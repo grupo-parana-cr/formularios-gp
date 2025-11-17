@@ -42,6 +42,7 @@ function closeSidebar() {
 function startNewChat() {
     currentChatId = null;
     renderChatArea();
+    renderChatList();
     closeSidebar();
 }
 
