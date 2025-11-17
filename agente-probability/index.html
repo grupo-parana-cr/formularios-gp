@@ -7,48 +7,60 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main-container">
-        <!-- Sidebar com histórico -->
-        <aside class="sidebar">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h2>Histórico</h2>
-                <button class="new-chat-btn" onclick="startNewConversation()" title="Nova conversa">
-                    <span>+</span>
+                <div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo Grupo Paraná" class="logo">
+                    <span class="logo-text">Grupo Paraná</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+                    <span class="toggle-icon">✕</span>
                 </button>
             </div>
+
+            <button class="new-chat-btn" onclick="startNewConversation()">
+                <span class="plus-icon">+</span>
+                Nova Conversa
+            </button>
+
             <div class="conversations-list" id="conversationsList"></div>
+
+            <div class="sidebar-footer">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
         </aside>
 
-        <!-- Chat principal -->
-        <div class="container">
-            <div class="header">
-                <div class="header-content">
-                    <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo Grupo Paraná" class="logo">
-                    <div class="header-text">
-                        <h1>Agente de Análise</h1>
-                        <p>Distribuição de Probabilidades com Verbalized Sampling</p>
+        <!-- Overlay para mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <!-- Main Chat -->
+        <div class="main-container">
+            <div class="chat-container">
+                <div class="chat-area" id="chatArea">
+                    <div class="empty-state">
+                        <div class="robot-icon">🤖</div>
+                        <h2>Bem-vindo ao Agente de Análise</h2>
+                        <p>Faça uma pergunta para começar a análise com distribuição de probabilidades</p>
                     </div>
                 </div>
-            </div>
 
-            <div class="chat-area" id="chatArea">
-                <div class="empty-state">
-                    <div class="robot-icon">🤖</div>
-                    <p>Olá! Faça uma pergunta para começar</p>
-                </div>
-            </div>
-
-            <div class="input-area">
-                <div class="input-wrapper">
-                    <input 
-                        type="text" 
-                        id="inputField" 
-                        placeholder="Faça sua pergunta..." 
-                        autocomplete="off"
-                    >
-                    <button id="sendBtn" onclick="sendMessage()">
-                        <span class="btn-icon">➤</span>
-                    </button>
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="inputField" 
+                            placeholder="Faça sua pergunta..." 
+                            autocomplete="off"
+                        >
+                        <button id="sendBtn" onclick="sendMessage()" class="send-btn" title="Enviar">
+                            <span class="send-icon">↑</span>
+                        </button>
+                    </div>
+                    <p class="input-hint">Pressione Enter ou clique no botão para enviar</p>
                 </div>
             </div>
         </div>
