@@ -19,7 +19,6 @@ if (savedTheme === 'dark') {
 
 loadConversationsFromStorage();
 loadLastConversation();
-renderConversationsList();
 
 inputField.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !isLoading) sendMessage();
@@ -44,24 +43,27 @@ function saveConversationsToStorage() {
     localStorage.setItem('conversations', JSON.stringify(conversations));
 }
 
-function updateCurrentConversation() {
-    if (currentConversationId && conversations[currentConversationId]) {
-        conversations[currentConversationId].messages = [...currentMessages];
-        conversations[currentConversationId].timestamp = new Date().toISOString();
-        saveConversationsToStorage();
-    }
-}
-
 function loadLastConversation() {
     const lastConvId = localStorage.getItem('lastConversationId');
     
     if (lastConvId && conversations[lastConvId]) {
         currentConversationId = lastConvId;
         currentMessages = conversations[lastConvId].messages ? [...conversations[lastConvId].messages] : [];
-        renderChatMessages();
     } else {
-        startNewConversation();
+        currentConversationId = generateId();
+        currentMessages = [];
+        conversations[currentConversationId] = {
+            id: currentConversationId,
+            title: 'Nova conversa',
+            messages: [],
+            timestamp: new Date().toISOString()
+        };
+        saveConversationsToStorage();
+        localStorage.setItem('lastConversationId', currentConversationId);
     }
+    
+    renderChatMessages();
+    renderConversationsList();
 }
 
 function toggleTheme() {
@@ -89,7 +91,10 @@ function closeSidebar() {
 
 function startNewConversation() {
     // Salvar conversa atual
-    updateCurrentConversation();
+    if (currentConversationId && conversations[currentConversationId]) {
+        conversations[currentConversationId].messages = currentMessages;
+        conversations[currentConversationId].timestamp = new Date().toISOString();
+    }
 
     // Criar nova
     currentConversationId = generateId();
@@ -101,10 +106,11 @@ function startNewConversation() {
         timestamp: new Date().toISOString()
     };
     
+    saveConversationsToStorage();
+    localStorage.setItem('lastConversationId', currentConversationId);
+    
     renderChatMessages();
     renderConversationsList();
-    localStorage.setItem('lastConversationId', currentConversationId);
-    saveConversationsToStorage();
     closeSidebar();
 }
 
@@ -112,26 +118,25 @@ function loadConversation(id) {
     if (id === currentConversationId) return;
     
     // Salvar conversa atual
-    updateCurrentConversation();
+    if (currentConversationId && conversations[currentConversationId]) {
+        conversations[currentConversationId].messages = currentMessages;
+        conversations[currentConversationId].timestamp = new Date().toISOString();
+        saveConversationsToStorage();
+    }
 
     // Carregar nova
     currentConversationId = id;
-    if (conversations[id]) {
-        currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
-    } else {
-        currentMessages = [];
-    }
+    currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
+    localStorage.setItem('lastConversationId', currentConversationId);
     
     renderChatMessages();
     renderConversationsList();
-    localStorage.setItem('lastConversationId', currentConversationId);
     closeSidebar();
 }
 
 function renderConversationsList() {
     conversationsList.innerHTML = '';
     
-    // Ordenar por timestamp descendente (mais recente primeiro)
     const sorted = Object.values(conversations).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
     sorted.forEach(conv => {
@@ -141,8 +146,10 @@ function renderConversationsList() {
         const title = document.createElement('span');
         title.className = 'conversation-title';
         title.textContent = conv.title;
-        title.style.cursor = 'pointer';
-        title.onclick = () => loadConversation(conv.id);
+        title.onclick = (e) => {
+            e.stopPropagation();
+            loadConversation(conv.id);
+        };
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'conversation-delete';
@@ -285,13 +292,17 @@ function displayResponse(data, originalQuestion) {
     });
 
     // Atualizar título se primeira resposta
-    if (!conversations[currentConversationId].messages || conversations[currentConversationId].messages.length === 0) {
+    if (conversations[currentConversationId].messages.length === 0) {
         const title = originalQuestion.substring(0, 40) + (originalQuestion.length > 40 ? '...' : '');
         conversations[currentConversationId].title = title;
     }
 
-    // Salvar e atualizar UI
-    updateCurrentConversation();
+    // Salvar
+    conversations[currentConversationId].messages = currentMessages;
+    conversations[currentConversationId].timestamp = new Date().toISOString();
+    saveConversationsToStorage();
+    
+    // Renderizar apenas a lista (não o chat)
     renderConversationsList();
 }
 
@@ -306,7 +317,6 @@ function renderChatMessages() {
                 <p>Faça uma pergunta para começar</p>
             </div>
         `;
-        inputField.focus();
         return;
     }
 
@@ -341,8 +351,6 @@ function renderChatMessages() {
             chatArea.appendChild(div);
         }
     });
-
-    chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 function escapeHtml(text) {
