@@ -4,21 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente de Análise - Grupo Paraná</title>
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles.css?v=5.0">
 </head>
 <body>
     <div class="app-wrapper">
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-top">
-                <button class="new-chat-btn" onclick="startNewConversation()">
-                    <span class="icon">+</span>
-                    <span>Novo chat</span>
-                </button>
+            <div class="sidebar-header">
+                <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo" class="logo">
+                <span class="logo-text">Grupo Paraná</span>
             </div>
+
+            <button class="new-chat-btn" onclick="startNewConversation()">
+                <span class="icon">+</span>
+                <span>Novo chat</span>
+            </button>
 
             <div class="conversations-list" id="conversationsList"></div>
 
-            <div class="sidebar-bottom">
+            <div class="sidebar-footer">
                 <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
                     <span class="theme-icon">🌙</span>
                 </button>
@@ -29,14 +32,6 @@
 
         <main class="main-content">
             <div class="header">
-                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Abrir/Fechar">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                </button>
                 <div class="logo-header">
                     <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo" class="logo-small">
                     <span>Grupo Paraná</span>
@@ -61,6 +56,6 @@
         </main>
     </div>
 
-    <script src="script.js?v=4.0"></script>
+    <script src="script.js?v=5.0"></script>
 </body>
 </html>
