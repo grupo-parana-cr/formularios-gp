@@ -90,24 +90,26 @@ function closeSidebar() {
 }
 
 function startNewConversation() {
-    // Salvar conversa atual
+    // Salvar conversa atual ANTES de criar nova
     if (currentConversationId && conversations[currentConversationId]) {
         conversations[currentConversationId].messages = currentMessages;
         conversations[currentConversationId].timestamp = new Date().toISOString();
+        saveConversationsToStorage();
     }
 
-    // Criar nova
-    currentConversationId = generateId();
+    // Criar nova conversa
+    const newId = generateId();
+    currentConversationId = newId;
     currentMessages = [];
-    conversations[currentConversationId] = {
-        id: currentConversationId,
+    conversations[newId] = {
+        id: newId,
         title: 'Nova conversa',
         messages: [],
         timestamp: new Date().toISOString()
     };
     
     saveConversationsToStorage();
-    localStorage.setItem('lastConversationId', currentConversationId);
+    localStorage.setItem('lastConversationId', newId);
     
     renderChatMessages();
     renderConversationsList();
@@ -115,23 +117,29 @@ function startNewConversation() {
 }
 
 function loadConversation(id) {
-    if (id === currentConversationId) return;
+    // Não fazer nada se já é a conversa atual
+    if (id === currentConversationId) {
+        renderConversationsList();
+        return;
+    }
     
-    // Salvar conversa atual
-    if (currentConversationId && conversations[currentConversationId]) {
+    // Salvar conversa ATUAL antes de trocar
+    if (conversations[currentConversationId]) {
         conversations[currentConversationId].messages = currentMessages;
         conversations[currentConversationId].timestamp = new Date().toISOString();
         saveConversationsToStorage();
     }
 
-    // Carregar nova
-    currentConversationId = id;
-    currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
-    localStorage.setItem('lastConversationId', currentConversationId);
-    
-    renderChatMessages();
-    renderConversationsList();
-    closeSidebar();
+    // Carregar NOVA conversa
+    if (conversations[id]) {
+        currentConversationId = id;
+        currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
+        localStorage.setItem('lastConversationId', id);
+        
+        renderChatMessages();
+        renderConversationsList();
+        closeSidebar();
+    }
 }
 
 function renderConversationsList() {
@@ -141,11 +149,13 @@ function renderConversationsList() {
     
     sorted.forEach(conv => {
         const item = document.createElement('div');
-        item.className = `conversation-item ${conv.id === currentConversationId ? 'active' : ''}`;
+        const isActive = conv.id === currentConversationId;
+        item.className = `conversation-item ${isActive ? 'active' : ''}`;
         
         const title = document.createElement('span');
         title.className = 'conversation-title';
         title.textContent = conv.title;
+        title.style.cursor = 'pointer';
         title.onclick = (e) => {
             e.stopPropagation();
             loadConversation(conv.id);
@@ -302,7 +312,7 @@ function displayResponse(data, originalQuestion) {
     conversations[currentConversationId].timestamp = new Date().toISOString();
     saveConversationsToStorage();
     
-    // Renderizar apenas a lista (não o chat)
+    // Atualizar lista
     renderConversationsList();
 }
 
