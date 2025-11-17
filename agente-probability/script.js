@@ -30,13 +30,11 @@ function toggleTheme() {
 }
 
 function toggleSidebar() {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('open');
+    sidebar.classList.toggle('collapsed');
 }
 
 function closeSidebar() {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('open');
+    // Não precisa mais
 }
 
 function startNewChat() {
