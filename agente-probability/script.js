@@ -93,6 +93,15 @@ function deleteChat(id) {
 function render() {
     renderChatArea();
     renderChatList();
+    updateHeader();
+}
+
+function updateHeader() {
+    const chat = allConversations[currentId];
+    const title = document.getElementById('currentChatTitle');
+    if (chat && title) {
+        title.textContent = chat.title;
+    }
 }
 
 function renderChatArea() {
