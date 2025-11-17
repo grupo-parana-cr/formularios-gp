@@ -99,6 +99,7 @@ function renderChatArea() {
     if (!currentChatId) {
         chatArea.innerHTML = `
             <div class="empty-state">
+                <div class="robot-icon">🤖</div>
                 <h1>Agente de Análise</h1>
                 <p>No que você está pensando hoje?</p>
             </div>
@@ -110,6 +111,7 @@ function renderChatArea() {
     if (!chat || !chat.messages || chat.messages.length === 0) {
         chatArea.innerHTML = `
             <div class="empty-state">
+                <div class="robot-icon">🤖</div>
                 <h1>Agente de Análise</h1>
                 <p>No que você está pensando hoje?</p>
             </div>
