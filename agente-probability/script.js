@@ -4,33 +4,24 @@ const inputField = document.getElementById('inputField');
 const sendBtn = document.getElementById('sendBtn');
 const conversationsList = document.getElementById('conversationsList');
 const sidebar = document.getElementById('sidebar');
-const sidebarOverlay = document.getElementById('sidebarOverlay');
+const overlay = document.getElementById('overlay');
 
 let currentConversationId = null;
 let conversations = {};
 let currentMessages = [];
 let isLoading = false;
 
-// Inicializar tema
+// Init
 const savedTheme = localStorage.getItem('theme') || 'light';
 if (savedTheme === 'dark') {
     document.body.classList.add('dark-theme');
 }
 
-// Carregar dados
 loadConversationsFromStorage();
 loadLastConversation();
 
-// Event listeners
 inputField.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !isLoading) {
-        sendMessage();
-    }
-});
-
-inputField.addEventListener('input', () => {
-    inputField.style.height = 'auto';
-    inputField.style.height = Math.min(inputField.scrollHeight, 100) + 'px';
+    if (e.key === 'Enter' && !isLoading) sendMessage();
 });
 
 function generateId() {
@@ -54,7 +45,6 @@ function saveConversationsToStorage() {
 
 function loadLastConversation() {
     const lastConvId = localStorage.getItem('lastConversationId');
-    
     if (lastConvId && conversations[lastConvId]) {
         loadConversation(lastConvId);
     } else {
@@ -77,12 +67,12 @@ function updateThemeIcon() {
 
 function toggleSidebar() {
     sidebar.classList.toggle('open');
-    sidebarOverlay.classList.toggle('open');
+    overlay.classList.toggle('open');
 }
 
 function closeSidebar() {
     sidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('open');
+    overlay.classList.remove('open');
 }
 
 function startNewConversation() {
@@ -98,13 +88,12 @@ function startNewConversation() {
     chatArea.innerHTML = `
         <div class="empty-state">
             <div class="robot-icon">🤖</div>
-            <h2>Bem-vindo ao Agente de Análise</h2>
-            <p>Faça uma pergunta para começar a análise com distribuição de probabilidades</p>
+            <h1>Agente de Análise</h1>
+            <p>Faça uma pergunta para começar</p>
         </div>
     `;
     
     inputField.value = '';
-    inputField.style.height = 'auto';
     inputField.disabled = false;
     sendBtn.disabled = false;
     isLoading = false;
@@ -177,7 +166,6 @@ function sendMessage() {
 
     addMessage(message, 'user');
     inputField.value = '';
-    inputField.style.height = 'auto';
     inputField.disabled = true;
     sendBtn.disabled = true;
     isLoading = true;
@@ -196,9 +184,7 @@ function sendMessage() {
 
     fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             question: message,
             num_respostas: 5,
@@ -206,20 +192,14 @@ function sendMessage() {
             conversation_id: currentConversationId
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-    })
+    .then(r => r.json())
     .then(data => {
         removeLoadingIfExists();
         displayResponse(data, message);
     })
     .catch(error => {
-        console.error('Erro:', error);
         removeLoadingIfExists();
-        addMessage(`❌ Erro ao conectar: ${error.message}`, 'error');
+        addMessage(`❌ Erro: ${error.message}`, 'error');
     })
     .finally(() => {
         inputField.disabled = false;
@@ -232,13 +212,7 @@ function sendMessage() {
 function addMessage(text, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
-    
-    if (type === 'error') {
-        messageDiv.innerHTML = `<div class="message-content"><div class="error-message">${escapeHtml(text)}</div></div>`;
-    } else {
-        messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
-    }
-    
+    messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
     chatArea.appendChild(messageDiv);
     chatArea.scrollTop = chatArea.scrollHeight;
 }
@@ -247,15 +221,7 @@ function addLoading() {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message assistant-message';
     messageDiv.id = 'loading-message';
-    messageDiv.innerHTML = `
-        <div class="message-content">
-            <div class="loading">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-            </div>
-        </div>
-    `;
+    messageDiv.innerHTML = `<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
     chatArea.appendChild(messageDiv);
     chatArea.scrollTop = chatArea.scrollHeight;
 }
@@ -279,13 +245,13 @@ function displayResponse(data, originalQuestion) {
             
             html += `
                 <div class="response-item">
-                    <div class="response-number">Resposta ${index + 1}: ${escapeHtml(resposta.titulo || 'Resposta')}</div>
+                    <div class="response-number">Resposta ${index + 1}: ${escapeHtml(resposta.titulo)}</div>
                     <div class="response-text">${escapeHtml(resposta.texto)}</div>
                     <div class="probability-badge">Probabilidade: ${prob}</div>
                 </div>
             `;
             
-            responseText += `Resposta ${index + 1}: ${resposta.titulo || 'Resposta'} - ${prob}\n`;
+            responseText += `Resposta ${index + 1}: ${resposta.titulo} - ${prob}\n`;
         });
     }
 
@@ -322,8 +288,8 @@ function renderChatMessages() {
         chatArea.innerHTML = `
             <div class="empty-state">
                 <div class="robot-icon">🤖</div>
-                <h2>Bem-vindo ao Agente de Análise</h2>
-                <p>Faça uma pergunta para começar a análise com distribuição de probabilidades</p>
+                <h1>Agente de Análise</h1>
+                <p>Faça uma pergunta para começar</p>
             </div>
         `;
         return;
@@ -355,7 +321,7 @@ function renderChatMessages() {
             
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.innerHTML = html || escapeHtml(msg.content);
+            messageContent.innerHTML = html;
             div.appendChild(messageContent);
             chatArea.appendChild(div);
         }
