@@ -10,6 +10,7 @@ let currentConversationId = null;
 let conversations = {};
 let currentMessages = [];
 let isLoading = false;
+let conversationCounter = 0;
 
 // Init
 const savedTheme = localStorage.getItem('theme') || 'light';
@@ -33,8 +34,11 @@ function loadConversationsFromStorage() {
     if (saved) {
         try {
             conversations = JSON.parse(saved);
+            // Contar conversas para numeração
+            conversationCounter = Object.keys(conversations).length;
         } catch (e) {
             conversations = {};
+            conversationCounter = 0;
         }
     }
 }
@@ -52,12 +56,14 @@ function loadLastConversation() {
     } else {
         // Criar primeira conversa
         currentConversationId = generateId();
+        conversationCounter = 1;
         currentMessages = [];
         conversations[currentConversationId] = {
             id: currentConversationId,
-            title: 'Nova conversa',
+            title: `Conversa ${conversationCounter}`,
             messages: [],
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            number: conversationCounter
         };
         saveConversationsToStorage();
         localStorage.setItem('lastConversationId', currentConversationId);
@@ -92,15 +98,24 @@ function closeSidebar() {
 
 function startNewConversation() {
     // Salvar conversa ATUAL
-    saveCurrentConversation();
+    if (currentConversationId && conversations[currentConversationId]) {
+        conversations[currentConversationId].messages = [...currentMessages];
+        conversations[currentConversationId].timestamp = new Date().toISOString();
+    }
 
-    // Criar nova
+    // Incrementar contador
+    conversationCounter++;
+
+    // Criar nova com ID único e timestamp distinto
     const newId = generateId();
+    const newTimestamp = new Date(Date.now() + conversationCounter).toISOString();
+    
     conversations[newId] = {
         id: newId,
-        title: 'Nova conversa',
+        title: `Conversa ${conversationCounter}`,
         messages: [],
-        timestamp: new Date().toISOString()
+        timestamp: newTimestamp,
+        number: conversationCounter
     };
     
     // Trocar para nova
@@ -124,7 +139,17 @@ function saveCurrentConversation() {
 }
 
 function loadConversation(id) {
-    if (id === currentConversationId) return;
+    // Se já é a conversa atual, só fechar sidebar
+    if (id === currentConversationId) {
+        closeSidebar();
+        return;
+    }
+    
+    // Validar se ID existe
+    if (!conversations[id]) {
+        console.error('Conversa não encontrada:', id);
+        return;
+    }
     
     // Salvar conversa atual
     saveCurrentConversation();
@@ -134,7 +159,6 @@ function loadConversation(id) {
     currentMessages = conversations[id].messages ? [...conversations[id].messages] : [];
     
     localStorage.setItem('lastConversationId', id);
-    saveConversationsToStorage();
     
     renderChatMessages();
     renderConversationsList();
@@ -144,16 +168,21 @@ function loadConversation(id) {
 function renderConversationsList() {
     conversationsList.innerHTML = '';
     
-    const sorted = Object.values(conversations).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Ordenar por timestamp DESC (mais recente primeiro)
+    const sorted = Object.values(conversations)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
     sorted.forEach(conv => {
         const item = document.createElement('div');
-        const isActive = (conv.id === currentConversationId);
+        
+        // Comparação direta e clara
+        const isActive = String(conv.id) === String(currentConversationId);
         item.className = `conversation-item ${isActive ? 'active' : ''}`;
         
         const title = document.createElement('span');
         title.className = 'conversation-title';
         title.textContent = conv.title;
+        title.style.cursor = 'pointer';
         title.onclick = (e) => {
             e.stopPropagation();
             loadConversation(conv.id);
@@ -301,8 +330,8 @@ function displayResponse(data, originalQuestion) {
 
     // Atualizar título se primeira resposta
     if (conversations[currentConversationId].messages.length === 0) {
-        const title = originalQuestion.substring(0, 40) + (originalQuestion.length > 40 ? '...' : '');
-        conversations[currentConversationId].title = title;
+        const firstMsg = originalQuestion.substring(0, 30) + (originalQuestion.length > 30 ? '...' : '');
+        conversations[currentConversationId].title = `Conversa ${conversations[currentConversationId].number}`;
     }
 
     // Salvar
