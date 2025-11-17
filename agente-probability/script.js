@@ -19,7 +19,7 @@ if (savedTheme === 'dark') {
 
 // Carregar dados
 loadConversationsFromStorage();
-startNewConversation();
+loadLastConversation();
 
 // Event listeners
 inputField.addEventListener('keypress', (e) => {
@@ -28,7 +28,6 @@ inputField.addEventListener('keypress', (e) => {
     }
 });
 
-// Auto-resize textarea
 inputField.addEventListener('input', () => {
     inputField.style.height = 'auto';
     inputField.style.height = Math.min(inputField.scrollHeight, 100) + 'px';
@@ -41,12 +40,26 @@ function generateId() {
 function loadConversationsFromStorage() {
     const saved = localStorage.getItem('conversations');
     if (saved) {
-        conversations = JSON.parse(saved);
+        try {
+            conversations = JSON.parse(saved);
+        } catch (e) {
+            conversations = {};
+        }
     }
 }
 
 function saveConversationsToStorage() {
     localStorage.setItem('conversations', JSON.stringify(conversations));
+}
+
+function loadLastConversation() {
+    const lastConvId = localStorage.getItem('lastConversationId');
+    
+    if (lastConvId && conversations[lastConvId]) {
+        loadConversation(lastConvId);
+    } else {
+        startNewConversation();
+    }
 }
 
 function toggleTheme() {
@@ -97,6 +110,7 @@ function startNewConversation() {
     isLoading = false;
     
     saveConversationsToStorage();
+    localStorage.setItem('lastConversationId', currentConversationId);
     renderConversationsList();
     closeSidebar();
 }
@@ -108,6 +122,7 @@ function loadConversation(id) {
     const conv = conversations[id];
     currentMessages = [...conv.messages];
     
+    localStorage.setItem('lastConversationId', currentConversationId);
     renderChatMessages();
     renderConversationsList();
     closeSidebar();
@@ -167,14 +182,12 @@ function sendMessage() {
     sendBtn.disabled = true;
     isLoading = true;
 
-    // Salvar mensagem do usuário
     currentMessages.push({
         role: 'user',
         content: message,
         timestamp: new Date().toISOString()
     });
 
-    // Preparar histórico para o n8n
     const historyContext = currentMessages
         .map((msg) => `${msg.role === 'user' ? 'Usuário' : 'Agente'}: ${msg.content}`)
         .join('\n\n');
@@ -284,14 +297,12 @@ function displayResponse(data, originalQuestion) {
     chatArea.appendChild(messageDiv);
     chatArea.scrollTop = chatArea.scrollHeight;
 
-    // Salvar mensagem do agente
     currentMessages.push({
         role: 'assistant',
         content: responseText.trim(),
         timestamp: new Date().toISOString()
     });
 
-    // Atualizar título da conversa baseado na primeira pergunta
     if (conversations[currentConversationId].messages.length === 0) {
         const title = originalQuestion.substring(0, 40) + (originalQuestion.length > 40 ? '...' : '');
         conversations[currentConversationId].title = title;
