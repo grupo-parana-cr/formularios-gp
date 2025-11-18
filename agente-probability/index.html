@@ -20,11 +20,14 @@
             </div>
 
             <button class="new-chat-btn" onclick="startNewChat()">
-                <span class="icon">+</span>
-                <span>Novo chat</span>
+                <div class="new-chat-icon">+</div>
+                <div class="new-chat-label">Novo bate-papo</div>
             </button>
 
-            <div class="conversations-list" id="conversationsList"></div>
+            <div class="conversations-list">
+                <div class="conversations-label">Recentes</div>
+                <div id="conversationsList"></div>
+            </div>
 
             <div class="sidebar-footer">
                 <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
@@ -37,7 +40,7 @@
 
         <main class="main-content">
             <div class="header">
-                <div style="flex: 1;"></div>
+                <h2 class="current-chat-title" id="currentChatTitle"></h2>
             </div>
 
             <div class="chat-area" id="chatArea">
