@@ -102,12 +102,17 @@ body.dark-theme .sidebar-header {
 }
 
 .logo-text {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--primary);
     white-space: nowrap;
     overflow: hidden;
     transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }
 
 .sidebar.collapsed .logo-text {
