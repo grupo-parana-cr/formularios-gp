@@ -41,6 +41,7 @@ function startNewChat() {
     currentChatId = null;
     renderChatArea();
     renderChatList();
+    updateHeaderTitle();
     closeSidebar();
 }
 
@@ -48,6 +49,7 @@ function selectChat(id) {
     currentChatId = id;
     renderChatArea();
     renderChatList();
+    updateHeaderTitle();
     closeSidebar();
 }
 
@@ -243,6 +245,7 @@ function sendMessage() {
     .finally(() => {
         saveChats();
         renderChatList();
+        updateHeaderTitle();
         inputField.disabled = false;
         sendBtn.disabled = false;
         isLoading = false;
