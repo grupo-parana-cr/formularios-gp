@@ -65,6 +65,15 @@ function saveChats() {
     localStorage.setItem('allChats', JSON.stringify(allChats));
 }
 
+function updateHeaderTitle() {
+    const titleEl = document.getElementById('currentChatTitle');
+    if (currentChatId && allChats[currentChatId]) {
+        titleEl.textContent = allChats[currentChatId].title;
+    } else {
+        titleEl.textContent = '';
+    }
+}
+
 function renderChatList() {
     conversationsList.innerHTML = '';
     const sorted = Object.values(allChats)
@@ -91,6 +100,8 @@ function renderChatList() {
         item.appendChild(deleteBtn);
         conversationsList.appendChild(item);
     });
+    
+    updateHeaderTitle();
 }
 
 function renderChatArea() {
