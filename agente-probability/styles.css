@@ -184,7 +184,7 @@ body.dark-theme .new-chat-btn:hover {
     font-weight: 500;
 }
 
-.sidebar.collapsed .new-chat-btn {
+.sidebar.collapsed .new-chat-label {
     display: none;
 }
 
@@ -209,6 +209,10 @@ body.dark-theme .conversations-label {
     color: var(--dark-text-secondary);
 }
 
+.sidebar.collapsed .conversations-label {
+    display: none;
+}
+
 #conversationsList {
     flex: 1;
     overflow-y: auto;
@@ -225,6 +229,10 @@ body.dark-theme .conversations-label {
 
 body.dark-theme #conversationsList::-webkit-scrollbar-thumb {
     background: var(--dark-border);
+}
+
+.sidebar.collapsed #conversationsList {
+    display: none;
 }
 
 .conversation-item {
