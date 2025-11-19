@@ -173,6 +173,45 @@ inputField.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !isLoading) sendMessage();
 });
 
+inputField.addEventListener('paste', (e) => {
+    const items = e.clipboardData.items;
+    for (let item of items) {
+        if (item.type.indexOf('image') !== -1) {
+            e.preventDefault();
+            const blob = item.getAsFile();
+            handleFileAttachBlob(blob);
+            break;
+        }
+    }
+});
+
+const inputWrapper = document.getElementById('inputWrapper');
+const dropHint = document.getElementById('dropHint');
+
+inputWrapper.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    inputWrapper.style.borderColor = '#004AC9';
+    dropHint.style.display = 'block';
+});
+
+inputWrapper.addEventListener('dragleave', () => {
+    inputWrapper.style.borderColor = 'var(--light-border)';
+    dropHint.style.display = 'none';
+});
+
+inputWrapper.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    inputWrapper.style.borderColor = 'var(--light-border)';
+    dropHint.style.display = 'none';
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        handleFileAttachBlob(files[0]);
+    }
+});
+
 function sendMessage() {
     const msg = inputField.value.trim();
     if (!msg || isLoading) return;
@@ -289,4 +328,18 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function handleFileAttach(event) {
+    const file = event.target.files[0];
+    if (file) {
+        handleFileAttachBlob(file);
+    }
+}
+
+function handleFileAttachBlob(file) {
+    const fileName = file.name;
+    const fileSize = (file.size / 1024).toFixed(2);
+    inputField.value = `[Arquivo anexado: ${fileName} (${fileSize}KB)]`;
+    inputField.focus();
 }
