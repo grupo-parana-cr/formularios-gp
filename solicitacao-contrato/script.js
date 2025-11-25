@@ -6,7 +6,7 @@ console.log('✓ Script carregando...');
 
 // ====== VARIÁVEIS GLOBAIS ======
 window.selectedEmpresas = [];
-const PRODUCTION_MODE = false;
+const PRODUCTION_MODE = true;
 let currentSection = 1;
 const totalSections = 8;
 let selectedContractType = null;
@@ -1647,7 +1647,7 @@ function showCNPJSuccessModal(data) {
           finalFormData.append(`documento_${index}`, file);
         });
         
-        const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook-test/solicitacao-contrato', {
+        const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook/solicitacao-contrato', {
           method: 'POST',
           body: finalFormData
         });
