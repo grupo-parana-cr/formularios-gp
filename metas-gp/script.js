@@ -128,7 +128,7 @@ async function saveDataToSheets() {
 // ============================================
 // CARREGAR DADOS DO GOOGLE SHEETS (Como a Pesquisa funciona)
 // ============================================
-async function loadDataFromSheets() {
+function loadDataFromSheets() {
     try {
         if (!departmentName) {
             console.warn('⚠️ Nome do departamento não identificado');
@@ -138,19 +138,27 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        const url = `${GOOGLE_SCRIPT_URL}?department=${encodeURIComponent(departmentName)}`;
+        // Criar função global de callback para JSONP
+        window.sheetCallback = function(result) {
+            if (result.result === 'success' && result.data) {
+                console.log('✅ Dados carregados do Sheets:', result.data);
+                populateFormWithData(result.data);
+                updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
+            } else {
+                console.log('ℹ️ Nenhum dado anterior encontrado');
+                loadLocalBackup();
+            }
+        };
         
-        const response = await fetch(url);
-        const result = await response.json();
-        
-        if (result.result === 'success' && result.data) {
-            console.log('✅ Dados carregados do Sheets:', result.data);
-            populateFormWithData(result.data);
-            updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
-        } else {
-            console.log('ℹ️ Nenhum dado anterior encontrado');
+        // Criar script tag dinamicamente (JSONP)
+        const url = `${GOOGLE_SCRIPT_URL}?callback=sheetCallback&department=${encodeURIComponent(departmentName)}`;
+        const script = document.createElement('script');
+        script.src = url;
+        script.onerror = function() {
+            console.error('⚠️ Erro ao carregar via JSONP');
             loadLocalBackup();
-        }
+        };
+        document.head.appendChild(script);
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
