@@ -1,11 +1,14 @@
 // ============================================
 // SISTEMA DE METAS 2025 - SCRIPT PRINCIPAL
+// INTEGRAÇÃO GOOGLE SHEETS COM JSON
 // ============================================
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/SEU_ID_AQUI/exec';
+// ⚠️ IMPORTANTE: Substitua estes valores
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVQouGlsrBIH1A4_2vzJO6g_F3kSAmMl2llsnngj3YvSXlEbwMRuXhZEybjwEqMdiE/exec';
 const AUTO_SAVE_DELAY = 500;
 let autoSaveTimeout;
 let dataChanged = false;
+let departmentName = '';
 
 // ============================================
 // INICIALIZAÇÃO
@@ -18,16 +21,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Se está em página de metas
-    generateUserIdIfNotExists();
-    
-    // Limpar valores default na primeira carga
-    if (!isReturningUser()) {
-        clearDefaultValues();
-        markAsFirstLoad();
+    // Extrair nome do departamento do título
+    const h1 = document.querySelector('h1');
+    if (h1) {
+        // Extrai "Agricultura" de "Dashboard Metas Agricultura 2025..."
+        const parts = h1.textContent.split('Metas ');
+        if (parts[1]) {
+            departmentName = parts[1].split(' 20')[0].trim();
+        }
     }
     
-    // Carregar dados salvos
+    console.log('📋 Departamento:', departmentName);
+    
+    // Carregar dados salvos do Google Sheets
     loadDataFromSheets();
     
     // Configurar auto-save
@@ -53,64 +59,12 @@ function goBackToHome() {
 }
 
 // ============================================
-// VERIFICAÇÃO DE PRIMEIRA CARGA
-// ============================================
-function isReturningUser() {
-    return localStorage.getItem('metas_first_load_done') === 'true';
-}
-
-function markAsFirstLoad() {
-    localStorage.setItem('metas_first_load_done', 'true');
-}
-
-// ============================================
-// LIMPEZA DE VALORES DEFAULT
-// ============================================
-function clearDefaultValues() {
-    document.querySelectorAll('input[type="number"]').forEach(el => {
-        if (el.value) el.value = '';
-    });
-    
-    document.querySelectorAll('input[type="text"]').forEach(el => {
-        if (el.value && /^\d+$/.test(el.value)) el.value = '';
-    });
-    
-    document.querySelectorAll('input[type="date"]').forEach(el => {
-        if (el.value && el.value.match(/2025-|2024-|2026-/)) el.value = '';
-    });
-    
-    document.querySelectorAll('select').forEach(select => {
-        select.querySelectorAll('option[selected]').forEach(opt => {
-            opt.removeAttribute('selected');
-        });
-        select.selectedIndex = 0;
-    });
-    
-    console.log('🧹 Valores default limpos');
-}
-
-// ============================================
-// GERAÇÃO DE ID DO USUÁRIO
-// ============================================
-function generateUserIdIfNotExists() {
-    const existingId = localStorage.getItem('metas_user_id');
-    
-    if (!existingId) {
-        const newId = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('metas_user_id', newId);
-        console.log('📝 ID gerado:', newId);
-    }
-}
-
-function getUserId() {
-    return localStorage.getItem('metas_user_id');
-}
-
-// ============================================
 // AUTO-SAVE
 // ============================================
 function setupAutoSaveListeners() {
-    const inputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea, select');
+    const inputs = document.querySelectorAll(
+        'input[type="text"], input[type="number"], input[type="date"], textarea, select'
+    );
     
     inputs.forEach(input => {
         input.addEventListener('change', triggerAutoSave);
@@ -135,33 +89,37 @@ function triggerAutoSave() {
 }
 
 // ============================================
-// SALVAR DADOS
+// SALVAR DADOS NO GOOGLE SHEETS (POST)
 // ============================================
 async function saveDataToSheets() {
     try {
         const data = collectFormData();
-        data.userId = getUserId();
+        data.department = departmentName;
         data.timestamp = new Date().toISOString();
         
-        const deptName = document.querySelector('h1');
-        if (deptName) data.department = deptName.textContent;
+        console.log('💾 Salvando:', data);
         
-        await fetch(GOOGLE_SCRIPT_URL, {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
         
-        updateSyncStatus('✅ Salvo com sucesso');
-        saveLocalBackup(data);
+        const result = await response.json();
         
-        setTimeout(() => {
-            const status = document.getElementById('syncStatus');
-            if (status && status.textContent.includes('Salvo')) {
-                updateSyncStatus('Sincronizado');
-            }
-        }, 3000);
+        if (result.success) {
+            updateSyncStatus('✅ Salvo com sucesso');
+            saveLocalBackup(data);
+            
+            setTimeout(() => {
+                const status = document.getElementById('syncStatus');
+                if (status && status.textContent.includes('Salvo')) {
+                    updateSyncStatus('Sincronizado');
+                }
+            }, 3000);
+        } else {
+            throw new Error(result.error || 'Erro desconhecido');
+        }
         
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
@@ -171,21 +129,32 @@ async function saveDataToSheets() {
 }
 
 // ============================================
-// CARREGAR DADOS
+// CARREGAR DADOS DO GOOGLE SHEETS (GET)
 // ============================================
 async function loadDataFromSheets() {
     try {
-        const userId = getUserId();
-        const url = `${GOOGLE_SCRIPT_URL}?action=getData&userId=${userId}`;
+        if (!departmentName) {
+            console.warn('⚠️ Nome do departamento não identificado');
+            loadLocalBackup();
+            return;
+        }
+        
+        const url = `${GOOGLE_SCRIPT_URL}?department=${encodeURIComponent(departmentName)}`;
+        
+        console.log('📥 Carregando dados de:', departmentName);
         
         const response = await fetch(url);
         const result = await response.json();
         
-        if (result.success && result.data) {
-            populateFormWithData(result.data);
+        if (result.dados && Object.keys(result.dados).length > 0) {
+            console.log('✅ Dados carregados:', result.dados);
+            populateFormWithData(result.dados);
+            updateSyncStatus('Carregado do servidor');
         } else {
+            console.log('ℹ️ Nenhum dado anterior encontrado');
             loadLocalBackup();
         }
+        
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
         loadLocalBackup();
@@ -193,31 +162,33 @@ async function loadDataFromSheets() {
 }
 
 // ============================================
-// BACKUP LOCAL
+// BACKUP LOCAL (localStorage)
 // ============================================
 function saveLocalBackup(data) {
     try {
         const backup = {
-            userId: getUserId(),
+            department: departmentName,
             timestamp: new Date().toISOString(),
             fields: data
         };
-        localStorage.setItem('metas_backup_' + getUserId(), JSON.stringify(backup));
+        localStorage.setItem(`metas_backup_${departmentName}`, JSON.stringify(backup));
+        console.log('💾 Backup local salvo');
     } catch (error) {
-        console.error('Erro ao salvar backup:', error);
+        console.error('Erro ao salvar backup local:', error);
     }
 }
 
 function loadLocalBackup() {
     try {
-        const backup = localStorage.getItem('metas_backup_' + getUserId());
+        const backup = localStorage.getItem(`metas_backup_${departmentName}`);
         if (backup) {
             const data = JSON.parse(backup);
             populateFormWithData(data.fields);
-            updateSyncStatus('Carregado do backup local');
+            updateSyncStatus('📦 Carregado do backup local');
+            console.log('✅ Backup local carregado');
         }
     } catch (error) {
-        console.error('Erro ao carregar backup:', error);
+        console.error('Erro ao carregar backup local:', error);
     }
 }
 
@@ -227,22 +198,27 @@ function loadLocalBackup() {
 function collectFormData() {
     const data = {};
     
+    // Inputs de texto
     document.querySelectorAll('input[type="text"]').forEach(el => {
         if (el.id) data[el.id] = el.value;
     });
     
+    // Inputs numéricos
     document.querySelectorAll('input[type="number"]').forEach(el => {
-        if (el.id) data[el.id] = parseFloat(el.value) || 0;
+        if (el.id) data[el.id] = el.value ? parseFloat(el.value) : 0;
     });
     
+    // Inputs de data
     document.querySelectorAll('input[type="date"]').forEach(el => {
         if (el.id) data[el.id] = el.value;
     });
     
+    // Textareas
     document.querySelectorAll('textarea').forEach(el => {
         if (el.id) data[el.id] = el.value;
     });
     
+    // Selects
     document.querySelectorAll('select').forEach(el => {
         if (el.id) data[el.id] = el.value;
     });
@@ -251,7 +227,7 @@ function collectFormData() {
 }
 
 // ============================================
-// POPULAR FORMULÁRIO
+// POPULAR FORMULÁRIO COM DADOS
 // ============================================
 function populateFormWithData(data) {
     if (!data || typeof data !== 'object') return;
@@ -260,12 +236,14 @@ function populateFormWithData(data) {
         const element = document.getElementById(fieldId);
         if (element) {
             element.value = data[fieldId] || '';
+            
+            // Dispara eventos para atualizar gráficos e cálculos
             element.dispatchEvent(new Event('change', { bubbles: true }));
             element.dispatchEvent(new Event('input', { bubbles: true }));
         }
     });
     
-    console.log('✅ Formulário populado');
+    console.log('✅ Formulário populado com sucesso');
 }
 
 // ============================================
@@ -288,6 +266,7 @@ function updateSyncStatus(message) {
             font-size: 0.9em;
             z-index: 100;
             font-weight: 600;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         `;
         document.body.appendChild(statusEl);
     }
@@ -306,6 +285,10 @@ function updateSyncStatus(message) {
         statusEl.style.background = '#fff3e0';
         statusEl.style.color = '#e65100';
         statusEl.style.borderLeft = '4px solid #ff9800';
+    } else if (message.includes('backup')) {
+        statusEl.style.background = '#f3e5f5';
+        statusEl.style.color = '#6a1b9a';
+        statusEl.style.borderLeft = '4px solid #9c27b0';
     } else {
         statusEl.style.background = '#e3f2fd';
         statusEl.style.color = '#1565c0';
@@ -328,9 +311,13 @@ function updateStatus(metaNum) {
     triggerAutoSave();
 }
 
+function updateAcidentes() {
+    triggerAutoSave();
+}
+
 function toggleMeta(metaId) {
     const element = document.getElementById(metaId);
     if (element) element.classList.toggle('active');
 }
 
-console.log('✅ Script carregado');
+console.log('✅ Script carregado - Sistema de Metas 2025 v2.0');
