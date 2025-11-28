@@ -21,16 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Extrair nome do departamento do título
-    const h1 = document.querySelector('h1');
-    if (h1) {
-        // Extrai "Agricultura" de "Dashboard Metas Agricultura 2025..."
-        // Exemplo: "Dashboard Metas Agricultura 2025" → "Agricultura"
-        const titleText = h1.textContent;
-        const match = titleText.match(/Metas\s+(.+?)\s+20\d{2}/);
-        if (match && match[1]) {
-            departmentName = match[1].trim();
-        }
+    // Extrair nome do departamento do URL do arquivo
+    // Exemplo: metas-agricultura-2025.html → Agricultura
+    const filename = window.location.pathname.split('/').pop();
+    const match = filename.match(/metas-(.+?)-2025\.html/i);
+    if (match && match[1]) {
+        // Converte: agricultura → Agricultura
+        const deptName = match[1];
+        departmentName = deptName.charAt(0).toUpperCase() + deptName.slice(1);
     }
     
     console.log('📋 Departamento:', departmentName);
