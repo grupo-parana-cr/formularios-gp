@@ -138,11 +138,17 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // Usar GET com senha (como a pesquisa)
+        // Usar GET COM CORS (permite ler resposta)
         const senha = 'metas2025';
         const url = `${GOOGLE_SCRIPT_URL}?password=${senha}&department=${encodeURIComponent(departmentName)}`;
         
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
         const result = await response.json();
         
         if (result.result === 'success' && result.data) {
