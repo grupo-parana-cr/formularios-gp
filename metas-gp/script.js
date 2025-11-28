@@ -126,7 +126,7 @@ async function saveDataToSheets() {
 }
 
 // ============================================
-// CARREGAR DADOS DO GOOGLE SHEETS via JSONP
+// CARREGAR DADOS DO GOOGLE SHEETS
 // ============================================
 async function loadDataFromSheets() {
     try {
@@ -138,17 +138,25 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // Usar JSONP (funciona sem CORS!)
+        // Usar fetch direto (sem CORS)
         const senha = 'metas2025';
-        const url = `${GOOGLE_SCRIPT_URL}?password=${senha}&department=${encodeURIComponent(departmentName)}&callback=loadSheetData`;
+        const url = `${GOOGLE_SCRIPT_URL}?password=${senha}&department=${encodeURIComponent(departmentName)}`;
         
-        // Criar função JSONP
-        window.loadSheetData = function(result) {
-            console.log('📥 Resposta do Apps Script:', result);
+        try {
+            const response = await fetch(url);
+            const text = await response.text();
             
-            if (result.result === 'success' && result.dados) {
-                try {
-                    // Se dados for string JSON, fazer parse
+            console.log('📥 Resposta bruta:', text.substring(0, 100));
+            
+            // Extrair JSON do JSONP: callback({...}) → {...}
+            const jsonMatch = text.match(/loadSheetData\((.*)\)/);
+            
+            if (jsonMatch && jsonMatch[1]) {
+                const result = JSON.parse(jsonMatch[1]);
+                
+                console.log('✅ Dados recebidos:', result);
+                
+                if (result.result === 'success' && result.dados) {
                     const data = typeof result.dados === 'string' 
                         ? JSON.parse(result.dados) 
                         : result.dados;
@@ -157,26 +165,14 @@ async function loadDataFromSheets() {
                     populateFormWithData(data);
                     updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
                     return;
-                } catch (parseErr) {
-                    console.error('Erro ao fazer parse JSON:', parseErr);
                 }
-            } else if (result.result === 'not_found') {
-                console.log('ℹ️ Nenhum dado anterior encontrado');
-                loadLocalBackup();
-            } else {
-                console.log('ℹ️ Nenhum dado anterior encontrado');
-                loadLocalBackup();
             }
-        };
+        } catch (fetchErr) {
+            console.log('⚠️ Não conseguiu via fetch, usando backup local');
+        }
         
-        // Executar JSONP
-        const script = document.createElement('script');
-        script.src = url;
-        script.onerror = () => {
-            console.error('❌ Erro ao carregar JSONP');
-            loadLocalBackup();
-        };
-        document.head.appendChild(script);
+        console.log('ℹ️ Nenhum dado anterior encontrado, usando backup local');
+        loadLocalBackup();
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
