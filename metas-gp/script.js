@@ -126,7 +126,7 @@ async function saveDataToSheets() {
 }
 
 // ============================================
-// CARREGAR DADOS DO GOOGLE SHEETS (GET)
+// CARREGAR DADOS DO GOOGLE SHEETS (GET via URL Pública)
 // ============================================
 async function loadDataFromSheets() {
     try {
@@ -138,32 +138,85 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // Usar GET COM CORS (permite ler resposta)
-        const senha = 'metas2025';
-        const url = `${GOOGLE_SCRIPT_URL}?password=${senha}&department=${encodeURIComponent(departmentName)}`;
+        // URL pública do Google Sheets em formato CSV
+        // Isso funciona em qualquer máquina, sem CORS!
+        const SHEET_ID = '1ZHrYZOCjQqqlK9WOW0SsxDEsG1OmjA_DBywGlqOxChI';
+        const SHEET_GID = '0'; // GID da aba "Respostas" (padrão é 0)
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
         
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
+        const response = await fetch(csvUrl);
+        const csvText = await response.text();
         
-        const result = await response.json();
+        // Parsear CSV
+        const lines = csvText.trim().split('\n');
         
-        if (result.result === 'success' && result.data) {
-            console.log('✅ Dados carregados do servidor:', result.data);
-            populateFormWithData(result.data);
-            updateSyncStatus('✅ Carregado do servidor');
-        } else {
-            console.log('ℹ️ Nenhum dado anterior encontrado, usando backup local');
+        if (lines.length < 2) {
+            console.log('ℹ️ Nenhum dado anterior encontrado');
             loadLocalBackup();
+            return;
         }
+        
+        // Headers: timestamp, department, dados
+        const headers = lines[0].split(',');
+        
+        // Procurar linha do departamento
+        for (let i = 1; i < lines.length; i++) {
+            const values = parseCSVLine(lines[i]);
+            
+            if (values.length >= 3 && values[1].trim() === departmentName) {
+                // Encontrou o departamento!
+                const jsonString = values[2];
+                
+                try {
+                    const data = JSON.parse(jsonString);
+                    console.log('✅ Dados carregados do Sheets:', data);
+                    populateFormWithData(data);
+                    updateSyncStatus('✅ Carregado do Sheets');
+                    return;
+                } catch (parseErr) {
+                    console.error('Erro ao fazer parse JSON:', parseErr);
+                }
+            }
+        }
+        
+        console.log('ℹ️ Departamento não encontrado na planilha, usando backup local');
+        loadLocalBackup();
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
         loadLocalBackup();
     }
+}
+
+// ============================================
+// PARSEAR LINHA CSV (lidar com aspas)
+// ============================================
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let insideQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+        
+        if (char === '"') {
+            if (insideQuotes && nextChar === '"') {
+                current += '"';
+                i++;
+            } else {
+                insideQuotes = !insideQuotes;
+            }
+        } else if (char === ',' && !insideQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    
+    result.push(current);
+    return result;
 }
 
 // ============================================
