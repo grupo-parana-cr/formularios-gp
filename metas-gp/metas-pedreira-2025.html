@@ -265,22 +265,6 @@
             }
         }
 
-        .btn-export {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1em;
-            cursor: pointer;
-            margin: 20px;
-            transition: transform 0.3s;
-        }
-
-        .btn-export:hover {
-            transform: scale(1.05);
-        }
-
         .info-box {
             background: #e3f2fd;
             border-left: 4px solid #2196f3;
@@ -717,10 +701,6 @@
                     </div>
                 </div>
             </div>
-
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn-export" onclick="exportData()">📥 Exportar Relatório</button>
-            </div>
         </div>
     </div>
 
@@ -996,21 +976,6 @@
                     }
                 });
             }
-        }
-
-        function exportData() {
-            const data = localStorage.getItem('metasPedreira2025');
-            if (!data) {
-                alert('Nenhum dado para exportar!');
-                return;
-            }
-
-            const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'metas_pedreira_2025_' + new Date().toISOString().split('T')[0] + '.json';
-            a.click();
         }
 
         window.onload = function() {
