@@ -99,16 +99,16 @@ async function saveDataToSheets() {
         
         console.log('💾 Salvando:', data);
         
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+        // Converter dados para query string
+        const params = new URLSearchParams();
+        params.append('action', 'save');
+        params.append('department', data.department);
+        params.append('data', JSON.stringify(data));
         
-        // Com no-cors, não conseguimos ler a resposta, então assumimos sucesso
-        console.log('✅ Dados enviados com sucesso');
-        // Com no-cors, não conseguimos ler a resposta, mas os dados já foram enviados
+        // Usar GET (sem CORS)
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`);
+        
+        // Dados foram enviados, assumimos sucesso
         updateSyncStatus('✅ Salvo com sucesso');
         saveLocalBackup(data);
         
