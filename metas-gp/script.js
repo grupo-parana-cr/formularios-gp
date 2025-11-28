@@ -76,7 +76,6 @@ function setupAutoSaveListeners() {
 
 function triggerAutoSave() {
     dataChanged = true;
-    updateSyncStatus('Alterações não salvas...');
     
     if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
     
@@ -111,16 +110,9 @@ async function saveDataToSheets() {
         updateSyncStatus('✅ Salvo com sucesso');
         saveLocalBackup(data);
         
-        setTimeout(() => {
-            const status = document.getElementById('syncStatus');
-            if (status && status.textContent.includes('Salvo')) {
-                updateSyncStatus('Sincronizado');
-            }
-        }, 3000);
-        
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
-        updateSyncStatus('⚠️ Erro - usando backup local');
+        updateSyncStatus('⚠️ Erro ao salvar');
         saveLocalBackup(collectFormData());
     }
 }
@@ -255,30 +247,44 @@ function populateFormWithData(data) {
 // STATUS DE SINCRONIZAÇÃO
 // ============================================
 function updateSyncStatus(message) {
-    let statusEl = document.getElementById('syncStatus');
+    // Remover elementos antigos
+    const oldStatus = document.querySelectorAll('#syncStatus');
+    oldStatus.forEach(el => el.remove());
     
-    if (!statusEl) {
-        statusEl = document.createElement('div');
-        statusEl.id = 'syncStatus';
-        statusEl.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 0.9em;
-            z-index: 100;
-            font-weight: 600;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    const statusEl = document.createElement('div');
+    statusEl.id = 'syncStatus';
+    statusEl.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 0.9em;
+        z-index: 100;
+        font-weight: 600;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    // Adicionar CSS de animação
+    if (!document.querySelector('style[data-sync-animation]')) {
+        const style = document.createElement('style');
+        style.setAttribute('data-sync-animation', 'true');
+        style.textContent = `
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateX(20px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
         `;
-        document.body.appendChild(statusEl);
+        document.head.appendChild(style);
     }
     
     statusEl.textContent = message;
     
-    if (message.includes('Salvo')) {
+    // Cores conforme o tipo de mensagem
+    if (message.includes('sucesso') || message.includes('Carregado')) {
         statusEl.style.background = '#e8f5e9';
         statusEl.style.color = '#2e7d32';
         statusEl.style.borderLeft = '4px solid #4caf50';
@@ -299,6 +305,15 @@ function updateSyncStatus(message) {
         statusEl.style.color = '#1565c0';
         statusEl.style.borderLeft = '4px solid #2196f3';
     }
+    
+    document.body.appendChild(statusEl);
+    
+    // Auto-remover após 3 segundos
+    setTimeout(() => {
+        if (statusEl && statusEl.parentNode) {
+            statusEl.remove();
+        }
+    }, 3000);
 }
 
 // ============================================
