@@ -99,7 +99,7 @@ async function saveDataToSheets() {
         
         console.log('💾 Salvando:', data);
         
-        // Usar POST com no-cors (exatamente como a pesquisa funciona)
+        // Usar POST com no-cors
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -126,7 +126,7 @@ async function saveDataToSheets() {
 }
 
 // ============================================
-// CARREGAR DADOS DO GOOGLE SHEETS (Como a Pesquisa funciona)
+// CARREGAR DADOS DO GOOGLE SHEETS (JSONP)
 // ============================================
 function loadDataFromSheets() {
     try {
@@ -302,27 +302,10 @@ function updateSyncStatus(message) {
 }
 
 // ============================================
-// FUNÇÕES AUXILIARES
+// AUXILIAR: Simples wrapper para compatibilidade HTML
 // ============================================
 function saveData() {
     triggerAutoSave();
-}
-
-function updateProgress(metaNum) {
-    triggerAutoSave();
-}
-
-function updateStatus(metaNum) {
-    triggerAutoSave();
-}
-
-function updateAcidentes() {
-    triggerAutoSave();
-}
-
-function toggleMeta(metaId) {
-    const element = document.getElementById(metaId);
-    if (element) element.classList.toggle('active');
 }
 
 console.log('✅ Script carregado - Sistema de Metas 2025 v2.0');
