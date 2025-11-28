@@ -126,7 +126,7 @@ async function saveDataToSheets() {
 }
 
 // ============================================
-// CARREGAR DADOS DO GOOGLE SHEETS
+// CARREGAR DADOS DO GOOGLE SHEETS (Como a Pesquisa funciona)
 // ============================================
 async function loadDataFromSheets() {
     try {
@@ -138,41 +138,19 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // Usar fetch direto (sem CORS)
-        const senha = 'metas2025';
-        const url = `${GOOGLE_SCRIPT_URL}?password=${senha}&department=${encodeURIComponent(departmentName)}`;
+        const url = `${GOOGLE_SCRIPT_URL}?department=${encodeURIComponent(departmentName)}`;
         
-        try {
-            const response = await fetch(url);
-            const text = await response.text();
-            
-            console.log('📥 Resposta bruta:', text.substring(0, 100));
-            
-            // Extrair JSON do JSONP: callback({...}) → {...}
-            const jsonMatch = text.match(/loadSheetData\((.*)\)/);
-            
-            if (jsonMatch && jsonMatch[1]) {
-                const result = JSON.parse(jsonMatch[1]);
-                
-                console.log('✅ Dados recebidos:', result);
-                
-                if (result.result === 'success' && result.dados) {
-                    const data = typeof result.dados === 'string' 
-                        ? JSON.parse(result.dados) 
-                        : result.dados;
-                    
-                    console.log('✅ Dados carregados do Sheets:', data);
-                    populateFormWithData(data);
-                    updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
-                    return;
-                }
-            }
-        } catch (fetchErr) {
-            console.log('⚠️ Não conseguiu via fetch, usando backup local');
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.result === 'success' && result.data) {
+            console.log('✅ Dados carregados do Sheets:', result.data);
+            populateFormWithData(result.data);
+            updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
+        } else {
+            console.log('ℹ️ Nenhum dado anterior encontrado');
+            loadLocalBackup();
         }
-        
-        console.log('ℹ️ Nenhum dado anterior encontrado, usando backup local');
-        loadLocalBackup();
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
