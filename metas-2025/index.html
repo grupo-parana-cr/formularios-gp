@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metas 2025 - Grupo Paraná</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Sistema de Metas 2025</h1>
+            <p>Grupo Paraná - Inova GP</p>
+        </div>
+
+        <div class="departments-grid">
+            <!-- Agricultura -->
+            <div class="dept-card" onclick="redirectToDept('agricultura')">
+                <div class="dept-header agricultura">
+                    <span class="dept-icon">🌾</span>
+                    <h2>Agricultura</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Kleber</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Autopecas -->
+            <div class="dept-card" onclick="redirectToDept('autopecas')">
+                <div class="dept-header autopecas">
+                    <span class="dept-icon">🔧</span>
+                    <h2>Autopecas</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Compras -->
+            <div class="dept-card" onclick="redirectToDept('compras')">
+                <div class="dept-header compras">
+                    <span class="dept-icon">📦</span>
+                    <h2>Compras</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Contabil/Fiscal -->
+            <div class="dept-card" onclick="redirectToDept('contabil-fiscal')">
+                <div class="dept-header contabil">
+                    <span class="dept-icon">💰</span>
+                    <h2>Contábil/Fiscal</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane | Coordenadora: Ananda</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- CSC -->
+            <div class="dept-card" onclick="redirectToDept('csc')">
+                <div class="dept-header csc">
+                    <span class="dept-icon">🏭</span>
+                    <h2>CSC</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- DP -->
+            <div class="dept-card" onclick="redirectToDept('dp')">
+                <div class="dept-header dp">
+                    <span class="dept-icon">👥</span>
+                    <h2>Desenvolvimento de Pessoas</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane | Coordenadora: Welita</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Frigorífico -->
+            <div class="dept-card" onclick="redirectToDept('frigorifico')">
+                <div class="dept-header frigorifico">
+                    <span class="dept-icon">🥩</span>
+                    <h2>Frigorífico</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Rodrigo</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Imobiliária -->
+            <div class="dept-card" onclick="redirectToDept('imobiliaria')">
+                <div class="dept-header imobiliaria">
+                    <span class="dept-icon">🏢</span>
+                    <h2>Imobiliária</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Katiane</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Marketing -->
+            <div class="dept-card" onclick="redirectToDept('marketing')">
+                <div class="dept-header marketing">
+                    <span class="dept-icon">📢</span>
+                    <h2>Marketing</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Pecuária -->
+            <div class="dept-card" onclick="redirectToDept('pecuaria')">
+                <div class="dept-header pecuaria">
+                    <span class="dept-icon">🐄</span>
+                    <h2>Pecuária</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Everton</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Pedreira -->
+            <div class="dept-card" onclick="redirectToDept('pedreira')">
+                <div class="dept-header pedreira">
+                    <span class="dept-icon">⛏️</span>
+                    <h2>Pedreira</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Esley</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- Rádio -->
+            <div class="dept-card" onclick="redirectToDept('radio')">
+                <div class="dept-header radio">
+                    <span class="dept-icon">📻</span>
+                    <h2>Rádio Super FM 98.9</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Roney</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- RH -->
+            <div class="dept-card" onclick="redirectToDept('rh')">
+                <div class="dept-header rh">
+                    <span class="dept-icon">💼</span>
+                    <h2>RH</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane | Coordenador: Elionai</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+
+            <!-- TI -->
+            <div class="dept-card" onclick="redirectToDept('ti')">
+                <div class="dept-header ti">
+                    <span class="dept-icon">💻</span>
+                    <h2>Tecnologia da Informação</h2>
+                </div>
+                <div class="dept-body">
+                    <p class="dept-leader">Líder: Liliane</p>
+                    <button class="btn-open">Abrir Metas →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
