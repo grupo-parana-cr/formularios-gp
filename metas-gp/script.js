@@ -107,7 +107,7 @@ async function saveDataToSheets() {
             body: JSON.stringify(data)
         });
         
-        console.log('✅ Enviado via POST no-cors');
+        console.log('✅ Enviado via POST');
         updateSyncStatus('✅ Salvo com sucesso');
         saveLocalBackup(data);
         
@@ -124,8 +124,6 @@ async function saveDataToSheets() {
         saveLocalBackup(collectFormData());
     }
 }
-    }
-}
 
 // ============================================
 // CARREGAR DADOS DO GOOGLE SHEETS (GET)
@@ -140,10 +138,21 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // Com no-cors não conseguimos ler a resposta
-        // Usar localStorage como fallback
-        console.log('ℹ️ Usando backup local');
-        loadLocalBackup();
+        // Usar GET com senha (como a pesquisa)
+        const senha = 'metas2025';
+        const url = `${GOOGLE_SCRIPT_URL}?password=${senha}&department=${encodeURIComponent(departmentName)}`;
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.result === 'success' && result.data) {
+            console.log('✅ Dados carregados do servidor:', result.data);
+            populateFormWithData(result.data);
+            updateSyncStatus('✅ Carregado do servidor');
+        } else {
+            console.log('ℹ️ Nenhum dado anterior encontrado, usando backup local');
+            loadLocalBackup();
+        }
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
