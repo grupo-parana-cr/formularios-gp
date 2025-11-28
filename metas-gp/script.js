@@ -25,9 +25,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const h1 = document.querySelector('h1');
     if (h1) {
         // Extrai "Agricultura" de "Dashboard Metas Agricultura 2025..."
-        const parts = h1.textContent.split('Metas ');
-        if (parts[1]) {
-            departmentName = parts[1].split(' 20')[0].trim();
+        // Exemplo: "Dashboard Metas Agricultura 2025" → "Agricultura"
+        const titleText = h1.textContent;
+        const match = titleText.match(/Metas\s+(.+?)\s+20\d{2}/);
+        if (match && match[1]) {
+            departmentName = match[1].trim();
         }
     }
     
