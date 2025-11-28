@@ -99,30 +99,34 @@ async function saveDataToSheets() {
         
         console.log('💾 Salvando:', data);
         
-        // Converter dados para query string
-        const params = new URLSearchParams();
-        params.append('action', 'save');
-        params.append('department', data.department);
-        params.append('data', JSON.stringify(data));
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
         
-        // Usar GET (sem CORS)
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`);
+        const result = await response.json();
         
-        // Dados foram enviados, assumimos sucesso
-        updateSyncStatus('✅ Salvo com sucesso');
-        saveLocalBackup(data);
-        
-        setTimeout(() => {
-            const status = document.getElementById('syncStatus');
-            if (status && status.textContent.includes('Salvo')) {
-                updateSyncStatus('Sincronizado');
-            }
-        }, 3000);
+        if (result.success) {
+            updateSyncStatus('✅ Salvo com sucesso');
+            saveLocalBackup(data);
+            
+            setTimeout(() => {
+                const status = document.getElementById('syncStatus');
+                if (status && status.textContent.includes('Salvo')) {
+                    updateSyncStatus('Sincronizado');
+                }
+            }, 3000);
+        } else {
+            throw new Error(result.error || 'Erro desconhecido');
+        }
         
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
         updateSyncStatus('⚠️ Erro - usando backup local');
         saveLocalBackup(collectFormData());
+    }
+}
     }
 }
 
