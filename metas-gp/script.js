@@ -5,6 +5,7 @@
 
 // ⚠️ IMPORTANTE: Substitua estes valores
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVQouGlsrBIH1A4_2vzJO6g_F3kSAmMl2llsnngj3YvSXlEbwMRuXhZEybjwEqMdiE/exec';
+const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 const AUTO_SAVE_DELAY = 500;
 let autoSaveTimeout;
 let dataChanged = false;
@@ -99,9 +100,12 @@ async function saveDataToSheets() {
         
         console.log('💾 Salvando:', data);
         
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
+        const response = await fetch(CORS_PROXY + GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: JSON.stringify(data)
         });
         
@@ -141,18 +145,23 @@ async function loadDataFromSheets() {
             return;
         }
         
-        const url = `${GOOGLE_SCRIPT_URL}?department=${encodeURIComponent(departmentName)}`;
+        const url = `${CORS_PROXY}${GOOGLE_SCRIPT_URL}?department=${encodeURIComponent(departmentName)}`;
         
         console.log('📥 Carregando dados de:', departmentName);
         
         const response = await fetch(url, {
-            method: 'GET',
-            mode: 'no-cors'
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
+        const result = await response.json();
         
-        // Com no-cors, a resposta é opaca, então carregamos do backup local
-        console.log('ℹ️ Usando backup local');
-        loadLocalBackup();
+        if (result.dados && Object.keys(result.dados).length > 0) {
+            console.log('✅ Dados carregados:', result.dados);
+            populateFormWithData(result.dados);
+            updateSyncStatus('Carregado do servidor');
+        } else {
+            console.log('ℹ️ Nenhum dado anterior encontrado');
+            loadLocalBackup();
+        }
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
