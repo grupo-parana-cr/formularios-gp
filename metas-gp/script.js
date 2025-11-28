@@ -99,20 +99,18 @@ async function saveDataToSheets() {
         
         console.log('💾 Salvando:', data);
         
-        // Converter para FormData (funciona com no-cors)
-        const formData = new FormData();
-        Object.keys(data).forEach(key => {
-            formData.append(key, JSON.stringify(data[key]));
+        // Usar Query Parameters (funciona com no-cors)
+        const params = new URLSearchParams();
+        params.append('action', 'save');
+        params.append('department', departmentName);
+        params.append('data', JSON.stringify(data));
+        
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
+            method: 'GET',
+            mode: 'no-cors'
         });
         
-        // Usar no-cors com FormData
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: formData
-        });
-        
-        console.log('✅ Dados enviados (no-cors + FormData)');
+        console.log('✅ Dados enviados');
         updateSyncStatus('✅ Salvo com sucesso');
         saveLocalBackup(data);
         
@@ -143,21 +141,22 @@ async function loadDataFromSheets() {
             return;
         }
         
-        const url = `${GOOGLE_SCRIPT_URL}?department=${encodeURIComponent(departmentName)}`;
-        
         console.log('📥 Carregando dados de:', departmentName);
         
-        const response = await fetch(url);
-        const result = await response.json();
+        // Usar Query Parameters (funciona com no-cors)
+        const params = new URLSearchParams();
+        params.append('action', 'load');
+        params.append('department', departmentName);
         
-        if (result.dados && Object.keys(result.dados).length > 0) {
-            console.log('✅ Dados carregados:', result.dados);
-            populateFormWithData(result.dados);
-            updateSyncStatus('Carregado do servidor');
-        } else {
-            console.log('ℹ️ Nenhum dado anterior encontrado');
-            loadLocalBackup();
-        }
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
+            method: 'GET',
+            mode: 'no-cors'
+        });
+        
+        // Com no-cors não conseguimos ler a resposta
+        // Então carregamos do backup local
+        console.log('ℹ️ Usando backup local (no-cors não permite ler resposta)');
+        loadLocalBackup();
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
