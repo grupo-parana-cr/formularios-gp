@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Metas TI 2025 - Grupo Paraná</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .kpi-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .kpi-label {
+            color: #666;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-section {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: #1e3c72;
+            font-size: 1.5em;
+        }
+
+        .metas-section {
+            padding: 30px;
+        }
+
+        .meta-card {
+            background: white;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .meta-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meta-header:hover {
+            opacity: 0.95;
+        }
+
+        .meta-header h3 {
+            font-size: 1.3em;
+        }
+
+        .meta-progress {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 5px 15px;
+            font-weight: bold;
+        }
+
+        .meta-content {
+            padding: 25px;
+            display: none;
+        }
+
+        .meta-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            flex: 1;
+            margin: 0;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .status-concluido {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-andamento {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-planejado {
+            background: #2196f3;
+            color: white;
+        }
+
+        .status-atrasado {
+            background: #f44336;
+            color: white;
+        }
+
+        .save-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 20px;
+            transition: transform 0.3s;
+        }
+
+        .btn-export:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="script.js"></script>
+</head>
+<body>
+    <button onclick="goBackToHome()" style="position: fixed; top: 20px; left: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 9999; font-weight: 600; font-size: 1em; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" >← Voltar para Home</button>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Dashboard Metas 2025</h1>
+            <p>Tecnologia da Informação - Grupo Paraná</p>
+            <p>Líder: Liliane</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Progresso Geral</div>
+                <div class="kpi-value" id="progressoGeral" style="color: #667eea;">0%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Metas Concluídas</div>
+                <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Em Andamento</div>
+                <div class="kpi-value" id="metasAndamento" style="color: #ff9800;">9</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Dias para 2026</div>
+                <div class="kpi-value" id="diasRestantes" style="color: #2196f3;">0</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-container">
+                <h3>Progresso por Meta</h3>
+                <canvas id="progressChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Status das Metas</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <div class="metas-section">
+            <h2 style="margin-bottom: 30px; color: #1e3c72; font-size: 2em;">Acompanhamento Detalhado</h2>
+
+            <!-- KR 1.1 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta1')">
+                    <h3>KR 1.1 - Implantação de software para Frigorífico</h3>
+                    <div class="meta-progress" id="progress1">0%</div>
+                </div>
+                <div class="meta-content" id="meta1">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status1" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent1" min="0" max="100"  onchange="updateProgress(1)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar1" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo Previsto para Finalização</label>
+                        <input type="date" id="prazo1" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel1" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dificuldades ou Impedimentos</label>
+                        <textarea id="dificuldades1" placeholder="Descrever se houver" onchange="saveData()"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.2 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta2')">
+                    <h3>KR 1.2 - Documentação de procedimentos de TI</h3>
+                    <div class="meta-progress" id="progress2">0%</div>
+                </div>
+                <div class="meta-content" id="meta2">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status2" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent2" min="0" max="100"  onchange="updateProgress(2)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar2" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Início</label>
+                        <input type="date" id="prazoInicio2" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Conclusão</label>
+                        <input type="date" id="prazo2" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel2" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.3 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta3')">
+                    <h3>KR 1.3 - Infraestrutura no prédio do GP (rede e telefonia)</h3>
+                    <div class="meta-progress" id="progress3">0%</div>
+                </div>
+                <div class="meta-content" id="meta3">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status3" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent3" min="0" max="100"  onchange="updateProgress(3)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar3" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo Previsto para Finalização</label>
+                        <input type="date" id="prazo3" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel3" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.4 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta4')">
+                    <h3>KR 1.4 - Câmeras speed dome na Pedreira</h3>
+                    <div class="meta-progress" id="progress4">0%</div>
+                </div>
+                <div class="meta-content" id="meta4">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status4" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent4" min="0" max="100"  onchange="updateProgress(4)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar4" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Início</label>
+                        <input type="date" id="prazoInicio4" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Conclusão</label>
+                        <input type="date" id="prazo4" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel4" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Necessidades para Execução</label>
+                        <textarea id="necessidades4" placeholder="Listar recursos, aprovações ou apoio necessário" onchange="saveData()"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.5 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta5')">
+                    <h3>KR 1.5 - Definições de processos - Descritivo de cargo</h3>
+                    <div class="meta-progress" id="progress5">0%</div>
+                </div>
+                <div class="meta-content" id="meta5">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status5" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent5" min="0" max="100"  onchange="updateProgress(5)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar5" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Início</label>
+                        <input type="date" id="prazoInicio5" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Conclusão</label>
+                        <input type="date" id="prazo5" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel5" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.6 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta6')">
+                    <h3>KR 1.6 - Projeto estabilização energia Pedreira Balança</h3>
+                    <div class="meta-progress" id="progress6">0%</div>
+                </div>
+                <div class="meta-content" id="meta6">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status6" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent6" min="0" max="100"  onchange="updateProgress(6)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar6" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Início</label>
+                        <input type="date" id="prazoInicio6" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Conclusão</label>
+                        <input type="date" id="prazo6" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel6" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.7 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta7')">
+                    <h3>KR 1.7 - Sistema de Monitoramento Único</h3>
+                    <div class="meta-progress" id="progress7">0%</div>
+                </div>
+                <div class="meta-content" id="meta7">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status7" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent7" min="0" max="100"  onchange="updateProgress(7)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar7" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Início</label>
+                        <input type="date" id="prazoInicio7" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Conclusão</label>
+                        <input type="date" id="prazo7" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel7" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.8 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta8')">
+                    <h3>KR 1.8 - Relatório Gerencial TI</h3>
+                    <div class="meta-progress" id="progress8">0%</div>
+                </div>
+                <div class="meta-content" id="meta8">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status8" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent8" min="0" max="100"  onchange="updateProgress(8)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar8" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Início</label>
+                        <input type="date" id="prazoInicio8" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Entrega do Primeiro Relatório</label>
+                        <input type="date" id="prazo8" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel8" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.9 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta9')">
+                    <h3>KR 1.9 - Atingir 90% de satisfação na pesquisa de atendimento</h3>
+                    <div class="meta-progress" id="progress9">0%</div>
+                </div>
+                <div class="meta-content" id="meta9">
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status9" onchange="saveData()">
+                            <option value="planejado">Planejado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Percentual Atual de Satisfação (%)</label>
+                        <input type="number" id="percent9" min="0" max="100"  onchange="updateProgress(9)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar9" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prazo para Atingir a Meta</label>
+                        <input type="date" id="prazo9" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel9" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ações Planejadas para Alcançar a Meta</label>
+                        <textarea id="acoes9" placeholder="Listar iniciativas que serão implementadas" onchange="saveData()"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn-export" onclick="exportData()">📥 Exportar Relatório</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">
+        ✓ Dados salvos automaticamente
+    </div>
+
+    <script>
+        let progressChart, statusChart;
+
+        function toggleMeta(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('active');
+        }
+
+        function updateProgress(metaId) {
+            const percent = document.getElementById('percent' + metaId).value;
+            const bar = document.getElementById('bar' + metaId);
+            const progressLabel = document.getElementById('progress' + metaId);
+            
+            bar.style.width = percent + '%';
+            bar.textContent = percent + '%';
+            progressLabel.textContent = percent + '%';
+            
+            saveData();
+            updateCharts();
+            updateKPIs();
+        }
+
+        function saveData() {
+            const data = {};
+            for (let i = 1; i <= 9; i++) {
+                data['meta' + i] = {
+                    status: document.getElementById('status' + i)?.value || '',
+                    percent: document.getElementById('percent' + i)?.value || '0',
+                    prazo: document.getElementById('prazo' + i)?.value || '',
+                    prazoInicio: document.getElementById('prazoInicio' + i)?.value || '',
+                    responsavel: document.getElementById('responsavel' + i)?.value || '',
+                    dificuldades: document.getElementById('dificuldades' + i)?.value || '',
+                    necessidades: document.getElementById('necessidades' + i)?.value || '',
+                    acoes: document.getElementById('acoes' + i)?.value || ''
+                };
+            }
+            
+            localStorage.setItem('metasTI2025', JSON.stringify(data));
+            showSaveIndicator();
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('metasTI2025');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                for (let i = 1; i <= 9; i++) {
+                    const meta = data['meta' + i];
+                    if (meta) {
+                        if (document.getElementById('status' + i)) document.getElementById('status' + i).value = meta.status;
+                        if (document.getElementById('percent' + i)) {
+                            document.getElementById('percent' + i).value = meta.percent;
+                            updateProgress(i);
+                        }
+                        if (document.getElementById('prazo' + i)) document.getElementById('prazo' + i).value = meta.prazo;
+                        if (document.getElementById('prazoInicio' + i)) document.getElementById('prazoInicio' + i).value = meta.prazoInicio;
+                        if (document.getElementById('responsavel' + i)) document.getElementById('responsavel' + i).value = meta.responsavel;
+                        if (document.getElementById('dificuldades' + i)) document.getElementById('dificuldades' + i).value = meta.dificuldades;
+                        if (document.getElementById('necessidades' + i)) document.getElementById('necessidades' + i).value = meta.necessidades;
+                        if (document.getElementById('acoes' + i)) document.getElementById('acoes' + i).value = meta.acoes;
+                    }
+                }
+            }
+            updateCharts();
+            updateKPIs();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        function updateKPIs() {
+            let total = 0;
+            let concluidas = 0;
+            let emAndamento = 0;
+
+            for (let i = 1; i <= 9; i++) {
+                const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                total += percent;
+                
+                if (percent === 100) concluidas++;
+                else if (percent > 0) emAndamento++;
+            }
+
+            const progressoGeral = Math.round(total / 9);
+            document.getElementById('progressoGeral').textContent = progressoGeral + '%';
+            document.getElementById('metasConcluidas').textContent = concluidas;
+            document.getElementById('metasAndamento').textContent = emAndamento;
+
+            const hoje = new Date();
+            const fimAno = new Date('2025-12-31');
+            const diasRestantes = Math.ceil((fimAno - hoje) / (1000 * 60 * 60 * 24));
+            document.getElementById('diasRestantes').textContent = diasRestantes;
+        }
+
+        function updateCharts() {
+            const progressData = [];
+            const labels = [];
+
+            for (let i = 1; i <= 9; i++) {
+                const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                progressData.push(percent);
+                labels.push('KR 1.' + i);
+            }
+
+            if (progressChart) {
+                progressChart.data.datasets[0].data = progressData;
+                progressChart.update();
+            } else {
+                const ctx1 = document.getElementById('progressChart').getContext('2d');
+                progressChart = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Progresso (%)',
+                            data: progressData,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            let planejado = 0, andamento = 0, concluido = 0, atrasado = 0;
+
+            for (let i = 1; i <= 9; i++) {
+                const status = document.getElementById('status' + i).value;
+                if (status === 'planejado') planejado++;
+                else if (status === 'andamento') andamento++;
+                else if (status === 'concluido') concluido++;
+                else if (status === 'atrasado') atrasado++;
+            }
+
+            if (statusChart) {
+                statusChart.data.datasets[0].data = [planejado, andamento, concluido, atrasado];
+                statusChart.update();
+            } else {
+                const ctx2 = document.getElementById('statusChart').getContext('2d');
+                statusChart = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Planejado', 'Em Andamento', 'Concluído', 'Atrasado'],
+                        datasets: [{
+                            data: [planejado, andamento, concluido, atrasado],
+                            backgroundColor: [
+                                'rgba(33, 150, 243, 0.8)',
+                                'rgba(255, 152, 0, 0.8)',
+                                'rgba(76, 175, 80, 0.8)',
+                                'rgba(244, 67, 54, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function exportData() {
+            const data = localStorage.getItem('metasTI2025');
+            if (!data) {
+                alert('Nenhum dado para exportar!');
+                return;
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'metas_ti_2025_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+        }
+
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>

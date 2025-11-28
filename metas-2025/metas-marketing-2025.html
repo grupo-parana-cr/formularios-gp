@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Metas Marketing 2025 - Grupo Paraná</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .kpi-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .kpi-label {
+            color: #666;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-section {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: #1e3c72;
+            font-size: 1.5em;
+        }
+
+        .metas-section {
+            padding: 30px;
+        }
+
+        .meta-card {
+            background: white;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .meta-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meta-header:hover {
+            opacity: 0.95;
+        }
+
+        .meta-header h3 {
+            font-size: 1.3em;
+            flex: 1;
+        }
+
+        .meta-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .meta-progress {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 5px 15px;
+            font-weight: bold;
+        }
+
+        .meta-status {
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .status-andamento {
+            background: #2196f3;
+            color: white;
+        }
+
+        .status-nao-iniciado {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-concluido {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-atrasado {
+            background: #f44336;
+            color: white;
+        }
+
+        .meta-content {
+            padding: 25px;
+            display: none;
+        }
+
+        .meta-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+
+        .save-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 20px;
+            transition: transform 0.3s;
+        }
+
+        .btn-export:hover {
+            transform: scale(1.05);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            color: #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="script.js"></script>
+</head>
+<body>
+    <button onclick="goBackToHome()" style="position: fixed; top: 20px; left: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 9999; font-weight: 600; font-size: 1em; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" >← Voltar para Home</button>
+    <div class="container">
+        <div class="header">
+            <h1>📢 Dashboard Metas 2025</h1>
+            <p>Marketing - Grupo Paraná</p>
+            <p>Líder: Liliane</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Progresso Geral</div>
+                <div class="kpi-value" id="progressoGeral" style="color: #667eea;">0%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Metas Concluídas</div>
+                <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Em Andamento</div>
+                <div class="kpi-value" id="metasAndamento" style="color: #2196f3;">4</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Total de Metas</div>
+                <div class="kpi-value" id="totalMetas" style="color: #764ba2;">4</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-container">
+                <h3>Progresso por Meta</h3>
+                <canvas id="progressChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Status das Metas</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <div class="metas-section">
+            <h2 style="margin-bottom: 30px; color: #1e3c72; font-size: 2em;">Acompanhamento Detalhado</h2>
+
+            <!-- KR 1.1 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta1')">
+                    <h3>KR 1.1 - Aumentar os seguidores, elevar o engajamento e aumentar o alcance das contas</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge1">Em andamento</div>
+                        <div class="meta-progress" id="progress1">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta1">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 30/06/2025
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status1" onchange="updateStatus(1)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent1" min="0" max="100"  onchange="updateProgress(1)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar1" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Seguidores Atual</label>
+                        <input type="number" id="seguidoresAtual1" min="0"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Meta de Seguidores</label>
+                        <input type="number" id="metaSeguidores1" min="0"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa de Engajamento Atual (%)</label>
+                        <input type="number" id="engajamento1" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Alcance Médio (impressões)</label>
+                        <input type="number" id="alcance1" min="0"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Redes Sociais Trabalhadas</label>
+                        <textarea id="redesSociais1" placeholder="Instagram, Facebook, LinkedIn..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Estratégias Implementadas</label>
+                        <textarea id="estrategias1" placeholder="Conteúdo orgânico, anúncios, parcerias..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Conclusão</label>
+                        <input type="date" id="prazo1" value="" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel1" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.2 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta2')">
+                    <h3>KR 1.2 - Garantir ao menos 3 postagens semanais por página</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge2">Em andamento</div>
+                        <div class="meta-progress" id="progress2">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta2">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Mínimo 3 postagens/semana por página
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status2" onchange="updateStatus(2)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent2" min="0" max="100"  onchange="updateProgress(2)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar2" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Páginas Gerenciadas</label>
+                        <input type="number" id="paginas2" min="0"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Total de Postagens nesta Semana</label>
+                        <input type="number" id="postagensSemana2" min="0"  onchange="updatePostagens()">
+                    </div>
+                    <div class="form-group">
+                        <label>Meta Semanal (páginas × 3)</label>
+                        <input type="number" id="metaSemanal2" min="0"  readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa de Cumprimento Semanal (%)</label>
+                        <input type="number" id="cumprimento2" min="0" max="100"  step="0.1" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Calendário Editorial</label>
+                        <select id="calendario2" onchange="saveData()">
+                            <option value="">Selecione...</option>
+                            <option value="implementado">Implementado</option>
+                            <option value="em_andamento">Em andamento</option>
+                            <option value="nao_iniciado">Não iniciado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel2" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.3 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta3')">
+                    <h3>KR 1.3 - Promover campanhas interativas (enquetes, desafios ou lives) mensalmente</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge3">Em andamento</div>
+                        <div class="meta-progress" id="progress3">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta3">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Campanhas interativas mensais
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status3" onchange="updateStatus(3)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Campanhas Realizadas no Ano</label>
+                        <input type="number" id="campanhasRealizadas3" min="0" max="12"  onchange="updateCampanhas()">
+                    </div>
+                    <div class="form-group">
+                        <label>Meta Anual (12 meses)</label>
+                        <input type="number" id="metaAnual3" min="0" value="12" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent3" min="0" max="100"  readonly>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar3" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipos de Campanhas Realizadas</label>
+                        <textarea id="tiposCampanhas3" placeholder="Enquetes, desafios, lives, sorteios..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa Média de Participação (%)</label>
+                        <input type="number" id="participacao3" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Alcance Médio das Campanhas</label>
+                        <input type="number" id="alcanceCampanhas3" min="0"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel3" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KR 1.4 -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta4')">
+                    <h3>KR 1.4 - Responder a comentários e mensagens diretas em até 24 horas</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge4">Em andamento</div>
+                        <div class="meta-progress" id="progress4">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta4">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/02/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Resposta em até 24 horas
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status4" onchange="updateStatus(4)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent4" min="0" max="100"  onchange="updateProgress(4)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar4" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Total de Mensagens/Comentários Recebidos no Mês</label>
+                        <input type="number" id="totalMensagens4" min="0"  onchange="updateTaxaResposta()">
+                    </div>
+                    <div class="form-group">
+                        <label>Respostas em até 24h</label>
+                        <input type="number" id="respostas24h4" min="0"  onchange="updateTaxaResposta()">
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa de Resposta em 24h (%)</label>
+                        <input type="number" id="taxaResposta4" min="0" max="100"  step="0.1" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Tempo Médio de Resposta (horas)</label>
+                        <input type="number" id="tempoMedio4" min="0"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Ferramentas Utilizadas</label>
+                        <input type="text" id="ferramentas4" placeholder="App nativo, gerenciador de redes sociais..." onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Início</label>
+                        <input type="date" id="dataInicio4" value="" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel4" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn-export" onclick="exportData()">📥 Exportar Relatório</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">
+        ✓ Dados salvos automaticamente
+    </div>
+
+    <script>
+        let progressChart, statusChart;
+
+        function toggleMeta(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('active');
+        }
+
+        function updateProgress(metaId) {
+            const percent = document.getElementById('percent' + metaId).value;
+            const bar = document.getElementById('bar' + metaId);
+            const progressLabel = document.getElementById('progress' + metaId);
+            
+            bar.style.width = percent + '%';
+            bar.textContent = percent + '%';
+            progressLabel.textContent = percent + '%';
+            
+            saveData();
+            updateCharts();
+            updateKPIs();
+        }
+
+        function updateStatus(metaId) {
+            const status = document.getElementById('status' + metaId).value;
+            const badge = document.getElementById('statusBadge' + metaId);
+            
+            badge.className = 'meta-status';
+            
+            if (status === 'planejado') {
+                badge.classList.add('status-nao-iniciado');
+                badge.textContent = 'Não iniciado';
+            } else if (status === 'andamento') {
+                badge.classList.add('status-andamento');
+                badge.textContent = 'Em andamento';
+            } else if (status === 'concluido') {
+                badge.classList.add('status-concluido');
+                badge.textContent = 'Concluído';
+            } else if (status === 'atrasado') {
+                badge.classList.add('status-atrasado');
+                badge.textContent = 'Atrasado';
+            }
+            
+            saveData();
+            updateCharts();
+            updateKPIs();
+        }
+
+        function updatePostagens() {
+            const paginas = parseInt(document.getElementById('paginas2').value) || 0;
+            const postagens = parseInt(document.getElementById('postagensSemana2').value) || 0;
+            
+            const metaSemanal = paginas * 3;
+            document.getElementById('metaSemanal2').value = metaSemanal;
+            
+            if (metaSemanal > 0) {
+                const cumprimento = Math.min(Math.round((postagens / metaSemanal) * 100), 100);
+                document.getElementById('cumprimento2').value = cumprimento;
+            }
+            
+            saveData();
+        }
+
+        function updateCampanhas() {
+            const campanhas = parseInt(document.getElementById('campanhasRealizadas3').value) || 0;
+            const percentual = Math.min(Math.round((campanhas / 12) * 100), 100);
+            document.getElementById('percent3').value = percentual;
+            
+            updateProgress(3);
+        }
+
+        function updateTaxaResposta() {
+            const total = parseInt(document.getElementById('totalMensagens4').value) || 0;
+            const respostas = parseInt(document.getElementById('respostas24h4').value) || 0;
+            
+            if (total > 0) {
+                const taxa = Math.round((respostas / total) * 100 * 10) / 10;
+                document.getElementById('taxaResposta4').value = taxa;
+            }
+            
+            saveData();
+        }
+
+        function saveData() {
+            const data = {};
+            for (let i = 1; i <= 4; i++) {
+                data['meta' + i] = {
+                    status: document.getElementById('status' + i)?.value || '',
+                    percent: document.getElementById('percent' + i)?.value || '0',
+                    prazo: document.getElementById('prazo' + i)?.value || '',
+                    responsavel: document.getElementById('responsavel' + i)?.value || ''
+                };
+                
+                // Campos específicos por meta
+                const camposEspecificos = {
+                    1: ['seguidoresAtual', 'metaSeguidores', 'engajamento', 'alcance', 'redesSociais', 'estrategias'],
+                    2: ['paginas', 'postagensSemana', 'metaSemanal', 'cumprimento', 'calendario'],
+                    3: ['campanhasRealizadas', 'metaAnual', 'tiposCampanhas', 'participacao', 'alcanceCampanhas'],
+                    4: ['totalMensagens', 'respostas24h', 'taxaResposta', 'tempoMedio', 'ferramentas', 'dataInicio']
+                };
+                
+                if (camposEspecificos[i]) {
+                    camposEspecificos[i].forEach(campo => {
+                        const elemento = document.getElementById(campo + i);
+                        if (elemento) {
+                            data['meta' + i][campo] = elemento.value;
+                        }
+                    });
+                }
+            }
+            
+            localStorage.setItem('metasMarketing2025', JSON.stringify(data));
+            showSaveIndicator();
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('metasMarketing2025');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                for (let i = 1; i <= 4; i++) {
+                    const meta = data['meta' + i];
+                    if (meta) {
+                        if (document.getElementById('status' + i)) {
+                            document.getElementById('status' + i).value = meta.status;
+                            updateStatus(i);
+                        }
+                        if (document.getElementById('percent' + i)) {
+                            document.getElementById('percent' + i).value = meta.percent;
+                            updateProgress(i);
+                        }
+                        
+                        // Restaurar todos os campos
+                        Object.keys(meta).forEach(campo => {
+                            if (campo !== 'status' && campo !== 'percent') {
+                                const elemento = document.getElementById(campo + i);
+                                if (elemento && meta[campo]) {
+                                    elemento.value = meta[campo];
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            updateCharts();
+            updateKPIs();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        function updateKPIs() {
+            let total = 0;
+            let concluidas = 0;
+            let emAndamento = 0;
+
+            for (let i = 1; i <= 4; i++) {
+                const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                const status = document.getElementById('status' + i).value;
+                
+                total += percent;
+                
+                if (percent === 100 || status === 'concluido') concluidas++;
+                else if (status === 'andamento') emAndamento++;
+            }
+
+            const progressoGeral = Math.round(total / 4);
+            document.getElementById('progressoGeral').textContent = progressoGeral + '%';
+            document.getElementById('metasConcluidas').textContent = concluidas;
+            document.getElementById('metasAndamento').textContent = emAndamento;
+        }
+
+        function updateCharts() {
+            const progressData = [];
+            const labels = [];
+
+            for (let i = 1; i <= 4; i++) {
+                const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                progressData.push(percent);
+                labels.push('KR 1.' + i);
+            }
+
+            if (progressChart) {
+                progressChart.data.datasets[0].data = progressData;
+                progressChart.update();
+            } else {
+                const ctx1 = document.getElementById('progressChart').getContext('2d');
+                progressChart = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Progresso (%)',
+                            data: progressData,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            let planejado = 0, andamento = 0, concluido = 0, atrasado = 0;
+
+            for (let i = 1; i <= 4; i++) {
+                const status = document.getElementById('status' + i).value;
+                if (status === 'planejado') planejado++;
+                else if (status === 'andamento') andamento++;
+                else if (status === 'concluido') concluido++;
+                else if (status === 'atrasado') atrasado++;
+            }
+
+            if (statusChart) {
+                statusChart.data.datasets[0].data = [planejado, andamento, concluido, atrasado];
+                statusChart.update();
+            } else {
+                const ctx2 = document.getElementById('statusChart').getContext('2d');
+                statusChart = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado'],
+                        datasets: [{
+                            data: [planejado, andamento, concluido, atrasado],
+                            backgroundColor: [
+                                'rgba(255, 152, 0, 0.8)',
+                                'rgba(33, 150, 243, 0.8)',
+                                'rgba(76, 175, 80, 0.8)',
+                                'rgba(244, 67, 54, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function exportData() {
+            const data = localStorage.getItem('metasMarketing2025');
+            if (!data) {
+                alert('Nenhum dado para exportar!');
+                return;
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'metas_marketing_2025_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+        }
+
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>

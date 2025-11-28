@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Metas Pecuária 2025 - Grupo Paraná</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .kpi-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .kpi-label {
+            color: #666;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-section {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: #1e3c72;
+            font-size: 1.5em;
+        }
+
+        .metas-section {
+            padding: 30px;
+        }
+
+        .meta-card {
+            background: white;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .meta-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meta-header:hover {
+            opacity: 0.95;
+        }
+
+        .meta-header h3 {
+            font-size: 1.3em;
+            flex: 1;
+        }
+
+        .meta-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .meta-progress {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 5px 15px;
+            font-weight: bold;
+        }
+
+        .meta-status {
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .status-andamento {
+            background: #2196f3;
+            color: white;
+        }
+
+        .status-nao-iniciado {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-concluido {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-atrasado {
+            background: #f44336;
+            color: white;
+        }
+
+        .meta-content {
+            padding: 25px;
+            display: none;
+        }
+
+        .meta-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+
+        .save-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 20px;
+            transition: transform 0.3s;
+        }
+
+        .btn-export:hover {
+            transform: scale(1.05);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            color: #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="script.js"></script>
+</head>
+<body>
+    <button onclick="goBackToHome()" style="position: fixed; top: 20px; left: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 9999; font-weight: 600; font-size: 1em; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" >← Voltar para Home</button>
+    <div class="container">
+        <div class="header">
+            <h1>🐄 Dashboard Metas 2025</h1>
+            <p>Pecuária - Grupo Paraná</p>
+            <p>Líder: Everton</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Progresso Geral</div>
+                <div class="kpi-value" id="progressoGeral" style="color: #667eea;">0%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Metas Concluídas</div>
+                <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Em Andamento</div>
+                <div class="kpi-value" id="metasAndamento" style="color: #2196f3;">16</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Total de Metas</div>
+                <div class="kpi-value" id="totalMetas" style="color: #764ba2;">16</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-container">
+                <h3>Progresso por Meta</h3>
+                <canvas id="progressChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Status das Metas</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <div class="metas-section">
+            <h2 style="margin-bottom: 30px; color: #1e3c72; font-size: 2em;">Acompanhamento Detalhado</h2>
+
+            <!-- Gerando todas as 16 metas -->
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta1')">
+                    <h3>KR 1.1 - Aumentar os índices de prenhez para 87%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge1">Em andamento</div>
+                        <div class="meta-progress" id="progress1">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta1">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Índice de prenhez de 87%
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status1" onchange="updateStatus(1)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Índice Atual de Prenhez (%)</label>
+                        <input type="number" id="indiceAtual1" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Progresso em Relação à Meta de 87% (%)</label>
+                        <input type="number" id="percent1" min="0" max="100"  onchange="updateProgress(1)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar1" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações Implementadas</label>
+                        <textarea id="acoes1" placeholder="Manejo reprodutivo, IATF, nutrição..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel1" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta2')">
+                    <h3>KR 1.2 - Aumentar a taxa de natalidade para 95%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge2">Em andamento</div>
+                        <div class="meta-progress" id="progress2">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta2">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Taxa de natalidade de 95%
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status2" onchange="updateStatus(2)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa Atual de Natalidade (%)</label>
+                        <input type="number" id="taxaAtual2" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Progresso em Relação à Meta (%)</label>
+                        <input type="number" id="percent2" min="0" max="100"  onchange="updateProgress(2)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar2" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações Implementadas</label>
+                        <textarea id="acoes2" placeholder="Assistência veterinária, monitoramento gestacional..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel2" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta3')">
+                    <h3>KR 1.3 - Reduzir a taxa de mortalidade para 2%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge3">Em andamento</div>
+                        <div class="meta-progress" id="progress3">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta3">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 30/05/2025<br>
+                        <strong>Meta:</strong> Reduzir mortalidade para 2%
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status3" onchange="updateStatus(3)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa Atual de Mortalidade (%)</label>
+                        <input type="number" id="taxaMortalidade3" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Progresso em Relação à Meta (%)</label>
+                        <input type="number" id="percent3" min="0" max="100"  onchange="updateProgress(3)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar3" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações Preventivas</label>
+                        <textarea id="acoes3" placeholder="Vacinação, manejo sanitário, nutrição adequada..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Prazo para Conclusão</label>
+                        <input type="date" id="prazo3" value="" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel3" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta4')">
+                    <h3>KR 1.4 - Equilibrar os custos com nutrição, de maneira que não sobre e nem falte animais pronto pra abate</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge4">Em andamento</div>
+                        <div class="meta-progress" id="progress4">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta4">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status4" onchange="updateStatus(4)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent4" min="0" max="100"  onchange="updateProgress(4)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar4" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sistema de Planejamento Nutricional</label>
+                        <textarea id="planejamento4" placeholder="Método de controle e programação" onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações de Otimização</label>
+                        <textarea id="acoes4" placeholder="Ajustes na dieta, cronograma de abate..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel4" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta5')">
+                    <h3>KR 1.5 - Reduzir as despesas operacionais em 5%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge5">Em andamento</div>
+                        <div class="meta-progress" id="progress5">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta5">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Redução de 5% nas despesas
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status5" onchange="updateStatus(5)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Redução Alcançado (%)</label>
+                        <input type="number" id="reducao5" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Progresso em Relação à Meta (%)</label>
+                        <input type="number" id="percent5" min="0" max="100"  onchange="updateProgress(5)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar5" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações de Redução</label>
+                        <textarea id="acoes5" placeholder="Otimização de processos, renegociação de contratos..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel5" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta6')">
+                    <h3>KR 1.6 - Desmamar bezerros com mais de 245kg</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge6">Em andamento</div>
+                        <div class="meta-progress" id="progress6">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta6">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Peso mínimo de 245kg na desmama
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status6" onchange="updateStatus(6)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso Médio Atual na Desmama (kg)</label>
+                        <input type="number" id="pesoMedio6" min="0"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Bezerros Acima de 245kg (%)</label>
+                        <input type="number" id="percent6" min="0" max="100"  onchange="updateProgress(6)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar6" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações de Manejo</label>
+                        <textarea id="acoes6" placeholder="Alimentação das mães, creep feeding, suplementação..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel6" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta7')">
+                    <h3>KR 1.7 - Aumentar a lucratividade para 3,2% a.m.</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge7">Em andamento</div>
+                        <div class="meta-progress" id="progress7">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta7">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Lucratividade de 3,2% ao mês
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status7" onchange="updateStatus(7)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lucratividade Atual Mensal (%)</label>
+                        <input type="number" id="lucratividadeAtual7" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Progresso em Relação à Meta (%)</label>
+                        <input type="number" id="percent7" min="0" max="100"  onchange="updateProgress(7)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar7" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações para Aumentar Lucratividade</label>
+                        <textarea id="acoes7" placeholder="Melhoria de produtividade, redução de custos, melhor preço de venda..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel7" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta8')">
+                    <h3>KR 1.8 - Manter peso médio de venda acima de Vacas 16@</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge8">Em andamento</div>
+                        <div class="meta-progress" id="progress8">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta8">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Peso médio mínimo de 16@ (480kg)
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status8" onchange="updateStatus(8)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso Médio Atual de Venda - Vacas (@)</label>
+                        <input type="number" id="pesoAtual8" min="0"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Vacas Acima de 16@ (%)</label>
+                        <input type="number" id="percent8" min="0" max="100"  onchange="updateProgress(8)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar8" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estratégias de Manejo</label>
+                        <textarea id="acoes8" placeholder="Terminação adequada, nutrição, seleção de animais..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel8" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta9')">
+                    <h3>KR 1.9 - Manter peso médio de venda acima de Novilhas 14@</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge9">Em andamento</div>
+                        <div class="meta-progress" id="progress9">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta9">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Peso médio mínimo de 14@ (420kg)
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status9" onchange="updateStatus(9)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso Médio Atual de Venda - Novilhas (@)</label>
+                        <input type="number" id="pesoAtual9" min="0"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Novilhas Acima de 14@ (%)</label>
+                        <input type="number" id="percent9" min="0" max="100"  onchange="updateProgress(9)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar9" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estratégias de Manejo</label>
+                        <textarea id="acoes9" placeholder="Terminação, nutrição, seleção..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel9" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta10')">
+                    <h3>KR 1.10 - Manter peso médio de venda acima de Novilhas 14@</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge10">Em andamento</div>
+                        <div class="meta-progress" id="progress10">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta10">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Peso médio mínimo de 14@ (420kg)
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status10" onchange="updateStatus(10)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso Médio Atual de Venda - Novilhas (@)</label>
+                        <input type="number" id="pesoAtual10" min="0"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Novilhas Acima de 14@ (%)</label>
+                        <input type="number" id="percent10" min="0" max="100"  onchange="updateProgress(10)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar10" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estratégias de Manejo</label>
+                        <textarea id="acoes10" placeholder="Terminação, nutrição, seleção..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel10" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta11')">
+                    <h3>KR 1.11 - Reduzir a ocorrência de doenças em 15%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge11">Em andamento</div>
+                        <div class="meta-progress" id="progress11">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta11">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Redução de 15% na ocorrência de doenças
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status11" onchange="updateStatus(11)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Redução Alcançado (%)</label>
+                        <input type="number" id="reducao11" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Progresso em Relação à Meta (%)</label>
+                        <input type="number" id="percent11" min="0" max="100"  onchange="updateProgress(11)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar11" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações Sanitárias</label>
+                        <textarea id="acoes11" placeholder="Vacinação, vermifugação, quarentena, biossegurança..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel11" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta12')">
+                    <h3>KR 1.12 - Implementar monitoramento mensal de sanidade</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge12">Em andamento</div>
+                        <div class="meta-progress" id="progress12">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta12">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status12" onchange="updateStatus(12)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Meses com Monitoramento Realizado</label>
+                        <input type="number" id="mesesMonitoramento12" min="0" max="12"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent12" min="0" max="100"  onchange="updateProgress(12)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar12" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sistema de Monitoramento</label>
+                        <textarea id="sistema12" placeholder="Protocolos, registros, indicadores..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel12" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta13')">
+                    <h3>KR 1.13 - Manter taxa de rendimento de carcaça Vacas acima de 50%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge13">Em andamento</div>
+                        <div class="meta-progress" id="progress13">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta13">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Rendimento de carcaça acima de 50%
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status13" onchange="updateStatus(13)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa de Rendimento Atual - Vacas (%)</label>
+                        <input type="number" id="rendimentoAtual13" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual Acima da Meta (%)</label>
+                        <input type="number" id="percent13" min="0" max="100"  onchange="updateProgress(13)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar13" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações de Manejo</label>
+                        <textarea id="acoes13" placeholder="Genética, nutrição, manejo pré-abate..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel13" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta14')">
+                    <h3>KR 1.14 - Manter taxa de rendimento de carcaça Novilhas acima de 51%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge14">Em andamento</div>
+                        <div class="meta-progress" id="progress14">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta14">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Rendimento de carcaça acima de 51%
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status14" onchange="updateStatus(14)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa de Rendimento Atual - Novilhas (%)</label>
+                        <input type="number" id="rendimentoAtual14" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual Acima da Meta (%)</label>
+                        <input type="number" id="percent14" min="0" max="100"  onchange="updateProgress(14)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar14" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações de Manejo</label>
+                        <textarea id="acoes14" placeholder="Genética, nutrição, manejo pré-abate..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel14" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta15')">
+                    <h3>KR 1.15 - Manter taxa de rendimento de carcaça Novilhas cruzamento acima de 51,5%</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge15">Em andamento</div>
+                        <div class="meta-progress" id="progress15">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta15">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025<br>
+                        <strong>Meta:</strong> Rendimento de carcaça acima de 51,5%
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status15" onchange="updateStatus(15)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa de Rendimento Atual - Novilhas Cruzamento (%)</label>
+                        <input type="number" id="rendimentoAtual15" min="0" max="100"  step="0.1" onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual Acima da Meta (%)</label>
+                        <input type="number" id="percent15" min="0" max="100"  onchange="updateProgress(15)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar15" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ações de Manejo</label>
+                        <textarea id="acoes15" placeholder="Programa de cruzamento, nutrição, seleção..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel15" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-card">
+                <div class="meta-header" onclick="toggleMeta('meta16')">
+                    <h3>KR 1.16 - Oferecer treinamento básico para colaboradores em apoio com o RH</h3>
+                    <div class="meta-info">
+                        <div class="meta-status status-andamento" id="statusBadge16">Em andamento</div>
+                        <div class="meta-progress" id="progress16">0%</div>
+                    </div>
+                </div>
+                <div class="meta-content" id="meta16">
+                    <div class="info-box">
+                        <strong>Período:</strong> 01/01/2025 a 31/12/2025
+                    </div>
+                    <div class="form-group">
+                        <label>Status Atual</label>
+                        <select id="status16" onchange="updateStatus(16)">
+                            <option value="planejado">Não Iniciado</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Percentual de Conclusão (%)</label>
+                        <input type="number" id="percent16" min="0" max="100"  onchange="updateProgress(16)">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="bar16" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Total de Colaboradores</label>
+                        <input type="number" id="totalColab16" min="0"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Colaboradores Treinados</label>
+                        <input type="number" id="colabTreinados16" min="0"  onchange="saveData()">
+                    </div>
+                    <div class="form-group">
+                        <label>Temas dos Treinamentos</label>
+                        <textarea id="temas16" placeholder="Manejo animal, segurança, boas práticas..." onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Parceria com RH</label>
+                        <textarea id="parceria16" placeholder="Ações conjuntas com o RH" onchange="saveData()"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsável pela Execução</label>
+                        <input type="text" id="responsavel16" placeholder="Nome do responsável" onchange="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn-export" onclick="exportData()">📥 Exportar Relatório</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">
+        ✓ Dados salvos automaticamente
+    </div>
+
+    <script>
+        let progressChart, statusChart;
+
+        function toggleMeta(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('active');
+        }
+
+        function updateProgress(metaId) {
+            const percent = document.getElementById('percent' + metaId).value;
+            const bar = document.getElementById('bar' + metaId);
+            const progressLabel = document.getElementById('progress' + metaId);
+            
+            bar.style.width = percent + '%';
+            bar.textContent = percent + '%';
+            progressLabel.textContent = percent + '%';
+            
+            saveData();
+            updateCharts();
+            updateKPIs();
+        }
+
+        function updateStatus(metaId) {
+            const status = document.getElementById('status' + metaId).value;
+            const badge = document.getElementById('statusBadge' + metaId);
+            
+            badge.className = 'meta-status';
+            
+            if (status === 'planejado') {
+                badge.classList.add('status-nao-iniciado');
+                badge.textContent = 'Não iniciado';
+            } else if (status === 'andamento') {
+                badge.classList.add('status-andamento');
+                badge.textContent = 'Em andamento';
+            } else if (status === 'concluido') {
+                badge.classList.add('status-concluido');
+                badge.textContent = 'Concluído';
+            } else if (status === 'atrasado') {
+                badge.classList.add('status-atrasado');
+                badge.textContent = 'Atrasado';
+            }
+            
+            saveData();
+            updateCharts();
+            updateKPIs();
+        }
+
+        function saveData() {
+            const data = {};
+            for (let i = 1; i <= 16; i++) {
+                data['meta' + i] = {
+                    status: document.getElementById('status' + i)?.value || '',
+                    percent: document.getElementById('percent' + i)?.value || '0',
+                    prazo: document.getElementById('prazo' + i)?.value || '',
+                    responsavel: document.getElementById('responsavel' + i)?.value || '',
+                    indiceAtual: document.getElementById('indiceAtual' + i)?.value || '',
+                    taxaAtual: document.getElementById('taxaAtual' + i)?.value || '',
+                    taxaMortalidade: document.getElementById('taxaMortalidade' + i)?.value || '',
+                    planejamento: document.getElementById('planejamento' + i)?.value || '',
+                    reducao: document.getElementById('reducao' + i)?.value || '',
+                    pesoMedio: document.getElementById('pesoMedio' + i)?.value || '',
+                    lucratividadeAtual: document.getElementById('lucratividadeAtual' + i)?.value || '',
+                    pesoAtual: document.getElementById('pesoAtual' + i)?.value || '',
+                    mesesMonitoramento: document.getElementById('mesesMonitoramento' + i)?.value || '',
+                    sistema: document.getElementById('sistema' + i)?.value || '',
+                    rendimentoAtual: document.getElementById('rendimentoAtual' + i)?.value || '',
+                    totalColab: document.getElementById('totalColab' + i)?.value || '',
+                    colabTreinados: document.getElementById('colabTreinados' + i)?.value || '',
+                    temas: document.getElementById('temas' + i)?.value || '',
+                    parceria: document.getElementById('parceria' + i)?.value || '',
+                    acoes: document.getElementById('acoes' + i)?.value || ''
+                };
+            }
+            
+            localStorage.setItem('metasPecuaria2025', JSON.stringify(data));
+            showSaveIndicator();
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('metasPecuaria2025');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                for (let i = 1; i <= 16; i++) {
+                    const meta = data['meta' + i];
+                    if (meta) {
+                        if (document.getElementById('status' + i)) {
+                            document.getElementById('status' + i).value = meta.status;
+                            updateStatus(i);
+                        }
+                        if (document.getElementById('percent' + i)) {
+                            document.getElementById('percent' + i).value = meta.percent;
+                            updateProgress(i);
+                        }
+                        
+                        const campos = ['prazo', 'responsavel', 'indiceAtual', 'taxaAtual', 'taxaMortalidade', 
+                                      'planejamento', 'reducao', 'pesoMedio', 'lucratividadeAtual', 'pesoAtual',
+                                      'mesesMonitoramento', 'sistema', 'rendimentoAtual', 'totalColab', 
+                                      'colabTreinados', 'temas', 'parceria', 'acoes'];
+                        
+                        campos.forEach(campo => {
+                            const elemento = document.getElementById(campo + i);
+                            if (elemento && meta[campo]) {
+                                elemento.value = meta[campo];
+                            }
+                        });
+                    }
+                }
+            }
+            updateCharts();
+            updateKPIs();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        function updateKPIs() {
+            let total = 0;
+            let concluidas = 0;
+            let emAndamento = 0;
+
+            for (let i = 1; i <= 16; i++) {
+                const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                const status = document.getElementById('status' + i).value;
+                
+                total += percent;
+                
+                if (percent === 100) concluidas++;
+                else if (status === 'andamento') emAndamento++;
+            }
+
+            const progressoGeral = Math.round(total / 16);
+            document.getElementById('progressoGeral').textContent = progressoGeral + '%';
+            document.getElementById('metasConcluidas').textContent = concluidas;
+            document.getElementById('metasAndamento').textContent = emAndamento;
+        }
+
+        function updateCharts() {
+            const progressData = [];
+            const labels = [];
+
+            for (let i = 1; i <= 16; i++) {
+                const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                progressData.push(percent);
+                labels.push('KR 1.' + i);
+            }
+
+            if (progressChart) {
+                progressChart.data.datasets[0].data = progressData;
+                progressChart.update();
+            } else {
+                const ctx1 = document.getElementById('progressChart').getContext('2d');
+                progressChart = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Progresso (%)',
+                            data: progressData,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            let planejado = 0, andamento = 0, concluido = 0, atrasado = 0;
+
+            for (let i = 1; i <= 16; i++) {
+                const status = document.getElementById('status' + i).value;
+                if (status === 'planejado') planejado++;
+                else if (status === 'andamento') andamento++;
+                else if (status === 'concluido') concluido++;
+                else if (status === 'atrasado') atrasado++;
+            }
+
+            if (statusChart) {
+                statusChart.data.datasets[0].data = [planejado, andamento, concluido, atrasado];
+                statusChart.update();
+            } else {
+                const ctx2 = document.getElementById('statusChart').getContext('2d');
+                statusChart = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado'],
+                        datasets: [{
+                            data: [planejado, andamento, concluido, atrasado],
+                            backgroundColor: [
+                                'rgba(255, 152, 0, 0.8)',
+                                'rgba(33, 150, 243, 0.8)',
+                                'rgba(76, 175, 80, 0.8)',
+                                'rgba(244, 67, 54, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function exportData() {
+            const data = localStorage.getItem('metasPecuaria2025');
+            if (!data) {
+                alert('Nenhum dado para exportar!');
+                return;
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'metas_pecuaria_2025_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+        }
+
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
