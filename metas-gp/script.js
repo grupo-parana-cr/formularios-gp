@@ -99,18 +99,15 @@ async function saveDataToSheets() {
         
         console.log('💾 Salvando:', data);
         
-        // Usar Query Parameters (funciona com no-cors)
-        const params = new URLSearchParams();
-        params.append('action', 'save');
-        params.append('department', departmentName);
-        params.append('data', JSON.stringify(data));
-        
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
-            method: 'GET',
-            mode: 'no-cors'
+        // Usar POST com no-cors (exatamente como a pesquisa funciona)
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
         });
         
-        console.log('✅ Dados enviados');
+        console.log('✅ Enviado via POST no-cors');
         updateSyncStatus('✅ Salvo com sucesso');
         saveLocalBackup(data);
         
@@ -143,19 +140,9 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // Usar Query Parameters (funciona com no-cors)
-        const params = new URLSearchParams();
-        params.append('action', 'load');
-        params.append('department', departmentName);
-        
-        const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
-            method: 'GET',
-            mode: 'no-cors'
-        });
-        
         // Com no-cors não conseguimos ler a resposta
-        // Então carregamos do backup local
-        console.log('ℹ️ Usando backup local (no-cors não permite ler resposta)');
+        // Usar localStorage como fallback
+        console.log('ℹ️ Usando backup local');
         loadLocalBackup();
         
     } catch (error) {
