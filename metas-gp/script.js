@@ -126,7 +126,7 @@ async function saveDataToSheets() {
 }
 
 // ============================================
-// CARREGAR DADOS DO GOOGLE SHEETS via SheetDB
+// CARREGAR DADOS DO GOOGLE SHEETS via JSONP
 // ============================================
 async function loadDataFromSheets() {
     try {
@@ -138,35 +138,45 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // SheetDB permite acessar Google Sheets como JSON SEM CORS
-        // URL: https://sheetdb.io/api/v1/SHEET_ID
-        const SHEET_ID = '1ZHrYZOCjQqqlK9WOW0SsxDEsG1OmjA_DBywGlqOxChI';
-        const sheetdbUrl = `https://sheetdb.io/api/v1/${SHEET_ID}/search?department=${encodeURIComponent(departmentName)}`;
+        // Usar JSONP (funciona sem CORS!)
+        const senha = 'metas2025';
+        const url = `${GOOGLE_SCRIPT_URL}?password=${senha}&department=${encodeURIComponent(departmentName)}&callback=loadSheetData`;
         
-        const response = await fetch(sheetdbUrl);
-        const result = await response.json();
-        
-        if (result && result.length > 0) {
-            // SheetDB retorna um array, pegamos o primeiro resultado
-            const row = result[0];
+        // Criar função JSONP
+        window.loadSheetData = function(result) {
+            console.log('📥 Resposta do Apps Script:', result);
             
-            console.log('✅ Dados carregados do Sheets:', row);
-            
-            // O JSON está na coluna "dados"
-            if (row.dados) {
+            if (result.result === 'success' && result.dados) {
                 try {
-                    const data = JSON.parse(row.dados);
+                    // Se dados for string JSON, fazer parse
+                    const data = typeof result.dados === 'string' 
+                        ? JSON.parse(result.dados) 
+                        : result.dados;
+                    
+                    console.log('✅ Dados carregados do Sheets:', data);
                     populateFormWithData(data);
                     updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
                     return;
                 } catch (parseErr) {
                     console.error('Erro ao fazer parse JSON:', parseErr);
                 }
+            } else if (result.result === 'not_found') {
+                console.log('ℹ️ Nenhum dado anterior encontrado');
+                loadLocalBackup();
+            } else {
+                console.log('ℹ️ Nenhum dado anterior encontrado');
+                loadLocalBackup();
             }
-        }
+        };
         
-        console.log('ℹ️ Nenhum dado anterior encontrado, usando backup local');
-        loadLocalBackup();
+        // Executar JSONP
+        const script = document.createElement('script');
+        script.src = url;
+        script.onerror = () => {
+            console.error('❌ Erro ao carregar JSONP');
+            loadLocalBackup();
+        };
+        document.head.appendChild(script);
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
