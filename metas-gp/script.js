@@ -126,7 +126,7 @@ async function saveDataToSheets() {
 }
 
 // ============================================
-// CARREGAR DADOS DO GOOGLE SHEETS (GET via URL Pública)
+// CARREGAR DADOS DO GOOGLE SHEETS via SheetDB
 // ============================================
 async function loadDataFromSheets() {
     try {
@@ -138,40 +138,26 @@ async function loadDataFromSheets() {
         
         console.log('📥 Carregando dados de:', departmentName);
         
-        // URL pública do Google Sheets em formato CSV
-        // Isso funciona em qualquer máquina, sem CORS!
+        // SheetDB permite acessar Google Sheets como JSON SEM CORS
+        // URL: https://sheetdb.io/api/v1/SHEET_ID
         const SHEET_ID = '1ZHrYZOCjQqqlK9WOW0SsxDEsG1OmjA_DBywGlqOxChI';
-        const SHEET_GID = '0'; // GID da aba "Respostas" (padrão é 0)
-        const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
+        const sheetdbUrl = `https://sheetdb.io/api/v1/${SHEET_ID}/search?department=${encodeURIComponent(departmentName)}`;
         
-        const response = await fetch(csvUrl);
-        const csvText = await response.text();
+        const response = await fetch(sheetdbUrl);
+        const result = await response.json();
         
-        // Parsear CSV
-        const lines = csvText.trim().split('\n');
-        
-        if (lines.length < 2) {
-            console.log('ℹ️ Nenhum dado anterior encontrado');
-            loadLocalBackup();
-            return;
-        }
-        
-        // Headers: timestamp, department, dados
-        const headers = lines[0].split(',');
-        
-        // Procurar linha do departamento
-        for (let i = 1; i < lines.length; i++) {
-            const values = parseCSVLine(lines[i]);
+        if (result && result.length > 0) {
+            // SheetDB retorna um array, pegamos o primeiro resultado
+            const row = result[0];
             
-            if (values.length >= 3 && values[1].trim() === departmentName) {
-                // Encontrou o departamento!
-                const jsonString = values[2];
-                
+            console.log('✅ Dados carregados do Sheets:', row);
+            
+            // O JSON está na coluna "dados"
+            if (row.dados) {
                 try {
-                    const data = JSON.parse(jsonString);
-                    console.log('✅ Dados carregados do Sheets:', data);
+                    const data = JSON.parse(row.dados);
                     populateFormWithData(data);
-                    updateSyncStatus('✅ Carregado do Sheets');
+                    updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
                     return;
                 } catch (parseErr) {
                     console.error('Erro ao fazer parse JSON:', parseErr);
@@ -179,44 +165,13 @@ async function loadDataFromSheets() {
             }
         }
         
-        console.log('ℹ️ Departamento não encontrado na planilha, usando backup local');
+        console.log('ℹ️ Nenhum dado anterior encontrado, usando backup local');
         loadLocalBackup();
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
         loadLocalBackup();
     }
-}
-
-// ============================================
-// PARSEAR LINHA CSV (lidar com aspas)
-// ============================================
-function parseCSVLine(line) {
-    const result = [];
-    let current = '';
-    let insideQuotes = false;
-    
-    for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const nextChar = line[i + 1];
-        
-        if (char === '"') {
-            if (insideQuotes && nextChar === '"') {
-                current += '"';
-                i++;
-            } else {
-                insideQuotes = !insideQuotes;
-            }
-        } else if (char === ',' && !insideQuotes) {
-            result.push(current);
-            current = '';
-        } else {
-            current += char;
-        }
-    }
-    
-    result.push(current);
-    return result;
 }
 
 // ============================================
