@@ -99,16 +99,20 @@ async function saveDataToSheets() {
         
         console.log('💾 Salvando:', data);
         
-        // Usar no-cors - os dados SERÃO salvos mesmo sem conseguir ler a resposta
+        // Converter para FormData (funciona com no-cors)
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+            formData.append(key, JSON.stringify(data[key]));
+        });
+        
+        // Usar no-cors com FormData
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: formData
         });
         
-        // Com no-cors, assumimos sucesso porque os dados foram enviados
-        console.log('✅ Dados enviados (no-cors)');
+        console.log('✅ Dados enviados (no-cors + FormData)');
         updateSyncStatus('✅ Salvo com sucesso');
         saveLocalBackup(data);
         
