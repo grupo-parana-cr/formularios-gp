@@ -1,4 +1,4 @@
-# 🚀 GUIA OBJETIVO - SISTEMA DE METAS 2025
+# 🚀 GUIA - METAS 2025
 
 ## 📦 ARQUIVOS QUE VOCÊ TEM:
 
@@ -14,7 +14,7 @@
 ### 1️⃣ Google Sheets (criar planilha)
 
 1. Acesse: https://sheets.google.com
-2. Crie planilha: "Metas 2025 - Grupo Paraná"
+2. Crie planilha: "Metas 2025"
 3. Copie o ID da URL: `https://docs.google.com/spreadsheets/d/**SEU_ID_AQUI**/edit`
 4. Guarde esse ID
 
@@ -89,7 +89,7 @@ font-weight: 600; font-size: 1em; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4
 
 1. Acesse: https://github.com/new
 2. Nome: `metas-2025`
-3. Descrição: "Sistema de Metas 2025 - Grupo Paraná"
+3. Descrição: "Metas 2025"
 4. ☑ Public
 5. Create repository
 
@@ -184,4 +184,4 @@ Teste: 5 minutos
 
 ---
 
-Desenvolvido para Grupo Paraná - Inova GP 2025
+Desenvolvido para Grupo Paraná
