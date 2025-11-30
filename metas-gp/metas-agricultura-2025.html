@@ -243,19 +243,6 @@
             background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%);
         }
 
-        .save-indicator {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #4caf50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-
         @keyframes slideIn {
             from {
                 transform: translateX(400px);
@@ -790,10 +777,6 @@
         </div>
     </div>
 
-    <div class="save-indicator" id="saveIndicator">
-        ✓ Dados salvos automaticamente
-    </div>
-
     <script>
         let progressChart, statusChart;
 
@@ -948,14 +931,6 @@
             }
             updateCharts();
             updateKPIs();
-        }
-
-        function showSaveIndicator() {
-            const indicator = document.getElementById('saveIndicator');
-            indicator.style.display = 'block';
-            setTimeout(() => {
-                indicator.style.display = 'none';
-            }, 2000);
         }
 
         function updateKPIs() {
