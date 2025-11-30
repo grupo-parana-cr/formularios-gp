@@ -709,37 +709,7 @@
         }
 
         function loadData() {
-            // localStorage removido
-
-            // const savedData = localStorage.getItem('metasMarketing2025');
-            // localStorage removido
-
-            if (false) { // localStorage desativado
-                const data = JSON.parse(savedData);
-                for (let i = 1; i <= 4; i++) {
-                    const meta = data['meta' + i];
-                    if (meta) {
-                        if (document.getElementById('status' + i)) {
-                            document.getElementById('status' + i).value = meta.status;
-                            updateStatus(i);
-                        }
-                        if (document.getElementById('percent' + i)) {
-                            document.getElementById('percent' + i).value = meta.percent;
-                            updateProgress(i);
-                        }
-                        
-                        // Restaurar todos os campos
-                        Object.keys(meta).forEach(campo => {
-                            if (campo !== 'status' && campo !== 'percent') {
-                                const elemento = document.getElementById(campo + i);
-                                if (elemento && meta[campo]) {
-                                    elemento.value = meta[campo];
-                                }
-                            }
-                        });
-                    }
-                }
-            }
+            // localStorage removido - sincronização via Google Sheets
             updateCampanhas();
             updateCharts();
             updateKPIs();
