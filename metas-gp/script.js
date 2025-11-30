@@ -33,13 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('📋 Departamento:', departmentName);
     
+    // Mostrar notificação de carregamento
+    updateSyncStatus('⏳ Carregando...');
+    
     // Carregar dados salvos do Google Sheets
     loadDataFromSheets();
     
     // Configurar auto-save
     setupAutoSaveListeners();
-    
-    updateSyncStatus('Carregado');
 });
 
 // ============================================
@@ -108,12 +109,10 @@ async function saveDataToSheets() {
         
         console.log('✅ Enviado via POST');
         updateSyncStatus('✅ Salvo com sucesso');
-        saveLocalBackup(data);
         
     } catch (error) {
         console.error('❌ Erro ao salvar:', error);
         updateSyncStatus('⚠️ Erro ao salvar');
-        saveLocalBackup(collectFormData());
     }
 }
 
@@ -124,7 +123,6 @@ function loadDataFromSheets() {
     try {
         if (!departmentName) {
             console.warn('⚠️ Nome do departamento não identificado');
-            loadLocalBackup();
             return;
         }
         
@@ -135,11 +133,11 @@ function loadDataFromSheets() {
             if (result.result === 'success' && result.data) {
                 console.log('✅ Dados carregados do Sheets:', result.data);
                 populateFormWithData(result.data);
-                updateSyncStatus('✅ Carregado do Sheets (sincronizado!)');
             } else {
-                console.log('ℹ️ Nenhum dado anterior encontrado');
-                loadLocalBackup();
+                console.log('ℹ️ Nenhum dado anterior encontrado - iniciando vazio');
             }
+            // Mostrar notificação de carregado independente se tem dados ou não
+            updateSyncStatus('✅ Carregado');
         };
         
         // Criar script tag dinamicamente (JSONP)
@@ -148,46 +146,20 @@ function loadDataFromSheets() {
         script.src = url;
         script.onerror = function() {
             console.error('⚠️ Erro ao carregar via JSONP');
-            loadLocalBackup();
+            // Não mostrar notificação, apenas log
         };
         document.head.appendChild(script);
         
     } catch (error) {
         console.error('⚠️ Erro ao carregar:', error);
-        loadLocalBackup();
+        // Não mostrar notificação, apenas log
     }
 }
 
 // ============================================
-// BACKUP LOCAL (localStorage)
+// BACKUP LOCAL (localStorage) - REMOVIDO
 // ============================================
-function saveLocalBackup(data) {
-    try {
-        const backup = {
-            department: departmentName,
-            timestamp: new Date().toISOString(),
-            fields: data
-        };
-        localStorage.setItem(`metas_backup_${departmentName}`, JSON.stringify(backup));
-        console.log('💾 Backup local salvo');
-    } catch (error) {
-        console.error('Erro ao salvar backup local:', error);
-    }
-}
-
-function loadLocalBackup() {
-    try {
-        const backup = localStorage.getItem(`metas_backup_${departmentName}`);
-        if (backup) {
-            const data = JSON.parse(backup);
-            populateFormWithData(data.fields);
-            updateSyncStatus('📦 Carregado do backup local');
-            console.log('✅ Backup local carregado');
-        }
-    } catch (error) {
-        console.error('Erro ao carregar backup local:', error);
-    }
-}
+// localStorage foi removido - sincronização apenas via Google Sheets
 
 // ============================================
 // COLETAR DADOS DO FORMULÁRIO
