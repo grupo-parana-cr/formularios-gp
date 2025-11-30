@@ -835,24 +835,48 @@
         }
 
         function updateLideres() {
-            const total = parseInt(document.getElementById('totalLideres4').value) || 0;
-            const participaram = parseInt(document.getElementById('lideresParticiparam4').value) || 0;
+            const totalInput = document.getElementById('totalLideres4').value;
+            const participaramInput = document.getElementById('lideresParticiparam4').value;
+            
+            // Se ambos vazios, progresso = 0%
+            if (totalInput === '' && participaramInput === '') {
+                document.getElementById('percent4').value = 0;
+                updateProgress(4);
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const participaram = parseInt(participaramInput) || 0;
             
             if (total > 0) {
                 const percentual = Math.min(Math.round((participaram / total) * 100), 100);
                 document.getElementById('percent4').value = percentual;
                 updateProgress(4);
+            } else {
+                document.getElementById('percent4').value = 0;
             }
         }
 
         function updateAvaliacao() {
-            const total = parseInt(document.getElementById('totalColab7').value) || 0;
-            const avaliados = parseInt(document.getElementById('colabAvaliados7').value) || 0;
+            const totalInput = document.getElementById('totalColab7').value;
+            const aviadosInput = document.getElementById('colabAvaliados7').value;
+            
+            // Se ambos vazios, progresso = 0%
+            if (totalInput === '' && aviadosInput === '') {
+                document.getElementById('percent7').value = 0;
+                updateProgress(7);
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const avaliados = parseInt(aviadosInput) || 0;
             
             if (total > 0) {
                 const percentual = Math.min(Math.round((avaliados / total) * 100), 100);
                 document.getElementById('percent7').value = percentual;
                 updateProgress(7);
+            } else {
+                document.getElementById('percent7').value = 0;
             }
         }
 
