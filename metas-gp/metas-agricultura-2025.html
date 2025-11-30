@@ -155,13 +155,13 @@
             font-size: 0.9em;
         }
 
-        .status-andamento {
-            background: #2196f3;
+                .status-nao-iniciado {
+            background: #ff9800;
             color: white;
         }
 
-        .status-nao-iniciado {
-            background: #ff9800;
+        .status-andamento {
+            background: #2196f3;
             color: white;
         }
 
@@ -347,7 +347,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta1')">
                     <h3>KR 1.1 - Reduzir os acidentes de trabalho (ocupacional e veicular) para 0 acidentes</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge1">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge1">Não Iniciado</div>
                         <div class="meta-progress" id="progress1">0%</div>
                     </div>
                 </div>
@@ -359,7 +359,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status1" onchange="updateStatus(1)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -404,7 +404,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta2')">
                     <h3>KR 1.2 - Baixar o custo operacional em 10%</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge2">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge2">Não Iniciado</div>
                         <div class="meta-progress" id="progress2">0%</div>
                     </div>
                 </div>
@@ -416,7 +416,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status2" onchange="updateStatus(2)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -450,10 +450,10 @@
 
             <!-- KR 1.3 - CONCLUÍDA -->
             <div class="meta-card">
-                <div class="meta-header concluida" onclick="toggleMeta('meta3')">
+                <div class="meta-header" onclick="toggleMeta('meta3')">
                     <h3>KR 1.3 - Realizar a colheita com equipamento próprio em 90% da área (considerando 3.000ha) ✓</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-concluido" id="statusBadge3">Concluído</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge3">Não Iniciado</div>
                         <div class="meta-progress" id="progress3">0%</div>
                     </div>
                 </div>
@@ -465,7 +465,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status3" onchange="updateStatus(3)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -503,10 +503,10 @@
 
             <!-- KR 1.4 - CONCLUÍDA -->
             <div class="meta-card">
-                <div class="meta-header concluida" onclick="toggleMeta('meta4')">
+                <div class="meta-header" onclick="toggleMeta('meta4')">
                     <h3>KR 1.4 - Produzir acima de 70 scs de soja por ha Bloco Costa Rica ✓</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-concluido" id="statusBadge4">Concluído</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge4">Não Iniciado</div>
                         <div class="meta-progress" id="progress4">0%</div>
                     </div>
                 </div>
@@ -519,7 +519,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status4" onchange="updateStatus(4)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -549,10 +549,10 @@
 
             <!-- KR 1.5 - CONCLUÍDA -->
             <div class="meta-card">
-                <div class="meta-header concluida" onclick="toggleMeta('meta5')">
+                <div class="meta-header" onclick="toggleMeta('meta5')">
                     <h3>KR 1.5 - Produzir acima de 58 scs de soja por ha Bloco Bonanza ✓</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-concluido" id="statusBadge5">Concluído</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge5">Não Iniciado</div>
                         <div class="meta-progress" id="progress5">0%</div>
                     </div>
                 </div>
@@ -565,7 +565,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status5" onchange="updateStatus(5)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -595,10 +595,10 @@
 
             <!-- KR 1.6 - CONCLUÍDA -->
             <div class="meta-card">
-                <div class="meta-header concluida" onclick="toggleMeta('meta6')">
+                <div class="meta-header" onclick="toggleMeta('meta6')">
                     <h3>KR 1.6 - Não ter áreas de replantio (exceto por intemperes climáticas) ✓</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-concluido" id="statusBadge6">Concluído</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge6">Não Iniciado</div>
                         <div class="meta-progress" id="progress6">0%</div>
                     </div>
                 </div>
@@ -610,7 +610,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status6" onchange="updateStatus(6)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -644,10 +644,10 @@
 
             <!-- KR 1.7 - CONCLUÍDA -->
             <div class="meta-card">
-                <div class="meta-header concluida" onclick="toggleMeta('meta7')">
+                <div class="meta-header" onclick="toggleMeta('meta7')">
                     <h3>KR 1.7 - Plantar 50% da área com semente própria (considerando 3.000ha) ✓</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-concluido" id="statusBadge7">Concluído</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge7">Não Iniciado</div>
                         <div class="meta-progress" id="progress7">0%</div>
                     </div>
                 </div>
@@ -660,7 +660,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status7" onchange="updateStatus(7)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -694,10 +694,10 @@
 
             <!-- KR 1.8 - CONCLUÍDA -->
             <div class="meta-card">
-                <div class="meta-header concluida" onclick="toggleMeta('meta8')">
+                <div class="meta-header" onclick="toggleMeta('meta8')">
                     <h3>KR 1.8 - Classificar e secar 130 sacas de soja por hora / 1560 dia ✓</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-concluido" id="statusBadge8">Concluído</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge8">Não Iniciado</div>
                         <div class="meta-progress" id="progress8">0%</div>
                     </div>
                 </div>
@@ -710,7 +710,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status8" onchange="updateStatus(8)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -744,10 +744,10 @@
 
             <!-- KR 1.9 - CONCLUÍDA -->
             <div class="meta-card">
-                <div class="meta-header concluida" onclick="toggleMeta('meta9')">
+                <div class="meta-header" onclick="toggleMeta('meta9')">
                     <h3>KR 1.9 - Produzir acima de 180 scs de milho por ha ✓</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-concluido" id="statusBadge9">Concluído</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge9">Não Iniciado</div>
                         <div class="meta-progress" id="progress9">0%</div>
                     </div>
                 </div>
@@ -760,7 +760,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status9" onchange="updateStatus(9)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -893,13 +893,20 @@
                 };
             }
             
-            localStorage.setItem('metasAgricultura2025', JSON.stringify(data));
+            // localStorage removido - sincronização via Google Sheets
+
+            
+            // localStorage.setItem('metasAgricultura2025', JSON.stringify(data));
             showSaveIndicator();
         }
 
         function loadData() {
-            const savedData = localStorage.getItem('metasAgricultura2025');
-            if (savedData) {
+            // localStorage removido
+
+            // const savedData = localStorage.getItem('metasAgricultura2025');
+            // localStorage removido
+
+            if (false) { // localStorage desativado
                 const data = JSON.parse(savedData);
                 for (let i = 1; i <= 9; i++) {
                     const meta = data['meta' + i];
@@ -1020,12 +1027,7 @@
                         labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado'],
                         datasets: [{
                             data: [planejado, andamento, concluido, atrasado],
-                            backgroundColor: [
-                                'rgba(255, 152, 0, 0.8)',
-                                'rgba(33, 150, 243, 0.8)',
-                                'rgba(76, 175, 80, 0.8)',
-                                'rgba(244, 67, 54, 0.8)'
-                            ],
+                            backgroundColor: ['rgba(255, 152, 0, 0.8)', 'rgba(33, 150, 243, 0.8)', 'rgba(76, 175, 80, 0.8)', 'rgba(244, 67, 54, 0.8)'],
                             borderWidth: 2
                         }]
                     },
