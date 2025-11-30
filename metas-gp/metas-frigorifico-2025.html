@@ -243,6 +243,19 @@
             background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%);
         }
 
+        .save-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(400px);
@@ -303,11 +316,11 @@
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Metas Concluídas</div>
-                <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">0</div>
+                <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">1</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Em Andamento</div>
-                <div class="kpi-value" id="metasAndamento" style="color: #2196f3;">0</div>
+                <div class="kpi-value" id="metasAndamento" style="color: #2196f3;">7</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Total de Metas</div>
@@ -904,44 +917,11 @@
 
             
             // localStorage.setItem('metasFrigorifico2025', JSON.stringify(data));
-            showSaveIndicator();
+            
         }
 
         function loadData() {
-            // localStorage removido
-
-            // const savedData = localStorage.getItem('metasFrigorifico2025');
-            // localStorage removido
-
-            if (false) { // localStorage desativado
-                const data = JSON.parse(savedData);
-                for (let i = 1; i <= 8; i++) {
-                    const meta = data['meta' + i];
-                    if (meta) {
-                        if (document.getElementById('status' + i)) {
-                            document.getElementById('status' + i).value = meta.status;
-                            updateStatus(i);
-                        }
-                        if (document.getElementById('percent' + i)) {
-                            document.getElementById('percent' + i).value = meta.percent;
-                            updateProgress(i);
-                        }
-                        
-                        const campos = ['prazo', 'responsavel', 'producaoAtual', 'metaProducao', 'acoes',
-                                      'tipoBox', 'dataAquisicao', 'valor', 'beneficios', 'instituicao',
-                                      'participantes', 'dataInicio', 'conteudo', 'metragemTotal', 'metragemInstalada',
-                                      'orcamento', 'etapas', 'adequacoes', 'totalAbatidas', 'metaAnual', 'mediaMensal',
-                                      'software', 'fornecedor', 'relatorios', 'formato', 'destinatarios'];
-                        
-                        campos.forEach(campo => {
-                            const elemento = document.getElementById(campo + i);
-                            if (elemento && meta[campo]) {
-                                elemento.value = meta[campo];
-                            }
-                        });
-                    }
-                }
-            }
+            // localStorage removido - sincronização via Google Sheets
             updateProducao();
             updateAbate();
             updateRelatorios();
@@ -1056,13 +1036,18 @@
             }
         }
 
+        function loadData() {
+            // localStorage removido - sincronização via Google Sheets
+            updateProducao();
+            updateAbate();
+            updateRelatorios();
+            updateCharts();
+            updateKPIs();
+        }
+
         // ✅ FIX: Aguardar dados do Google Sheets (script.js)
-        // Não chamar loadData() para evitar conflito de timing
         window.onload = function() {
-            setTimeout(() => {
-                updateCharts();
-                updateKPIs();
-            }, 500);
+            loadData();
         };
     </script>
 </body>
