@@ -856,6 +856,7 @@
             
             // Se AMBOS estão vazios, progresso = 0%
             if (ocupacionaisInput === '' && veicularesInput === '') {
+                document.getElementById('totalAcidentes1').value = '';
                 document.getElementById('percent1').value = 0;
                 updateProgress(1);
                 return;
