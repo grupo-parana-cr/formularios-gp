@@ -155,13 +155,13 @@
             font-size: 0.9em;
         }
 
-        .status-andamento {
-            background: #2196f3;
+                .status-nao-iniciado {
+            background: #ff9800;
             color: white;
         }
 
-        .status-nao-iniciado {
-            background: #ff9800;
+        .status-andamento {
+            background: #2196f3;
             color: white;
         }
 
@@ -343,7 +343,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta1')">
                     <h3>KR 1.1 - Aumentar a clareza e a eficiência da comunicação com a equipe, garantindo que 100% dos colaboradores recebam feedback frequente</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge1">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge1">Não Iniciado</div>
                         <div class="meta-progress" id="progress1">0%</div>
                     </div>
                 </div>
@@ -355,7 +355,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status1" onchange="updateStatus(1)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -397,7 +397,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta2')">
                     <h3>KR 1.2 - Monitorar a satisfação dos colaboradores com a comunicação e feedback nas avaliações de engajamento</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge2">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge2">Não Iniciado</div>
                         <div class="meta-progress" id="progress2">0%</div>
                     </div>
                 </div>
@@ -408,7 +408,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status2" onchange="updateStatus(2)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -445,7 +445,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta3')">
                     <h3>KR 1.3 - Utilizar o módulo 67 para todas as atividades da agricultura, para obtermos números e controle</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge3">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge3">Não Iniciado</div>
                         <div class="meta-progress" id="progress3">0%</div>
                     </div>
                 </div>
@@ -457,7 +457,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status3" onchange="updateStatus(3)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -494,7 +494,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta4')">
                     <h3>KR 1.4 - Manter o estoque de veneno em tempo real, romaneios para retirada, notas de saída para transporte correto</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge4">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge4">Não Iniciado</div>
                         <div class="meta-progress" id="progress4">0%</div>
                     </div>
                 </div>
@@ -505,7 +505,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status4" onchange="updateStatus(4)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -547,7 +547,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta5')">
                     <h3>KR 1.5 - Controlar o estoque do Silo e fornecer os relatórios</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge5">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge5">Não Iniciado</div>
                         <div class="meta-progress" id="progress5">0%</div>
                     </div>
                 </div>
@@ -558,7 +558,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status5" onchange="updateStatus(5)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -591,7 +591,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta6')">
                     <h3>KR 1.6 - Realizar todos os cadastros necessários no Multi Bovinos e no Campex</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge6">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge6">Não Iniciado</div>
                         <div class="meta-progress" id="progress6">0%</div>
                     </div>
                 </div>
@@ -603,7 +603,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status6" onchange="updateStatus(6)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -640,7 +640,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta7')">
                     <h3>KR 1.7 - Manter relatórios atualizados de alimentação, reprodução e rastreabilidade</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge7">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge7">Não Iniciado</div>
                         <div class="meta-progress" id="progress7">0%</div>
                     </div>
                 </div>
@@ -651,7 +651,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status7" onchange="updateStatus(7)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -688,7 +688,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta8')">
                     <h3>KR 1.8 - Melhorar os lançamentos e acompanhar periodicamente as baixas</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge8">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge8">Não Iniciado</div>
                         <div class="meta-progress" id="progress8">0%</div>
                     </div>
                 </div>
@@ -699,7 +699,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status8" onchange="updateStatus(8)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -738,7 +738,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta9')">
                     <h3>KR 1.9 - Atualizar a relação de veículos assegurados e revisar apólices</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge9">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge9">Não Iniciado</div>
                         <div class="meta-progress" id="progress9">0%</div>
                     </div>
                 </div>
@@ -750,7 +750,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status9" onchange="updateStatus(9)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -792,10 +792,10 @@
 
             <!-- KR 1.10 - ATRASADA -->
             <div class="meta-card">
-                <div class="meta-header atrasada" onclick="toggleMeta('meta10')">
+                <div class="meta-header" onclick="toggleMeta('meta10')">
                     <h3>KR 1.10 - Atualizar a relação de colaboradores com seguro de vida e apólices ⚠️</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-atrasado" id="statusBadge10">Atrasado</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge10">Não Iniciado</div>
                         <div class="meta-progress" id="progress10">0%</div>
                     </div>
                 </div>
@@ -807,7 +807,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status10" onchange="updateStatus(10)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -993,13 +993,20 @@
                 }
             }
             
-            localStorage.setItem('metasCSC2025', JSON.stringify(data));
+            // localStorage removido - sincronização via Google Sheets
+
+            
+            // localStorage.setItem('metasCSC2025', JSON.stringify(data));
             showSaveIndicator();
         }
 
         function loadData() {
-            const savedData = localStorage.getItem('metasCSC2025');
-            if (savedData) {
+            // localStorage removido
+
+            // const savedData = localStorage.getItem('metasCSC2025');
+            // localStorage removido
+
+            if (false) { // localStorage desativado
                 const data = JSON.parse(savedData);
                 for (let i = 1; i <= 10; i++) {
                     const meta = data['meta' + i];
@@ -1058,7 +1065,7 @@
             document.getElementById('progressoGeral').textContent = progressoGeral + '%';
             document.getElementById('metasConcluidas').textContent = concluidas;
             document.getElementById('metasAndamento').textContent = emAndamento;
-            document.getElementById('metasAtrasadas').textContent = atrasadas;
+            (document.getElementById('metasAtrasadas') ? document.getElementById('metasAtrasadas') : {textContent: ''}).textContent = atrasadas;
         }
 
         function updateCharts() {
@@ -1121,12 +1128,7 @@
                         labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado'],
                         datasets: [{
                             data: [planejado, andamento, concluido, atrasado],
-                            backgroundColor: [
-                                'rgba(255, 152, 0, 0.8)',
-                                'rgba(33, 150, 243, 0.8)',
-                                'rgba(76, 175, 80, 0.8)',
-                                'rgba(244, 67, 54, 0.8)'
-                            ],
+                            backgroundColor: ['rgba(255, 152, 0, 0.8)', 'rgba(33, 150, 243, 0.8)', 'rgba(76, 175, 80, 0.8)', 'rgba(244, 67, 54, 0.8)'],
                             borderWidth: 2
                         }]
                     },
