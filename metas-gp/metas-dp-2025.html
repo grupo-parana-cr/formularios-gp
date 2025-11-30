@@ -803,13 +803,25 @@
         }
 
         function updateDocumentos() {
-            const total = parseInt(document.getElementById('totalColab3').value) || 0;
-            const atualizados = parseInt(document.getElementById('colabAtualizados3').value) || 0;
+            const totalInput = document.getElementById('totalColab3').value;
+            const atualizadosInput = document.getElementById('colabAtualizados3').value;
+            
+            // Se ambos vazios, progresso = 0%
+            if (totalInput === '' && atualizadosInput === '') {
+                document.getElementById('percent3').value = 0;
+                updateProgress(3);
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const atualizados = parseInt(atualizadosInput) || 0;
             
             if (total > 0) {
                 const percentual = Math.min(Math.round((atualizados / total) * 100), 100);
                 document.getElementById('percent3').value = percentual;
                 updateProgress(3);
+            } else {
+                document.getElementById('percent3').value = 0;
             }
         }
 
