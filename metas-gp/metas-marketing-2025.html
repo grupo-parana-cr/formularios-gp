@@ -655,12 +655,14 @@
             
             // Se vazio, progresso = 0%
             if (campanhasInput === '') {
+                document.getElementById('metaAnual3').value = '';
                 document.getElementById('percent3').value = 0;
                 updateProgress(3);
                 return;
             }
             
             const campanhas = parseInt(campanhasInput) || 0;
+            document.getElementById('metaAnual3').value = 12;
             const percentual = Math.min(Math.round((campanhas / 12) * 100), 100);
             document.getElementById('percent3').value = percentual;
             updateProgress(3);
