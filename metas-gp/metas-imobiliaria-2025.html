@@ -931,7 +931,17 @@
         }
 
         function updateLotesVendidos() {
-            const lotes = parseInt(document.getElementById('lotesVendidos6').value) || 0;
+            const lotesInput = document.getElementById('lotesVendidos6').value;
+            
+            // Se vazio, progresso = 0%
+            if (lotesInput === '') {
+                document.getElementById('percent6').value = 0;
+                (document.getElementById('lotesVendidos') ? document.getElementById('lotesVendidos') : {textContent: ''}).textContent = '0/22';
+                updateProgress(6);
+                return;
+            }
+            
+            const lotes = parseInt(lotesInput) || 0;
             const percent = Math.round((lotes / 22) * 100);
             
             document.getElementById('percent6').value = percent;
