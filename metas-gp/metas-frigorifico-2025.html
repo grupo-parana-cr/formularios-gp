@@ -316,11 +316,11 @@
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Metas Concluídas</div>
-                <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">0</div>
+                <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">1</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Em Andamento</div>
-                <div class="kpi-value" id="metasAndamento" style="color: #2196f3;">0</div>
+                <div class="kpi-value" id="metasAndamento" style="color: #2196f3;">7</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Total de Metas</div>
@@ -367,7 +367,7 @@
                     </div>
                     <div class="form-group">
                         <label>Produção Atual Mensal (kg)</label>
-                        <input type="number" id="producaoAtual1" min="0"  onchange="saveData()">
+                        <input type="number" id="producaoAtual1" min="0"  onchange="updateProducao()">
                     </div>
                     <div class="form-group">
                         <label>Meta de Produção (kg)</label>
@@ -821,11 +821,32 @@
             updateKPIs();
         }
 
+        function updateProducao() {
+            const producaoInput = document.getElementById('producaoAtual1').value;
+            
+            // Se vazio, progresso = 0%
+            if (producaoInput === '') {
+                document.getElementById('metaProducao1').value = '';
+                document.getElementById('percent1').value = 0;
+                updateProgress(1);
+                return;
+            }
+            
+            const producaoAtual = parseInt(producaoInput) || 0;
+            const metaProducao = 22000;
+            document.getElementById('metaProducao1').value = metaProducao;
+            
+            const percentual = Math.min(Math.round((producaoAtual / metaProducao) * 100), 100);
+            document.getElementById('percent1').value = percentual;
+            updateProgress(1);
+        }
+
         function updateAbate() {
             const totalAbatidasInput = document.getElementById('totalAbatidas6').value;
             
             // Se vazio, progresso = 0%
             if (totalAbatidasInput === '') {
+                document.getElementById('metaAnual6').value = '';
                 document.getElementById('percent6').value = 0;
                 document.getElementById('mediaMensal6').value = '';
                 updateProgress(6);
@@ -834,6 +855,7 @@
             
             const totalAbatidas = parseInt(totalAbatidasInput) || 0;
             const metaAnual = 2500;
+            document.getElementById('metaAnual6').value = metaAnual;
             const mesesDecorridos = new Date().getMonth() + 1;
             
             const mediaMensal = mesesDecorridos > 0 ? Math.round(totalAbatidas / mesesDecorridos) : 0;
@@ -1056,8 +1078,13 @@
             }
         }
 
+        // ✅ FIX: Aguardar dados do Google Sheets (script.js)
+        // Não chamar loadData() para evitar conflito de timing
         window.onload = function() {
-            loadData();
+            setTimeout(() => {
+                updateCharts();
+                updateKPIs();
+            }, 500);
         };
     </script>
 </body>
