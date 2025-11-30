@@ -97,10 +97,25 @@
             font-weight: bold;
             font-size: 0.9em;
         }
-        .status-andamento { background: #2196f3; color: white; }
-        .status-nao-iniciado { background: #ff9800; color: white; }
-        .status-concluido { background: #4caf50; color: white; }
-        .status-atrasado { background: #f44336; color: white; }
+                .status-nao-iniciado {
+            background: #ff9800;
+            color: white;
+        }
+
+        .status-andamento {
+            background: #2196f3;
+            color: white;
+        }
+
+        .status-concluido {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-atrasado {
+            background: #f44336;
+            color: white;
+        }
         .meta-content { padding: 25px; display: none; }
         .meta-content.active { display: block; }
         .form-group { margin-bottom: 20px; }
@@ -245,7 +260,7 @@
                         <div class="meta-header" onclick="toggleMeta('meta${meta.id}')">
                             <h3>KR 1.${meta.id} - ${meta.titulo}</h3>
                             <div class="meta-info">
-                                <div class="meta-status status-andamento" id="statusBadge${meta.id}">Em andamento</div>
+                                <div class="meta-status status-nao-iniciado" id="statusBadge${meta.id}">Não Iniciado</div>
                                 <div class="meta-progress" id="progress${meta.id}">0%</div>
                             </div>
                         </div>
@@ -256,7 +271,7 @@
                             <div class="form-group">
                                 <label>Status Atual</label>
                                 <select id="status${meta.id}" onchange="updateStatus(${meta.id})">
-                                    <option value="planejado">Não Iniciado</option>
+                                    <option value="planejado" selected>Não Iniciado</option>
                                     <option value="andamento">Em Andamento</option>
                                     <option value="concluido">Concluído</option>
                                     <option value="atrasado">Atrasado</option>
@@ -362,13 +377,22 @@
                 };
             }
             
-            localStorage.setItem('metasContabilFiscal2025', JSON.stringify(data));
+            // localStorage removido - sincronização via Google Sheets
+            // // localStorage removido - sincronização via Google Sheets
+ // localStorage.setItem('metasContabilFiscal2025', JSON.stringify(data));
             showSaveIndicator();
         }
 
         function loadData() {
-            const savedData = localStorage.getItem('metasContabilFiscal2025');
-            if (savedData) {
+            // localStorage removido - dados carregam do Google Sheets via script.js
+            // Mantém compatibilidade de estrutura
+            /*
+            // localStorage removido
+
+            // const savedData = localStorage.getItem('metasContabilFiscal2025');
+            // localStorage removido
+
+            if (false) { // localStorage desativado
                 const data = JSON.parse(savedData);
                 for (let i = 1; i <= 14; i++) {
                     const meta = data['meta' + i];
@@ -391,6 +415,7 @@
                     }
                 }
             }
+            */
             updateCharts();
             updateKPIs();
         }
@@ -484,12 +509,7 @@
                         labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado'],
                         datasets: [{
                             data: [planejado, andamento, concluido, atrasado],
-                            backgroundColor: [
-                                'rgba(255, 152, 0, 0.8)',
-                                'rgba(33, 150, 243, 0.8)',
-                                'rgba(76, 175, 80, 0.8)',
-                                'rgba(244, 67, 54, 0.8)'
-                            ],
+                            backgroundColor: ['rgba(255, 152, 0, 0.8)', 'rgba(33, 150, 243, 0.8)', 'rgba(76, 175, 80, 0.8)', 'rgba(244, 67, 54, 0.8)'],
                             borderWidth: 2
                         }]
                     },
