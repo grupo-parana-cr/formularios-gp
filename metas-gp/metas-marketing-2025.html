@@ -623,8 +623,19 @@
         }
 
         function updatePostagens() {
-            const paginas = parseInt(document.getElementById('paginas2').value) || 0;
-            const postagens = parseInt(document.getElementById('postagensSemana2').value) || 0;
+            const paginasInput = document.getElementById('paginas2').value;
+            const postagensInput = document.getElementById('postagensSemana2').value;
+            
+            // Se ambos vazios, limpa
+            if (paginasInput === '' && postagensInput === '') {
+                document.getElementById('metaSemanal2').value = '';
+                document.getElementById('cumprimento2').value = '';
+                saveData();
+                return;
+            }
+            
+            const paginas = parseInt(paginasInput) || 0;
+            const postagens = parseInt(postagensInput) || 0;
             
             const metaSemanal = paginas * 3;
             document.getElementById('metaSemanal2').value = metaSemanal;
@@ -632,22 +643,42 @@
             if (metaSemanal > 0) {
                 const cumprimento = Math.min(Math.round((postagens / metaSemanal) * 100), 100);
                 document.getElementById('cumprimento2').value = cumprimento;
+            } else {
+                document.getElementById('cumprimento2').value = 0;
             }
             
             saveData();
         }
 
         function updateCampanhas() {
-            const campanhas = parseInt(document.getElementById('campanhasRealizadas3').value) || 0;
+            const campanhasInput = document.getElementById('campanhasRealizadas3').value;
+            
+            // Se vazio, progresso = 0%
+            if (campanhasInput === '') {
+                document.getElementById('percent3').value = 0;
+                updateProgress(3);
+                return;
+            }
+            
+            const campanhas = parseInt(campanhasInput) || 0;
             const percentual = Math.min(Math.round((campanhas / 12) * 100), 100);
             document.getElementById('percent3').value = percentual;
-            
             updateProgress(3);
         }
 
         function updateTaxaResposta() {
-            const total = parseInt(document.getElementById('totalMensagens4').value) || 0;
-            const respostas = parseInt(document.getElementById('respostas24h4').value) || 0;
+            const totalInput = document.getElementById('totalMensagens4').value;
+            const respostasInput = document.getElementById('respostas24h4').value;
+            
+            // Se ambos vazios, limpa
+            if (totalInput === '' && respostasInput === '') {
+                document.getElementById('taxaResposta4').value = '';
+                saveData();
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const respostas = parseInt(respostasInput) || 0;
             
             if (total > 0) {
                 const taxa = Math.round((respostas / total) * 100 * 10) / 10;
