@@ -822,7 +822,17 @@
         }
 
         function updateAbate() {
-            const totalAbatidas = parseInt(document.getElementById('totalAbatidas6').value) || 0;
+            const totalAbatidasInput = document.getElementById('totalAbatidas6').value;
+            
+            // Se vazio, progresso = 0%
+            if (totalAbatidasInput === '') {
+                document.getElementById('percent6').value = 0;
+                document.getElementById('mediaMensal6').value = '';
+                updateProgress(6);
+                return;
+            }
+            
+            const totalAbatidas = parseInt(totalAbatidasInput) || 0;
             const metaAnual = 2500;
             const mesesDecorridos = new Date().getMonth() + 1;
             
@@ -831,15 +841,22 @@
             
             const percentual = Math.min(Math.round((totalAbatidas / metaAnual) * 100), 100);
             document.getElementById('percent6').value = percentual;
-            
             updateProgress(6);
         }
 
         function updateRelatorios() {
-            const relatoriosEnviados = parseInt(document.getElementById('relatorios8').value) || 0;
+            const relatoriosInput = document.getElementById('relatorios8').value;
+            
+            // Se vazio, progresso = 0%
+            if (relatoriosInput === '') {
+                document.getElementById('percent8').value = 0;
+                updateProgress(8);
+                return;
+            }
+            
+            const relatoriosEnviados = parseInt(relatoriosInput) || 0;
             const percentual = Math.min(Math.round((relatoriosEnviados / 12) * 100), 100);
             document.getElementById('percent8').value = percentual;
-            
             updateProgress(8);
         }
 
