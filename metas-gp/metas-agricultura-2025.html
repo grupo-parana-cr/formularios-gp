@@ -851,13 +851,24 @@
         }
 
         function updateAcidentes() {
-            const ocupacionais = parseInt(document.getElementById('acidentesOcup1').value) || 0;
-            const veiculares = parseInt(document.getElementById('acidentesVeic1').value) || 0;
+            const ocupacionaisInput = document.getElementById('acidentesOcup1').value;
+            const veicularesInput = document.getElementById('acidentesVeic1').value;
+            
+            // Se AMBOS estão vazios, progresso = 0%
+            if (ocupacionaisInput === '' && veicularesInput === '') {
+                document.getElementById('percent1').value = 0;
+                updateProgress(1);
+                return;
+            }
+            
+            // Se tem valor, calcula
+            const ocupacionais = parseInt(ocupacionaisInput) || 0;
+            const veiculares = parseInt(veicularesInput) || 0;
             const total = ocupacionais + veiculares;
             
             document.getElementById('totalAcidentes1').value = total;
             
-            const percent = total === 0 ? 0 : 100;
+            const percent = total === 0 ? 100 : 0;
             document.getElementById('percent1').value = percent;
             
             updateProgress(1);
