@@ -151,13 +151,13 @@
             font-size: 0.9em;
         }
 
-        .status-andamento {
-            background: #2196f3;
+                .status-nao-iniciado {
+            background: #ff9800;
             color: white;
         }
 
-        .status-nao-iniciado {
-            background: #ff9800;
+        .status-andamento {
+            background: #2196f3;
             color: white;
         }
 
@@ -330,7 +330,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta1')">
                     <h3>KR 1.1 - Aumentar os seguidores, elevar o engajamento e aumentar o alcance das contas</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge1">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge1">Não Iniciado</div>
                         <div class="meta-progress" id="progress1">0%</div>
                     </div>
                 </div>
@@ -341,7 +341,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status1" onchange="updateStatus(1)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -394,7 +394,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta2')">
                     <h3>KR 1.2 - Garantir ao menos 3 postagens semanais por página</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge2">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge2">Não Iniciado</div>
                         <div class="meta-progress" id="progress2">0%</div>
                     </div>
                 </div>
@@ -406,7 +406,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status2" onchange="updateStatus(2)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -456,7 +456,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta3')">
                     <h3>KR 1.3 - Promover campanhas interativas (enquetes, desafios ou lives) mensalmente</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge3">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge3">Não Iniciado</div>
                         <div class="meta-progress" id="progress3">0%</div>
                     </div>
                 </div>
@@ -468,7 +468,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status3" onchange="updateStatus(3)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -513,7 +513,7 @@
                 <div class="meta-header" onclick="toggleMeta('meta4')">
                     <h3>KR 1.4 - Responder a comentários e mensagens diretas em até 24 horas</h3>
                     <div class="meta-info">
-                        <div class="meta-status status-andamento" id="statusBadge4">Em andamento</div>
+                        <div class="meta-status status-nao-iniciado" id="statusBadge4">Não Iniciado</div>
                         <div class="meta-progress" id="progress4">0%</div>
                     </div>
                 </div>
@@ -525,7 +525,7 @@
                     <div class="form-group">
                         <label>Status Atual</label>
                         <select id="status4" onchange="updateStatus(4)">
-                            <option value="planejado">Não Iniciado</option>
+                            <option value="planejado" selected>Não Iniciado</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluído</option>
                             <option value="atrasado">Atrasado</option>
@@ -685,13 +685,20 @@
                 }
             }
             
-            localStorage.setItem('metasMarketing2025', JSON.stringify(data));
+            // localStorage removido - sincronização via Google Sheets
+
+            
+            // localStorage.setItem('metasMarketing2025', JSON.stringify(data));
             showSaveIndicator();
         }
 
         function loadData() {
-            const savedData = localStorage.getItem('metasMarketing2025');
-            if (savedData) {
+            // localStorage removido
+
+            // const savedData = localStorage.getItem('metasMarketing2025');
+            // localStorage removido
+
+            if (false) { // localStorage desativado
                 const data = JSON.parse(savedData);
                 for (let i = 1; i <= 4; i++) {
                     const meta = data['meta' + i];
@@ -810,12 +817,7 @@
                         labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado'],
                         datasets: [{
                             data: [planejado, andamento, concluido, atrasado],
-                            backgroundColor: [
-                                'rgba(255, 152, 0, 0.8)',
-                                'rgba(33, 150, 243, 0.8)',
-                                'rgba(76, 175, 80, 0.8)',
-                                'rgba(244, 67, 54, 0.8)'
-                            ],
+                            backgroundColor: ['rgba(255, 152, 0, 0.8)', 'rgba(33, 150, 243, 0.8)', 'rgba(76, 175, 80, 0.8)', 'rgba(244, 67, 54, 0.8)'],
                             borderWidth: 2
                         }]
                     },
