@@ -772,7 +772,16 @@
         }
 
         function updateUtilizacao() {
-            const utilizacao = parseFloat(document.getElementById('utilizacao7').value) || 0;
+            const utilizacaoInput = document.getElementById('utilizacao7').value;
+            
+            // Se vazio, progresso = 0%
+            if (utilizacaoInput === '') {
+                document.getElementById('percent7').value = 0;
+                updateProgress(7);
+                return;
+            }
+            
+            const utilizacao = parseFloat(utilizacaoInput) || 0;
             document.getElementById('percent7').value = utilizacao;
             updateProgress(7);
         }
