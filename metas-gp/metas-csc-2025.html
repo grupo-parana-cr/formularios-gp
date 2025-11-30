@@ -916,46 +916,94 @@
         }
 
         function updateFeedback() {
-            const total = parseInt(document.getElementById('totalColab1').value) || 0;
-            const feedback = parseInt(document.getElementById('colabFeedback1').value) || 0;
+            const totalInput = document.getElementById('totalColab1').value;
+            const feedbackInput = document.getElementById('colabFeedback1').value;
+            
+            // Se ambos vazios, progresso = 0%
+            if (totalInput === '' && feedbackInput === '') {
+                document.getElementById('percent1').value = 0;
+                updateProgress(1);
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const feedback = parseInt(feedbackInput) || 0;
             
             if (total > 0) {
                 const percentual = Math.min(Math.round((feedback / total) * 100), 100);
                 document.getElementById('percent1').value = percentual;
                 updateProgress(1);
+            } else {
+                document.getElementById('percent1').value = 0;
             }
         }
 
         function updateCadastros() {
-            const total = parseInt(document.getElementById('totalCadastros6').value) || 0;
-            const realizados = parseInt(document.getElementById('cadastrosRealizados6').value) || 0;
+            const totalInput = document.getElementById('totalCadastros6').value;
+            const realizadosInput = document.getElementById('cadastrosRealizados6').value;
+            
+            // Se ambos vazios, progresso = 0%
+            if (totalInput === '' && realizadosInput === '') {
+                document.getElementById('percent6').value = 0;
+                updateProgress(6);
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const realizados = parseInt(realizadosInput) || 0;
             
             if (total > 0) {
                 const percentual = Math.min(Math.round((realizados / total) * 100), 100);
                 document.getElementById('percent6').value = percentual;
                 updateProgress(6);
+            } else {
+                document.getElementById('percent6').value = 0;
             }
         }
 
         function updateVeiculos() {
-            const total = parseInt(document.getElementById('totalVeiculos9').value) || 0;
-            const atualizados = parseInt(document.getElementById('veiculosAtualizados9').value) || 0;
+            const totalInput = document.getElementById('totalVeiculos9').value;
+            const atualizadosInput = document.getElementById('veiculosAtualizados9').value;
+            
+            // Se ambos vazios, progresso = 0%
+            if (totalInput === '' && atualizadosInput === '') {
+                document.getElementById('percent9').value = 0;
+                updateProgress(9);
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const atualizados = parseInt(atualizadosInput) || 0;
             
             if (total > 0) {
                 const percentual = Math.min(Math.round((atualizados / total) * 100), 100);
                 document.getElementById('percent9').value = percentual;
                 updateProgress(9);
+            } else {
+                document.getElementById('percent9').value = 0;
             }
         }
 
         function updateSeguroVida() {
-            const total = parseInt(document.getElementById('totalColab10').value) || 0;
-            const atualizados = parseInt(document.getElementById('colabAtualizados10').value) || 0;
+            const totalInput = document.getElementById('totalColab10').value;
+            const atualizadosInput = document.getElementById('colabAtualizados10').value;
+            
+            // Se ambos vazios, progresso = 0%
+            if (totalInput === '' && atualizadosInput === '') {
+                document.getElementById('percent10').value = 0;
+                updateProgress(10);
+                return;
+            }
+            
+            const total = parseInt(totalInput) || 0;
+            const atualizados = parseInt(atualizadosInput) || 0;
             
             if (total > 0) {
                 const percentual = Math.min(Math.round((atualizados / total) * 100), 100);
                 document.getElementById('percent10').value = percentual;
                 updateProgress(10);
+            } else {
+                document.getElementById('percent10').value = 0;
             }
         }
 
