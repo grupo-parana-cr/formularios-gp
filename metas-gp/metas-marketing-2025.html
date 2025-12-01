@@ -636,16 +636,17 @@
         function updateCampanhas() {
             const campanhasInput = document.getElementById('campanhasRealizadas3').value;
             
+            // SEMPRE preencher a meta (valor fixo)
+            document.getElementById('metaAnual3').value = 12;
+            
             // Se vazio, progresso = 0%
             if (campanhasInput === '') {
-                document.getElementById('metaAnual3').value = '';
                 document.getElementById('percent3').value = 0;
                 updateProgress(3);
                 return;
             }
             
             const campanhas = parseInt(campanhasInput) || 0;
-            document.getElementById('metaAnual3').value = 12;
             const percentual = Math.min(Math.round((campanhas / 12) * 100), 100);
             document.getElementById('percent3').value = percentual;
             updateProgress(3);
@@ -702,10 +703,6 @@
             }
             
             // localStorage removido - sincronização via Google Sheets
-
-            
-            // localStorage.setItem('metasMarketing2025', JSON.stringify(data));
-            showSaveIndicator();
         }
 
         function loadData() {
