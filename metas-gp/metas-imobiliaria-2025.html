@@ -1037,10 +1037,11 @@
 
             for (let i = 1; i <= 12; i++) {
                 const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                const status = document.getElementById('status' + i).value;
                 total += percent;
                 
-                if (percent === 100) concluidas++;
-                else if (percent > 0) emAndamento++;
+                if (percent === 100 || status === 'concluido') concluidas++;
+                else if (status === 'andamento') emAndamento++;
             }
 
             const progressoGeral = Math.round(total / 12);
