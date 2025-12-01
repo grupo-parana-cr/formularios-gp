@@ -122,8 +122,8 @@
             align-items: center;
         }
 
-        .meta-header.nao-iniciada {
-            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+        .meta-header.concluida {
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
         }
 
         .meta-header:hover {
@@ -868,13 +868,11 @@
             const header = badge.closest('.meta-header');
             
             badge.className = 'meta-status';
-            header.classList.remove('nao-iniciada');
             header.classList.remove('concluida');
             
             if (status === 'planejado') {
                 badge.classList.add('status-nao-iniciado');
                 badge.textContent = 'Não iniciado';
-                header.classList.add('nao-iniciada');
             } else if (status === 'andamento') {
                 badge.classList.add('status-andamento');
                 badge.textContent = 'Em andamento';
@@ -936,10 +934,6 @@
             }
             
             // localStorage removido - sincronização via Google Sheets
-
-            
-            // localStorage.setItem('metasAutoPecas2025', JSON.stringify(data));
-            showSaveIndicator();
         }
 
         function loadData() {
