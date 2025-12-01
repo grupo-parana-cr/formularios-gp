@@ -869,6 +869,7 @@
             
             badge.className = 'meta-status';
             header.classList.remove('nao-iniciada');
+            header.classList.remove('concluida');
             
             if (status === 'planejado') {
                 badge.classList.add('status-nao-iniciado');
@@ -880,6 +881,7 @@
             } else if (status === 'concluido') {
                 badge.classList.add('status-concluido');
                 badge.textContent = 'Concluído';
+                header.classList.add('concluida');
             } else if (status === 'atrasado') {
                 badge.classList.add('status-atrasado');
                 badge.textContent = 'Atrasado';
@@ -1012,7 +1014,7 @@
                 
                 total += percent;
                 
-                if (percent === 100) concluidas++;
+                if (percent === 100 || status === 'concluido') concluidas++;
                 else if (status === 'andamento') emAndamento++;
                 else if (status === 'planejado') naoIniciadas++;
             }
