@@ -741,6 +741,34 @@
             content.classList.toggle('active');
         }
 
+        function updateStatus(metaId) {
+            const status = document.getElementById('status' + metaId).value;
+            const badge = document.getElementById('statusBadge' + metaId);
+            const header = badge.closest('.meta-header');
+            
+            badge.className = 'meta-status';
+            header.classList.remove('concluida');
+            
+            if (status === 'planejado') {
+                badge.classList.add('status-nao-iniciado');
+                badge.textContent = 'Não iniciado';
+            } else if (status === 'andamento') {
+                badge.classList.add('status-andamento');
+                badge.textContent = 'Em andamento';
+            } else if (status === 'concluido') {
+                badge.classList.add('status-concluido');
+                badge.textContent = 'Concluído';
+                header.classList.add('concluida');
+            } else if (status === 'atrasado') {
+                badge.classList.add('status-atrasado');
+                badge.textContent = 'Atrasado';
+            }
+            
+            saveData();
+            updateCharts();
+            updateKPIs();
+        }
+
         function updateProgress(metaId) {
             const percent = document.getElementById('percent' + metaId).value;
             const bar = document.getElementById('bar' + metaId);
@@ -771,10 +799,6 @@
             }
             
             // localStorage removido - sincronização via Google Sheets
-
-            
-            // localStorage.setItem('metasTI2025', JSON.stringify(data));
-            showSaveIndicator();
         }
 
         function loadData() {
