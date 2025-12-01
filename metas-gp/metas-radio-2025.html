@@ -1285,10 +1285,6 @@
             }
             
             // localStorage removido - sincronização via Google Sheets
-
-            
-            // localStorage.setItem('metasRadio2025', JSON.stringify(data));
-            showSaveIndicator();
         }
 
         function loadData() {
@@ -1368,10 +1364,11 @@
 
             for (let i = 1; i <= 14; i++) {
                 const percent = parseInt(document.getElementById('percent' + i).value) || 0;
+                const status = document.getElementById('status' + i).value;
                 total += percent;
                 
-                if (percent === 100) concluidas++;
-                else if (percent > 0) emAndamento++;
+                if (percent === 100 || status === 'concluido') concluidas++;
+                else if (status === 'andamento') emAndamento++;
             }
 
             const progressoGeral = Math.round(total / 14);
