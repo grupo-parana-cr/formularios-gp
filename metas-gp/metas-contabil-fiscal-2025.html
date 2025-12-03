@@ -82,6 +82,12 @@
             justify-content: space-between;
             align-items: center;
         }
+        .meta-header.concluida {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+        }
+        .meta-header.nao-cumprido {
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        }
         .meta-header:hover { opacity: 0.95; }
         .meta-header h3 { font-size: 1.3em; flex: 1; }
         .meta-info { display: flex; gap: 15px; align-items: center; }
@@ -113,7 +119,12 @@
         }
 
         .status-atrasado {
-            background: #f44336;
+            background: #ffd600;
+            color: #000;
+        }
+
+        .status-nao-cumprido {
+            background: #d32f2f;
             color: white;
         }
         .meta-content { padding: 25px; display: none; }
@@ -181,6 +192,7 @@
         }
     </style>
     <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <button onclick="goBackToHome()" style="position: fixed; top: 20px; left: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 9999; font-weight: 600; font-size: 1em; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" >← Voltar para Home</button>
@@ -191,6 +203,11 @@
             <p>Líder: Liliane | Ananda</p>
         </div>
 
+                <div style="padding: 20px 30px; background: #f8f9fa; text-align: right;">
+            <button id="btnExportarPDF" onclick="exportarPDF()" style="background: #2196f3; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-size: 1em; cursor: pointer; font-weight: 600;">
+                📥 Exportar PDF
+            </button>
+        </div>
         <div class="dashboard-grid">
             <div class="kpi-card">
                 <div class="kpi-label">Progresso Geral</div>
@@ -201,12 +218,20 @@
                 <div class="kpi-value" id="metasConcluidas" style="color: #4caf50;">0</div>
             </div>
             <div class="kpi-card">
+                <div class="kpi-label">Não Cumprido</div>
+                <div class="kpi-value" id="metasNaoCumprido" style="color: #d32f2f;">0</div>
+            </div>
+            <div class="kpi-card">
                 <div class="kpi-label">Em Andamento</div>
                 <div class="kpi-value" id="metasAndamento" style="color: #2196f3;">0</div>
             </div>
             <div class="kpi-card">
+                <div class="kpi-label">Atrasado</div>
+                <div class="kpi-value" id="metasAtrasado" style="color: #ffd600;">0</div>
+            </div>
+            <div class="kpi-card">
                 <div class="kpi-label">Total de Metas</div>
-                <div class="kpi-value" id="totalMetas" style="color: #764ba2;">14</div>
+                <div class="kpi-value" id="totalMetas" style="color: #764ba2;">9</div>
             </div>
         </div>
 
@@ -260,10 +285,11 @@
                             <div class="form-group">
                                 <label>Status Atual</label>
                                 <select id="status${meta.id}" onchange="updateStatus(${meta.id})">
-                                    <option value="planejado" selected>Não Iniciado</option>
+                                    <option value="nao-iniciado" selected>Não Iniciado</option>
                                     <option value="andamento">Em Andamento</option>
                                     <option value="concluido">Concluído</option>
                                     <option value="atrasado">Atrasado</option>
+                                    <option value="nao-cumprido">Não Cumprido</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -326,10 +352,12 @@
         function updateStatus(metaId) {
             const status = document.getElementById('status' + metaId).value;
             const badge = document.getElementById('statusBadge' + metaId);
+            const header = badge.closest('.meta-header');
             
             badge.className = 'meta-status';
+            header.classList.remove('concluida', 'nao-cumprido');
             
-            if (status === 'planejado') {
+            if (status === 'nao-iniciado') {
                 badge.classList.add('status-nao-iniciado');
                 badge.textContent = 'Não iniciado';
             } else if (status === 'andamento') {
@@ -338,9 +366,14 @@
             } else if (status === 'concluido') {
                 badge.classList.add('status-concluido');
                 badge.textContent = 'Concluído';
+                header.classList.add('concluida');
             } else if (status === 'atrasado') {
                 badge.classList.add('status-atrasado');
                 badge.textContent = 'Atrasado';
+            } else if (status === 'nao-cumprido') {
+                badge.classList.add('status-nao-cumprido');
+                badge.textContent = 'Não Cumprido';
+                header.classList.add('nao-cumprido');
             }
             
             saveData();
@@ -409,6 +442,8 @@
             let total = 0;
             let concluidas = 0;
             let emAndamento = 0;
+            let atrasado = 0;
+            let naoCumprido = 0;
 
             for (let i = 1; i <= 14; i++) {
                 const percent = parseInt(document.getElementById('percent' + i).value) || 0;
@@ -418,12 +453,16 @@
                 
                 if (percent === 100 || status === 'concluido') concluidas++;
                 else if (status === 'andamento') emAndamento++;
+                else if (status === 'atrasado') atrasado++;
+                else if (status === 'nao-cumprido') naoCumprido++;
             }
 
             const progressoGeral = Math.round(total / 14);
             document.getElementById('progressoGeral').textContent = progressoGeral + '%';
             document.getElementById('metasConcluidas').textContent = concluidas;
+            document.getElementById('metasNaoCumprido').textContent = naoCumprido;
             document.getElementById('metasAndamento').textContent = emAndamento;
+            document.getElementById('metasAtrasado').textContent = atrasado;
         }
 
         function updateCharts() {
@@ -465,28 +504,29 @@
                 });
             }
 
-            let planejado = 0, andamento = 0, concluido = 0, atrasado = 0;
+            let naoIniciado = 0, andamento = 0, concluido = 0, atrasado = 0, naoCumprido = 0;
 
             for (let i = 1; i <= 14; i++) {
                 const status = document.getElementById('status' + i).value;
-                if (status === 'planejado') planejado++;
+                if (status === 'nao-iniciado') naoIniciado++;
                 else if (status === 'andamento') andamento++;
                 else if (status === 'concluido') concluido++;
                 else if (status === 'atrasado') atrasado++;
+                else if (status === 'nao-cumprido') naoCumprido++;
             }
 
             if (statusChart) {
-                statusChart.data.datasets[0].data = [planejado, andamento, concluido, atrasado];
+                statusChart.data.datasets[0].data = [naoIniciado, andamento, concluido, atrasado, naoCumprido];
                 statusChart.update();
             } else {
                 const ctx2 = document.getElementById('statusChart').getContext('2d');
                 statusChart = new Chart(ctx2, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado'],
+                        labels: ['Não Iniciado', 'Em Andamento', 'Concluído', 'Atrasado', 'Não Cumprido'],
                         datasets: [{
-                            data: [planejado, andamento, concluido, atrasado],
-                            backgroundColor: ['rgba(255, 152, 0, 0.8)', 'rgba(33, 150, 243, 0.8)', 'rgba(76, 175, 80, 0.8)', 'rgba(244, 67, 54, 0.8)'],
+                            data: [naoIniciado, andamento, concluido, atrasado, naoCumprido],
+                            backgroundColor: ['rgba(255, 152, 0, 0.8)', 'rgba(33, 150, 243, 0.8)', 'rgba(76, 175, 80, 0.8)', 'rgba(255, 214, 0, 0.8)', 'rgba(211, 47, 47, 0.8)'],
                             borderWidth: 2
                         }]
                     },
@@ -502,6 +542,45 @@
             }
         }
 
+
+        function exportarPDF() {
+            const element = document.querySelector('.container');
+            const opt = {
+                margin: 5,
+                filename: 'dashboard-metas-2025.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            // Criar cópia do elemento com todos os cards abertos
+            const clone = element.cloneNode(true);
+            clone.style.display = 'block';
+            
+            // Abrir todos os meta-content para PDF
+            const conteudos = clone.querySelectorAll('.meta-content');
+            conteudos.forEach(content => {
+                content.classList.add('active');
+                content.style.display = 'block';
+            });
+            
+            // Remover botões de ação do PDF
+            const botoes = clone.querySelectorAll('button');
+            botoes.forEach(btn => {
+                if (btn.id === 'btnExportarPDF' || btn.textContent.includes('Expandir') || btn.textContent.includes('Fechar')) {
+                    btn.remove();
+                }
+            });
+
+            // Compilar PDF com cópia
+            html2pdf().set(opt).from(clone).save();
+        }
+
+        function showSaveIndicator() {
+            // Função para indicar que dados foram salvos
+            // Pode ser expandida para mostrar notificação visual
+        }
         window.onload = function() {
             loadData();
         };
