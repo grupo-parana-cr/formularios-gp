@@ -96,7 +96,7 @@ if (!PESQUISA_ATIVA) {
                     justify-content: center;
                     flex-wrap: wrap;
                 ">
-                    <a href="https://www.superfm989ms.com.br" target="_blank" style="
+                    <a href="https://www.superfmcr.com.br/" target="_blank" style="
                         background: linear-gradient(135deg, #2B5BA8 0%, #1B3A6B 100%);
                         color: white;
                         padding: 15px 40px;
@@ -111,7 +111,7 @@ if (!PESQUISA_ATIVA) {
                     " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 30px rgba(43, 91, 168, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(43, 91, 168, 0.3)';">
                         🌐 Visite nosso site
                     </a>
-                    <a href="https://www.instagram.com/superfm989ms/" target="_blank" style="
+                    <a href="https://www.instagram.com/superfm98.9/" target="_blank" style="
                         background: white;
                         color: #2B5BA8;
                         padding: 15px 40px;
