@@ -711,7 +711,7 @@
                     </div>
                     <div class="form-group">
                         <label>Percentual de Conclusão em Relação aos 100% (%)</label>
-                        <input type="number" id="percent7" min="0" max="100"  readonly>
+                        <input type="number" id="percent7" min="0" max="100" >
                         <div class="progress-bar-container">
                             <div class="progress-bar" id="bar7" style="width: 0%">0%</div>
                         </div>
@@ -885,25 +885,50 @@
         }
 
         function updateKPIs() {
-            let total = 0;
+            let somaProgresso = 0;
             let concluidas = 0;
             let emAndamento = 0;
             let atrasado = 0;
             let naoCumprido = 0;
+            let contadoProgresso = 0; // Conta KRs que entram no cálculo
 
-            for (let i = 1; i <= 7; i++) {
+            // Encontrar quantos KRs existem dinamicamente
+            let maxKRs = 0;
+            let i = 1;
+            while (document.getElementById('status' + i)) {
+                maxKRs = i;
+                i++;
+            }
+
+            // Processar cada KR
+            for (let i = 1; i <= maxKRs; i++) {
                 const percent = parseInt(document.getElementById('percent' + i).value) || 0;
                 const status = document.getElementById('status' + i).value;
                 
-                total += percent;
-                
-                if (percent === 100 || status === 'concluido') concluidas++;
-                else if (status === 'andamento') emAndamento++;
-                else if (status === 'atrasado') atrasado++;
-                else if (status === 'nao-cumprido') naoCumprido++;
+                // Contar status
+                if (status === 'concluido') {
+                    concluidas++;
+                    somaProgresso += percent;
+                    contadoProgresso++;
+                } else if (status === 'andamento') {
+                    emAndamento++;
+                    somaProgresso += 0; // Entra como 0%
+                    contadoProgresso++;
+                } else if (status === 'atrasado') {
+                    atrasado++;
+                    somaProgresso += 0; // Entra como 0%
+                    contadoProgresso++;
+                } else if (status === 'nao-cumprido') {
+                    naoCumprido++;
+                    somaProgresso += 0; // Entra como 0%
+                    contadoProgresso++;
+                } else if (status === 'nao-iniciado') {
+                    // NÃO CONTA no cálculo
+                }
             }
 
-            const progressoGeral = Math.round(total / 7);
+            // Calcular Progresso Geral
+            const progressoGeral = contadoProgresso > 0 ? Math.round(somaProgresso / contadoProgresso) : 0;;
             document.getElementById('progressoGeral').textContent = progressoGeral + '%';
             document.getElementById('metasConcluidas').textContent = concluidas;
             document.getElementById('metasNaoCumprido').textContent = naoCumprido;
