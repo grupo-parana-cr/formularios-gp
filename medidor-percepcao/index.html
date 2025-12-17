@@ -13,12 +13,52 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #003da5 0%, #0052cc 100%);
+      background: linear-gradient(-45deg, #003da5, #0052cc, #003da5, #0052cc);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      position: relative;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    body::before {
+      top: -200px;
+      left: -200px;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    body::after {
+      bottom: -200px;
+      right: -200px;
+      animation: float 25s infinite ease-in-out reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(30px, 30px) rotate(90deg); }
+      50% { transform: translate(0, 60px) rotate(180deg); }
+      75% { transform: translate(-30px, 30px) rotate(270deg); }
     }
 
     .container {
@@ -28,6 +68,8 @@
       max-width: 800px;
       width: 100%;
       padding: 40px;
+      position: relative;
+      z-index: 100;
     }
 
     .header {
@@ -75,7 +117,27 @@
       border-radius: 8px;
       border-left: 4px solid #003da5;
       transition: all 0.3s ease;
+      animation: slideIn 0.5s ease-out forwards;
+      opacity: 0;
     }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .link-item:nth-child(1) { animation-delay: 0.1s; }
+    .link-item:nth-child(2) { animation-delay: 0.2s; }
+    .link-item:nth-child(3) { animation-delay: 0.3s; }
+    .link-item:nth-child(4) { animation-delay: 0.4s; }
+    .link-item:nth-child(5) { animation-delay: 0.5s; }
+    .link-item:nth-child(6) { animation-delay: 0.6s; }
 
     .link-item:hover {
       background: #f0f3ff;
@@ -115,6 +177,7 @@
     .btn-copy:hover {
       background: #fbbf24;
       transform: scale(1.05);
+      animation: pulse 0.6s ease-in-out;
     }
 
     .btn-copy.copied {
@@ -137,6 +200,12 @@
     .btn-open:hover {
       background: #0052cc;
       transform: scale(1.05);
+      animation: pulse 0.6s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 61, 165, 0.7); }
+      50% { box-shadow: 0 0 0 10px rgba(0, 61, 165, 0); }
     }
 
     .icon-copy {
@@ -266,12 +335,7 @@
     <div class="header">
       <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo Grupo Paraná">
       <h1>Medidor de Percepção</h1>
-      <p>Avalie os setores de sua empresa</p>
-    </div>
-
-    <div class="section-separator">
-      <h3>📋 Como funciona?</h3>
-      <p>Selecione o setor abaixo, responda as perguntas de 0 a 10 (usando emojis) e ajude-nos a melhorar continuamente. Você também pode compartilhar o link com outras pessoas!</p>
+      <p>Avaliação dos Setores</p>
     </div>
 
     <div class="links-section">
