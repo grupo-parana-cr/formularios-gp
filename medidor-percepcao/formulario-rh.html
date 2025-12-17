@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulário - RH</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo Grupo Paraná">
+      <h1>Medidor de Percepção</h1>
+      <p>Setor Recursos Humanos</p>
+    </div>
+
+    <div class="content active">
+      <!-- CAPA -->
+      <div id="cover" class="section active">
+        <div class="cover-section">
+          <h2>Vamos iniciar?</h2>
+          <p>Sua opinião é muito importante para nós! Este formulário toma apenas alguns minutos e ajuda a melhorar continuamente nossos serviços.</p>
+          <button class="btn-start" onclick="startForm()">Iniciar</button>
+        </div>
+      </div>
+
+      <!-- CPF -->
+      <div id="cpf" class="section">
+        <div class="cpf-section">
+          <h2>Identificação</h2>
+          <p>Para garantir que cada colaborador responda uma única vez, precisamos do seu CPF.</p>
+          <div class="form-group">
+            <label for="cpfInput">CPF</label>
+            <input type="text" id="cpfInput" placeholder="000.000.000-00" maxlength="14">
+            <div class="error-message"></div>
+          </div>
+          <button class="btn-continue" onclick="continueToCpf()">Continuar</button>
+        </div>
+      </div>
+
+      <!-- PERGUNTAS -->
+      <div id="questions" class="section">
+        <div class="questions-section">
+          <div id="question-0" class="question-container">
+            <div class="question-number">Pergunta 1 de 4</div>
+            <div class="question-text">Como você avalia a comunicação e a clareza das informações transmitidas pelo RH?</div>
+            <div class="emoji-scale">
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="0" onclick="selectEmoji(0, 0)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">0</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="1" onclick="selectEmoji(0, 1)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">1</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="2" onclick="selectEmoji(0, 2)" style="background-color: #e67e2220; border-color: #e67e22;">😔</button><div class="emoji-label">2</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="3" onclick="selectEmoji(0, 3)" style="background-color: #e67e2220; border-color: #e67e22;">😐</button><div class="emoji-label">3</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="4" onclick="selectEmoji(0, 4)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">4</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="5" onclick="selectEmoji(0, 5)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">5</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="6" onclick="selectEmoji(0, 6)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">6</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="7" onclick="selectEmoji(0, 7)" style="background-color: #f1c40f20; border-color: #f1c40f;">😊</button><div class="emoji-label">7</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="8" onclick="selectEmoji(0, 8)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">8</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="9" onclick="selectEmoji(0, 9)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">9</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="0" data-value="10" onclick="selectEmoji(0, 10)" style="background-color: #27ae6020; border-color: #27ae60;">😄</button><div class="emoji-label">10</div></div>
+            </div>
+          </div>
+
+          <div id="question-1" class="question-container">
+            <div class="question-number">Pergunta 2 de 4</div>
+            <div class="question-text">Como você avalia o apoio do RH em ações de integração, treinamentos e desenvolvimento profissional?</div>
+            <div class="emoji-scale">
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="0" onclick="selectEmoji(1, 0)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">0</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="1" onclick="selectEmoji(1, 1)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">1</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="2" onclick="selectEmoji(1, 2)" style="background-color: #e67e2220; border-color: #e67e22;">😔</button><div class="emoji-label">2</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="3" onclick="selectEmoji(1, 3)" style="background-color: #e67e2220; border-color: #e67e22;">😐</button><div class="emoji-label">3</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="4" onclick="selectEmoji(1, 4)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">4</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="5" onclick="selectEmoji(1, 5)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">5</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="6" onclick="selectEmoji(1, 6)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">6</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="7" onclick="selectEmoji(1, 7)" style="background-color: #f1c40f20; border-color: #f1c40f;">😊</button><div class="emoji-label">7</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="8" onclick="selectEmoji(1, 8)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">8</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="9" onclick="selectEmoji(1, 9)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">9</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="1" data-value="10" onclick="selectEmoji(1, 10)" style="background-color: #27ae6020; border-color: #27ae60;">😄</button><div class="emoji-label">10</div></div>
+            </div>
+          </div>
+
+          <div id="question-2" class="question-container">
+            <div class="question-number">Pergunta 3 de 4</div>
+            <div class="question-text">Como você avalia o atendimento e disponibilidade do RH para esclarecer dúvidas e orientar os colaboradores?</div>
+            <div class="emoji-scale">
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="0" onclick="selectEmoji(2, 0)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">0</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="1" onclick="selectEmoji(2, 1)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">1</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="2" onclick="selectEmoji(2, 2)" style="background-color: #e67e2220; border-color: #e67e22;">😔</button><div class="emoji-label">2</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="3" onclick="selectEmoji(2, 3)" style="background-color: #e67e2220; border-color: #e67e22;">😐</button><div class="emoji-label">3</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="4" onclick="selectEmoji(2, 4)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">4</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="5" onclick="selectEmoji(2, 5)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">5</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="6" onclick="selectEmoji(2, 6)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">6</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="7" onclick="selectEmoji(2, 7)" style="background-color: #f1c40f20; border-color: #f1c40f;">😊</button><div class="emoji-label">7</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="8" onclick="selectEmoji(2, 8)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">8</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="9" onclick="selectEmoji(2, 9)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">9</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="2" data-value="10" onclick="selectEmoji(2, 10)" style="background-color: #27ae6020; border-color: #27ae60;">😄</button><div class="emoji-label">10</div></div>
+            </div>
+          </div>
+
+          <div id="question-3" class="question-container">
+            <div class="question-number">Pergunta 4 de 4</div>
+            <div class="question-text">Como você avalia o suporte do RH nas questões relacionadas à gestão de pessoas (como clima, liderança, desenvolvimento e cultura organizacional)?</div>
+            <div class="emoji-scale">
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="0" onclick="selectEmoji(3, 0)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">0</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="1" onclick="selectEmoji(3, 1)" style="background-color: #e74c3c20; border-color: #e74c3c;">😠</button><div class="emoji-label">1</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="2" onclick="selectEmoji(3, 2)" style="background-color: #e67e2220; border-color: #e67e22;">😔</button><div class="emoji-label">2</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="3" onclick="selectEmoji(3, 3)" style="background-color: #e67e2220; border-color: #e67e22;">😐</button><div class="emoji-label">3</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="4" onclick="selectEmoji(3, 4)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">4</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="5" onclick="selectEmoji(3, 5)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">5</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="6" onclick="selectEmoji(3, 6)" style="background-color: #f39c1220; border-color: #f39c12;">😐</button><div class="emoji-label">6</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="7" onclick="selectEmoji(3, 7)" style="background-color: #f1c40f20; border-color: #f1c40f;">😊</button><div class="emoji-label">7</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="8" onclick="selectEmoji(3, 8)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">8</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="9" onclick="selectEmoji(3, 9)" style="background-color: #2ecc7120; border-color: #2ecc71;">😄</button><div class="emoji-label">9</div></div>
+              <div class="emoji-option"><button class="emoji-btn" data-question="3" data-value="10" onclick="selectEmoji(3, 10)" style="background-color: #27ae6020; border-color: #27ae60;">😄</button><div class="emoji-label">10</div></div>
+            </div>
+          </div>
+
+          <div class="question-nav">
+            <button class="btn-prev" onclick="prevQuestion()" disabled>← Anterior</button>
+            <span class="progress-info">1 de 4</span>
+            <button class="btn-next" onclick="nextQuestion()" disabled>Próxima →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMENTÁRIO FINAL -->
+      <div id="final-comment" class="section">
+        <div class="final-comment-section">
+          <h3>Comentário Final</h3>
+          <p>Por favor, deixe seu comentário geral sobre o setor. Como você avalia no geral?</p>
+          <textarea class="comment-input" placeholder="Digite seu comentário aqui..."></textarea>
+          <div class="comment-error error-message"></div>
+          <div class="final-buttons">
+            <button class="btn-submit" onclick="submitForm()">Enviar Resposta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="checkmark">✓</div>
+      <h2>Resposta Registrada!</h2>
+      <p>Obrigado por participar!</p>
+      <button class="btn-close-modal" onclick="closeModal()">Fechar</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const perguntas = [
+      'Como você avalia a comunicação e a clareza das informações transmitidas pelo RH?',
+      'Como você avalia o apoio do RH em ações de integração, treinamentos e desenvolvimento profissional?',
+      'Como você avalia o atendimento e disponibilidade do RH para esclarecer dúvidas e orientar os colaboradores?',
+      'Como você avalia o suporte do RH nas questões relacionadas à gestão de pessoas (como clima, liderança, desenvolvimento e cultura organizacional)?'
+    ];
+    initForm('RH', perguntas);
+  </script>
+</body>
+</html>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Medidor de Percepção</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, #003da5 0%, #0052cc 100%);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      position: relative;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 0;
+      padding: 15px 0;
+      height: 70px;
+      align-content: center;
+    }
+
+    .sidebar-header img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+
+    .sidebar-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      margin-top: 30px;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 8px;
+    }
+
+    .sidebar-menu button {
+      width: 100%;
+      padding: 12px 15px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-menu button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar-menu button.active {
+      background: #dc2626;
+      border-left-color: #fcd34d;
+      box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
+    }
+
+    .toggle-sidebar {
+      display: none;
+      background: #003da5;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 101;
+    }
+
+    /* MAIN CONTENT */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      background: white;
+      padding: 15px 30px;
+      border-bottom: 2px solid #003da5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      height: 70px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .header h1 {
+      color: #003da5;
+      font-size: 24px;
+      margin: 0;
+      flex-shrink: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-shrink: 0;
+      height: 40px;
+    }
+
+    .btn-refresh {
+      background: #fcd34d;
+      color: #003da5;
+      border: none;
+      padding: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 40px;
+      width: 180px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #btnText {
+      display: inline-block;
+    }
+
+    .btn-pdf {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 40px;
+      width: 90px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+
+    .btn-pdf:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+    }
+
+    .btn-pdf.loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .btn-refresh:hover {
+      background: #fbbf24;
+      transform: scale(1.05);
+    }
+
+    .btn-refresh.loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .status-info {
+      font-size: 12px;
+      color: #666;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      width: auto;
+    }
+
+    /* CONTENT */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .setor-title {
+      color: #003da5;
+      margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    /* TABLE */
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #003da5 0%, #0052cc 100%);
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+
+    th {
+      padding: 15px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th:first-child {
+      text-align: left;
+      border-right: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    td:first-child {
+      text-align: left;
+      border-right: 2px solid #e5e7eb;
+      font-weight: 500;
+      color: #333;
+      max-width: 300px;
+      word-break: break-word;
+    }
+
+    tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* EMOJIS NA COLUNA */
+    .emoji-header {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .emoji-value {
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #333;
+    }
+
+    .emoji-value[data-emoji="0"],
+    .emoji-value[data-emoji="1"] {
+      background: #fca5a5;
+    }
+
+    .emoji-value[data-emoji="0"].dark,
+    .emoji-value[data-emoji="1"].dark {
+      background: #f87171;
+      color: white;
+    }
+
+    .emoji-value[data-emoji="2"] {
+      background: #fdba74;
+    }
+
+    .emoji-value[data-emoji="2"].dark {
+      background: #ea580c;
+      color: white;
+    }
+
+    .emoji-value[data-emoji="3"],
+    .emoji-value[data-emoji="4"],
+    .emoji-value[data-emoji="5"],
+    .emoji-value[data-emoji="6"] {
+      background: #fcd34d;
+    }
+
+    .emoji-value[data-emoji="3"].dark,
+    .emoji-value[data-emoji="4"].dark,
+    .emoji-value[data-emoji="5"].dark,
+    .emoji-value[data-emoji="6"].dark {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .emoji-value[data-emoji="7"] {
+      background: #fef08a;
+    }
+
+    .emoji-value[data-emoji="7"].dark {
+      background: #fde047;
+      color: #333;
+    }
+
+    .emoji-value[data-emoji="8"],
+    .emoji-value[data-emoji="9"],
+    .emoji-value[data-emoji="10"] {
+      background: #86efac;
+    }
+
+    .emoji-value[data-emoji="8"].dark,
+    .emoji-value[data-emoji="9"].dark,
+    .emoji-value[data-emoji="10"].dark {
+      background: #4ade80;
+      color: white;
+    }
+
+    /* TOTAIS E MÉDIAS */
+    .total-row {
+      background: #f3f4f6;
+      font-weight: 600;
+      color: #003da5;
+    }
+
+    .total-row td:first-child {
+      background: linear-gradient(90deg, #003da5 0%, #0052cc 100%);
+      color: white;
+    }
+
+    .total-row .emoji-value {
+      background: #f3f4f6 !important;
+      color: #003da5 !important;
+      font-weight: 600;
+    }
+
+    .total-row td:nth-last-child(2),
+    .total-row td:nth-last-child(1) {
+      background: #f3f4f6;
+      color: #003da5;
+      font-weight: 600;
+    }
+
+    .media-row {
+      background: #eff6ff;
+      font-weight: 600;
+      color: #0c4a6e;
+    }
+
+    .media-row td:first-child {
+      background: linear-gradient(90deg, #0c4a6e 0%, #0369a1 100%);
+      color: white;
+    }
+
+    .media-value {
+      background: #dbeafe;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+      font-size: 16px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #003da5;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* RESPONSIVO */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        max-height: 60px;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      .sidebar.open {
+        max-height: 400px;
+      }
+
+      .toggle-sidebar {
+        display: block;
+      }
+
+      .sidebar-header h2,
+      .sidebar-menu li {
+        display: none;
+      }
+
+      .sidebar.open .sidebar-header h2,
+      .sidebar.open .sidebar-menu li {
+        display: block;
+      }
+
+      .sidebar-header {
+        margin-bottom: 0;
+      }
+
+      .sidebar.open .sidebar-header {
+        margin-bottom: 0;
+        height: auto;
+      }
+
+      .main {
+        min-height: 0;
+      }
+
+      .header {
+        flex-wrap: nowrap;
+        gap: 15px;
+        height: auto;
+        padding: 10px 20px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+
+      .content {
+        padding: 15px;
+      }
+
+      table {
+        min-width: 600px;
+        font-size: 12px;
+      }
+
+      th, td {
+        padding: 10px 8px;
+      }
+
+      .emoji-header {
+        font-size: 16px;
+      }
+
+      .status-info {
+        width: 100%;
+        order: 3;
+        align-items: flex-start;
+        margin-top: 5px;
+      }
+
+      .btn-refresh {
+        padding: 10px 30px;
+        font-size: 14px;
+      }
+
+      td:first-child {
+        max-width: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 16px;
+      }
+
+      .content {
+        padding: 10px;
+      }
+
+      table {
+        min-width: 500px;
+        font-size: 11px;
+      }
+
+      th, td {
+        padding: 8px 5px;
+      }
+
+      .emoji-header {
+        font-size: 14px;
+      }
+
+      td:first-child {
+        max-width: 150px;
+        white-space: normal;
+      }
+
+      .btn-refresh {
+        padding: 8px 20px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar" id="sidebar">
+      <button class="toggle-sidebar" id="toggleSidebar">☰</button>
+      <div class="sidebar-header">
+        <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo">
+        <h2>Grupo Paraná</h2>
+      </div>
+      <ul class="sidebar-menu" id="setorMenu"></ul>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>Medidor de Percepção</h1>
+        <div class="header-actions">
+          <button class="btn-refresh" id="btnRefresh" onclick="refreshData()">
+            <span id="btnIcon">🔄</span>
+            <span id="btnText">Atualizar</span>
+          </button>
+          <button class="btn-pdf" onclick="exportarPDF()" title="Exportar para PDF">
+            <span>📄</span>
+            <span>PDF</span>
+          </button>
+          <div class="status-info">
+            <div id="statusUltima">Carregando...</div>
+            <div id="statusTotal">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content" id="content">
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Carregando dados...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOgHibVcPjGKEi2l3ZSSMDDgqIwywsCTN3hmJLFNVDZizT31qrc-DRVtSbbkXr6NXQ/exec';
+    
+    const setores = ['Auto Peças', 'Compras', 'DP', 'RH', 'SSMA', 'TI'];
+    
+    const perguntasPorSetor = {
+      "Auto Peças": [
+        "Como você avalia o tempo de resposta da oficina para atender solicitações de manutenção e reparos?",
+        "Como você avalia a qualidade técnica das manutenções realizadas pela oficina (eficiência, durabilidade, resolução do problema)?",
+        "Como você avalia a clareza das informações prestadas pela oficina sobre prazos, diagnósticos e andamento dos serviços?",
+        "Como você avalia o cumprimento dos prazos acordados para devolução dos veículos e máquinas?",
+        "Como você avalia a organização da oficina no controle das entradas e saídas de veículos e equipamentos?",
+        "Como você avalia o suporte da oficina em casos urgentes ou imprevistos?",
+        "Como você avalia o relacionamento e a postura da equipe da oficina com sua área?"
+      ],
+      "Compras": [
+        "Como você avalia a agilidade do setor de Compras em atender suas solicitações dentro dos prazos esperados?",
+        "Como você avalia a clareza das informações, retornos e orientações repassadas pelo setor de Compras?",
+        "Como você avalia o quanto o setor de Compras adquire corretamente o que foi solicitado, conforme descrição, quantidade e especificação técnica?",
+        "Como você avalia a qualidade dos produtos e serviços comprados para sua área?",
+        "Como você avalia os preços praticados nas compras realizadas pelo setor, considerando custo-benefício e pesquisa de mercado?",
+        "Como você avalia o suporte do setor de Compras em situações emergenciais ou de alta prioridade?",
+        "Como você avalia a compreensão que o setor de Compras tem das necessidades reais da sua área?"
+      ],
+      "DP": [
+        "Como você avalia a clareza e cumprimento de prazos para férias, folhas e documentos trabalhistas?",
+        "Como você avalia a disponibilidade e atenção da equipe do DP em casos individuais ou dúvidas?",
+        "Como você avalia o controle e gestão de ponto eletrônico e banco de horas na sua empresa?",
+        "Como você avalia o suporte do DP em relação a admissões, demissões e alterações contratuais?"
+      ],
+      "RH": [
+        "Como você avalia a comunicação e a clareza das informações transmitidas pelo RH?",
+        "Como você avalia o apoio do RH em ações de integração, treinamentos e desenvolvimento profissional?",
+        "Como você avalia o atendimento e disponibilidade do RH para esclarecer dúvidas e orientar os colaboradores?",
+        "Como você avalia o suporte do RH nas questões relacionadas à gestão de pessoas (como clima, liderança, desenvolvimento e cultura organizacional)?"
+      ],
+      "SSMA": [
+        "Como você avalia o cuidado com o meio ambiente na sua unidade de trabalho?",
+        "Como você avalia as ações de conscientização e treinamentos de segurança na sua área?",
+        "Como você avalia o fornecimento e uso adequado de EPIs na sua função?",
+        "Como você avalia as campanhas e ações de saúde promovidas pelo setor de SSMA?",
+        "Como você avalia o suporte e as orientações fornecidas pelo setor de SSMA no dia a dia da sua empresa?"
+      ],
+      "TI": [
+        "Como você avalia a agilidade da equipe de TI no atendimento às suas solicitações e chamados?",
+        "Como você avalia a qualidade das soluções oferecidas pela equipe de TI, em termos de resolução e eficácia?",
+        "Como você avalia o suporte prestado pela equipe de TI em seu dia a dia?",
+        "Como você avalia a infraestrutura de tecnologia da sua área (computadores, impressoras, rede, sistemas, etc.)?",
+        "Como você avalia o apoio do TI em inovar e melhorar as tecnologias da sua área?",
+        "Como você avalia a capacidade do setor de TI em trazer inovações e propor melhorias tecnológicas para sua área?"
+      ]
+    };
+
+    let setorAtual = 'Auto Peças';
+    let dadosCache = {};
+
+    function inicializarMenu() {
+      const menu = document.getElementById('setorMenu');
+      setores.forEach(setor => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.textContent = setor;
+        btn.className = setor === setorAtual ? 'active' : '';
+        btn.onclick = () => selecionarSetor(setor, btn);
+        li.appendChild(btn);
+        menu.appendChild(li);
+      });
+    }
+
+    function selecionarSetor(setor, btn) {
+      setorAtual = setor;
+      document.querySelectorAll('.sidebar-menu button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+
+      exibirDados(setor);
+    }
+
+    async function carregarDados() {
+      const btnRefresh = document.getElementById('btnRefresh');
+      btnRefresh.classList.add('loading');
+      document.getElementById('btnText').textContent = 'Carregando...';
+      document.getElementById('btnIcon').textContent = '⏳';
+      
+      try {
+        console.log('Buscando dados...');
+        
+        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'getAllData',
+            setores: setores
+          })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        console.log('Dados recebidos:', data);
+
+        dadosCache = data;
+        exibirDados(setorAtual);
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        document.getElementById('content').innerHTML = `<div class="loading">❌ Erro: ${error.message}</div>`;
+      } finally {
+        btnRefresh.classList.remove('loading');
+        document.getElementById('btnText').textContent = 'Atualizar';
+        document.getElementById('btnIcon').textContent = '🔄';
+        atualizarStatusUltima();
+      }
+    }
+
+    function exibirDados(setor) {
+      const content = document.getElementById('content');
+      const dados = dadosCache[setor];
+      const perguntas = perguntasPorSetor[setor] || [];
+
+      // Mostrar tabela vazia pronta mesmo sem dados
+      let html = `<h2 class="setor-title">${setor}</h2><div class="table-container"><table>`;
+      
+      // Header
+      html += '<thead><tr><th>Pergunta</th>';
+      const emojis = ['😠', '😠', '😔', '😐', '😐', '😐', '😐', '😊', '😄', '😄', '😄'];
+      for (let i = 0; i <= 10; i++) {
+        html += `<th class="emoji-header"><div>${emojis[i]}</div><div style="font-size: 10px; font-weight: normal; margin-top: 2px;">${i}</div></th>`;
+      }
+      html += '<th>Qtd Resp</th><th>Média</th></tr></thead>';
+
+      html += '<tbody>';
+
+      // Mostrar todas as perguntas
+      perguntas.forEach((pergunta, idx) => {
+        const resps = dados && dados.respostas && dados.respostas[idx] 
+          ? dados.respostas[idx] 
+          : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        
+        const total = resps.reduce((a, b) => a + b, 0);
+        const media = total > 0 ? (resps.reduce((a, b, i) => a + (i * b), 0) / total).toFixed(2) : '-';
+        const mediaPercent = media !== '-' ? Math.round((parseFloat(media) / 10) * 100) : '-';
+
+        html += `<tr><td>${pergunta}</td>`;
+        resps.forEach((count, emojiIdx) => {
+          const cell = `<td class="emoji-value${count > 0 ? ' dark' : ''}" data-emoji="${emojiIdx}">${count}</td>`;
+          html += cell;
+        });
+        html += `<td><strong>${total}</strong></td><td class="media-value">${mediaPercent !== '-' ? mediaPercent + '%' : '-'}</td></tr>`;
+      });
+
+      // Total
+      let totalGeral = 0;
+      let somaMedias = 0;
+      if (dados && dados.respostas) {
+        totalGeral = Object.values(dados.respostas).reduce((a, b) => a + b.reduce((x, y) => x + y, 0), 0);
+        Object.values(dados.respostas).forEach(resps => {
+          const total = resps.reduce((a, b) => a + b, 0);
+          const media = total > 0 ? resps.reduce((a, b, i) => a + (i * b), 0) / total : 0;
+          somaMedias += media;
+        });
+      }
+      
+      const mediaFinal = perguntas.length > 0 ? Math.round((somaMedias / perguntas.length / 10) * 100) : '-';
+      
+      html += `<tr class="total-row"><td>TOTAL</td>`;
+      for (let i = 0; i <= 10; i++) {
+        let sum = 0;
+        if (dados && dados.respostas) {
+          Object.values(dados.respostas).forEach(resps => sum += resps[i] || 0);
+        }
+        html += `<td class="emoji-value${sum > 0 ? ' dark' : ''}" data-emoji="${i}">${sum}</td>`;
+      }
+      html += `<td><strong>${totalGeral}</strong></td><td>${mediaFinal !== '-' ? mediaFinal + '%' : '-'}</td></tr>`;
+
+      html += '</tbody></table></div>';
+      content.innerHTML = html;
+      document.getElementById('statusTotal').textContent = `Total de respostas: ${totalGeral}`;
+    }
+
+    function atualizarStatusUltima() {
+      const data = new Date().toLocaleString('pt-BR');
+      document.getElementById('statusUltima').textContent = `Atualizado em: ${data}`;
+    }
+
+    function refreshData() {
+      carregarDados();
+    }
+
+    function exportarPDF() {
+      const btnPdf = document.querySelector('.btn-pdf');
+      btnPdf.classList.add('loading');
+      
+      try {
+        const elemento = document.querySelector('.table-container');
+        const titulo = document.createElement('h1');
+        titulo.textContent = `Medidor de Percepção - ${setorAtual}`;
+        titulo.style.color = '#003da5';
+        titulo.style.marginBottom = '10px';
+        titulo.style.fontSize = '18px';
+        
+        const containerClone = document.createElement('div');
+        const tableClone = elemento.cloneNode(true);
+        
+        // Reduzir tamanho da tabela pro PDF
+        tableClone.style.fontSize = '10px';
+        const table = tableClone.querySelector('table');
+        if (table) {
+          table.style.width = '100%';
+          const ths = tableClone.querySelectorAll('th');
+          const tds = tableClone.querySelectorAll('td');
+          ths.forEach(th => th.style.padding = '4px 2px');
+          tds.forEach(td => td.style.padding = '4px 2px');
+        }
+        
+        containerClone.appendChild(titulo);
+        containerClone.appendChild(tableClone);
+        
+        const opt = {
+          margin: 8,
+          filename: `medidor-percepcao-${setorAtual}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
+        };
+        
+        html2pdf().set(opt).from(containerClone).save();
+      } finally {
+        btnPdf.classList.remove('loading');
+      }
+    }
+
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    inicializarMenu();
+    carregarDados();
+    // Removido: auto-refresh
+  </script>
+</body>
+</html>
