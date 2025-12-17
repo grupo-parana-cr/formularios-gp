@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medidor de Percepção - Grupo Paraná</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #003da5 0%, #0052cc 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      border-radius: 50%;
+    }
+
+    .header h1 {
+      color: #003da5;
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .links-section {
+      margin-bottom: 30px;
+    }
+
+    .links-section h2 {
+      color: #003da5;
+      font-size: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #003da5;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border-left: 4px solid #003da5;
+      transition: all 0.3s ease;
+    }
+
+    .link-item:hover {
+      background: #f0f3ff;
+      transform: translateX(5px);
+    }
+
+    .link-label {
+      flex: 1;
+      font-weight: 600;
+      color: #333;
+      font-size: 15px;
+    }
+
+    .link-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-copy {
+      background: #fcd34d;
+      color: #003da5;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      min-width: 85px;
+      justify-content: center;
+    }
+
+    .btn-copy:hover {
+      background: #fbbf24;
+      transform: scale(1.05);
+    }
+
+    .btn-copy.copied {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-open {
+      background: #003da5;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .btn-open:hover {
+      background: #0052cc;
+      transform: scale(1.05);
+    }
+
+    .icon-copy {
+      font-size: 16px;
+    }
+
+    .section-separator {
+      margin: 30px 0;
+      padding: 20px;
+      background: #eff6ff;
+      border-radius: 8px;
+      border-left: 4px solid #0052cc;
+    }
+
+    .section-separator h3 {
+      color: #003da5;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .section-separator p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .copy-notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .dashboard-link {
+      margin-top: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #003da5 0%, #0052cc 100%);
+      color: white;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .dashboard-link h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .dashboard-link p {
+      font-size: 14px;
+      margin-bottom: 15px;
+      opacity: 0.9;
+    }
+
+    .btn-dashboard {
+      background: #fcd34d;
+      color: #003da5;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-dashboard:hover {
+      background: #fbbf24;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .link-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .link-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .btn-copy,
+      .btn-open {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://raw.githubusercontent.com/grupo-parana-cr/formularios-gp/main/img/logo-grupo-parana.png" alt="Logo Grupo Paraná">
+      <h1>Medidor de Percepção</h1>
+      <p>Avalie os setores de sua empresa</p>
+    </div>
+
+    <div class="section-separator">
+      <h3>📋 Como funciona?</h3>
+      <p>Selecione o setor abaixo, responda as perguntas de 0 a 10 (usando emojis) e ajude-nos a melhorar continuamente. Você também pode compartilhar o link com outras pessoas!</p>
+    </div>
+
+    <div class="links-section">
+      <h2>🔗 Links dos Formulários</h2>
+      
+      <div class="link-item">
+        <span class="link-label">Auto Peças</span>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copiarLink('https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-auto-pecas.html', this)">
+            <span class="icon-copy">📋</span>
+            <span>Copiar</span>
+          </button>
+          <a href="https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-auto-pecas.html" target="_blank" class="btn-open">Abrir</a>
+        </div>
+      </div>
+
+      <div class="link-item">
+        <span class="link-label">Compras</span>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copiarLink('https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-compras.html', this)">
+            <span class="icon-copy">📋</span>
+            <span>Copiar</span>
+          </button>
+          <a href="https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-compras.html" target="_blank" class="btn-open">Abrir</a>
+        </div>
+      </div>
+
+      <div class="link-item">
+        <span class="link-label">Departamento Pessoal</span>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copiarLink('https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-dp.html', this)">
+            <span class="icon-copy">📋</span>
+            <span>Copiar</span>
+          </button>
+          <a href="https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-dp.html" target="_blank" class="btn-open">Abrir</a>
+        </div>
+      </div>
+
+      <div class="link-item">
+        <span class="link-label">Recursos Humanos</span>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copiarLink('https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-rh.html', this)">
+            <span class="icon-copy">📋</span>
+            <span>Copiar</span>
+          </button>
+          <a href="https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-rh.html" target="_blank" class="btn-open">Abrir</a>
+        </div>
+      </div>
+
+      <div class="link-item">
+        <span class="link-label">SSMA</span>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copiarLink('https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-ssma.html', this)">
+            <span class="icon-copy">📋</span>
+            <span>Copiar</span>
+          </button>
+          <a href="https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-ssma.html" target="_blank" class="btn-open">Abrir</a>
+        </div>
+      </div>
+
+      <div class="link-item">
+        <span class="link-label">TI</span>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copiarLink('https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-ti.html', this)">
+            <span class="icon-copy">📋</span>
+            <span>Copiar</span>
+          </button>
+          <a href="https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/formulario-ti.html" target="_blank" class="btn-open">Abrir</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-link">
+      <h3>📊 Ver Resultados</h3>
+      <p>Acesse o dashboard para visualizar os resultados consolidados de todos os setores</p>
+      <a href="https://grupo-parana-cr.github.io/formularios-gp/medidor-percepcao/dashboard.html" target="_blank" class="btn-dashboard">Abrir Dashboard</a>
+    </div>
+
+    <div class="footer">
+      <p>Grupo Paraná © 2025 - Medidor de Percepção</p>
+    </div>
+  </div>
+
+  <script>
+    function copiarLink(url, btn) {
+      navigator.clipboard.writeText(url).then(() => {
+        // Mudar estilo do botão
+        const textSpan = btn.querySelector('span:last-child');
+        const originalText = textSpan.textContent;
+        
+        btn.classList.add('copied');
+        textSpan.textContent = 'Copiado!';
+
+        // Notificação flutuante
+        const notification = document.createElement('div');
+        notification.className = 'copy-notification';
+        notification.textContent = '✓ Link copiado!';
+        document.body.appendChild(notification);
+
+        // Restaurar depois de 2 segundos
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          textSpan.textContent = originalText;
+          notification.remove();
+        }, 2000);
+      }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        alert('Erro ao copiar o link');
+      });
+    }
+  </script>
+</body>
+</html>
