@@ -744,7 +744,8 @@
       let totalGeral = 0;
       let somaMedias = 0;
       if (dados && dados.respostas) {
-        totalGeral = Object.values(dados.respostas).reduce((a, b) => a + b.reduce((x, y) => x + y, 0), 0);
+        // Usar totalRespostas (pessoas que responderam) ao invés de somar
+        totalGeral = dados.totalRespostas || 0;
         Object.values(dados.respostas).forEach(resps => {
           const total = resps.reduce((a, b) => a + b, 0);
           const media = total > 0 ? resps.reduce((a, b, i) => a + (i * b), 0) / total : 0;
@@ -765,6 +766,25 @@
       html += `<td><strong>${totalGeral}</strong></td><td>${mediaFinal !== '-' ? mediaFinal + '%' : '-'}</td></tr>`;
 
       html += '</tbody></table></div>';
+
+      // Seção de comentários
+      if (dados && dados.comentarios && dados.comentarios.length > 0) {
+        html += `<div style="margin-top: 30px;">
+          <h3 style="color: #003da5; font-size: 18px; margin-bottom: 15px;">💬 Comentários (${dados.comentarios.length})</h3>
+          <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 0;">`;
+        
+        dados.comentarios.forEach((comentario, idx) => {
+          // Normalizar: Maiúscula na primeira letra e resto minúsculo
+          const normalizado = comentario.charAt(0).toUpperCase() + comentario.slice(1).toLowerCase();
+          
+          html += `<div style="padding: 15px; border-bottom: 1px solid #e5e7eb; ${idx === 0 ? 'border-radius: 8px 8px 0 0;' : ''} ${idx === dados.comentarios.length - 1 ? 'border-bottom: none; border-radius: 0 0 8px 8px;' : ''}">
+            <p style="margin: 0; color: #333; font-size: 14px; line-height: 1.5;">"${normalizado}"</p>
+          </div>`;
+        });
+        
+        html += `</div></div>`;
+      }
+
       content.innerHTML = html;
       document.getElementById('statusTotal').textContent = `Total de respostas: ${totalGeral}`;
     }
