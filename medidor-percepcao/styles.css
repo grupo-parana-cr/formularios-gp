@@ -534,6 +534,21 @@ body {
 
   .emoji-scale {
     gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    justify-content: center;
+  }
+
+  .emoji-scale .emoji-option:nth-child(9) {
+    grid-column: 1;
+  }
+
+  .emoji-scale .emoji-option:nth-child(10) {
+    grid-column: 2;
+  }
+
+  .emoji-scale .emoji-option:nth-child(11) {
+    grid-column: 3;
   }
 
   .emoji-btn {
