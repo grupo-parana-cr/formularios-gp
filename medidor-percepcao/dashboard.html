@@ -826,6 +826,37 @@
         
         containerClone.appendChild(titulo);
         containerClone.appendChild(tableClone);
+
+        // Adicionar comentários no PDF
+        const dadosAtual = dadosCache[setorAtual];
+        if (dadosAtual && dadosAtual.comentarios && dadosAtual.comentarios.length > 0) {
+          const secaoComentarios = document.createElement('div');
+          secaoComentarios.style.marginTop = '20px';
+          secaoComentarios.style.pageBreakBefore = 'auto';
+          
+          const tituloComentarios = document.createElement('h3');
+          tituloComentarios.textContent = `💬 Comentários (${dadosAtual.comentarios.length})`;
+          tituloComentarios.style.color = '#003da5';
+          tituloComentarios.style.fontSize = '12px';
+          tituloComentarios.style.marginBottom = '10px';
+          
+          secaoComentarios.appendChild(tituloComentarios);
+          
+          dadosAtual.comentarios.forEach((comentario, idx) => {
+            const normalizado = comentario.charAt(0).toUpperCase() + comentario.slice(1).toLowerCase();
+            const divComentario = document.createElement('div');
+            divComentario.style.fontSize = '9px';
+            divComentario.style.padding = '8px';
+            divComentario.style.marginBottom = '8px';
+            divComentario.style.borderLeft = '3px solid #003da5';
+            divComentario.style.backgroundColor = '#f9fafb';
+            divComentario.style.color = '#333';
+            divComentario.textContent = `"${normalizado}"`;
+            secaoComentarios.appendChild(divComentario);
+          });
+          
+          containerClone.appendChild(secaoComentarios);
+        }
         
         const opt = {
           margin: 8,
