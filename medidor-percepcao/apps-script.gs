@@ -33,7 +33,9 @@ function handleGetAllData(data, spreadsheet) {
       resultado[setorName] = {
         setor: setorName,
         perguntas: [],
-        respostas: {}
+        respostas: {},
+        comentarios: [],
+        totalRespostas: lastRow - 1
       };
       
       if (lastRow < 2) return;
@@ -53,6 +55,12 @@ function handleGetAllData(data, spreadsheet) {
           }
           resultado[setorName].respostas[idx][resp]++;
         });
+        
+        // Capturar comentário (última coluna)
+        const comentario = row[row.length - 1];
+        if (comentario && comentario.trim()) {
+          resultado[setorName].comentarios.push(comentario.trim());
+        }
       });
     });
     
