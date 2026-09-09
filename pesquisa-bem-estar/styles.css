@@ -1,0 +1,86 @@
+/* Complementos ao Tailwind — Pesquisa Bem-Estar, Grupo Paraná */
+
+:root {
+  --gp-blue: #004AC9;
+  --gp-dark: #003580;
+  --gp-light: #E8F2FF;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* As classes de display do Tailwind (.flex, .grid) têm a mesma especificidade
+   que o [hidden] do navegador e vêm depois na cascata — sem o !important,
+   elementos marcados como hidden continuariam visíveis. */
+[hidden] {
+  display: none !important;
+}
+
+/* Tailwind não tem neutral-150 */
+.border-neutral-150 {
+  border-color: #ececec;
+}
+
+/* Barra de rolagem discreta, como na referência */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+
+/* Marca de seleção dos chips: o quadrado se preenche de azul quando marcado */
+.opcao input:checked + div .marca {
+  background-color: var(--gp-blue);
+  border-color: var(--gp-blue);
+}
+
+.opcao input:checked + div .marca svg {
+  opacity: 1;
+}
+
+.opcao input:focus-visible + div {
+  outline: 2px solid var(--gp-blue);
+  outline-offset: 2px;
+}
+
+/* Cada etapa entra com um leve deslize */
+.etapa:not([hidden]),
+.pergunta:not([hidden]) {
+  animation: surgir 0.35s ease-out;
+}
+
+@keyframes surgir {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pulse-once {
+  animation: pulsar 0.6s ease-out;
+}
+
+@keyframes pulsar {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Botões da escala 0–10 */
+.nota {
+  min-height: 52px;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  .nota {
+    aspect-ratio: auto;
+    min-height: 56px;
+  }
+}
+
+/* Respeita quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pesquisa | Bem-Estar e Fatores de Preocupação — Grupo Paraná</title>
+<meta name="description" content="Pesquisa interna do Grupo Paraná sobre bem-estar e fatores de preocupação.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          gp: {
+            blue: '#004AC9',
+            dark: '#003580',
+            light: '#E8F2FF'
+          }
+        },
+        fontFamily: {
+          sans: ['Plus Jakarta Sans', 'Segoe UI', 'sans-serif']
+        }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-white text-neutral-900 antialiased selection:bg-gp-light selection:text-gp-dark">
+
+<!-- Navegação -->
+<nav class="sticky top-0 z-50 w-full bg-white/85 backdrop-blur-md border-b border-neutral-100">
+  <div class="max-w-5xl mx-auto px-5 sm:px-6 py-3 flex items-center justify-between">
+    <img src="../img/logo-grupo-parana.png"
+         alt="Grupo Paraná" class="h-8 w-auto">
+    <span class="text-sm font-medium text-neutral-500 hidden sm:block">Pesquisa de Bem-Estar</span>
+  </div>
+</nav>
+
+<main class="w-full overflow-hidden">
+
+  <!-- Hero -->
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 mt-4">
+    <div class="relative bg-gp-blue rounded-[2.5rem] p-8 md:p-14 overflow-hidden text-white">
+      <div class="relative z-10 max-w-2xl">
+        <span class="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold tracking-wide uppercase px-4 py-1.5 rounded-full mb-6">
+          <i class="w-3.5 h-3.5" data-lucide="heart-handshake"></i>
+          Pesquisa interna
+        </span>
+        <h1 class="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.12] mb-5">
+          Bem-estar e fatores<br>de preocupação
+        </h1>
+        <p class="text-lg md:text-xl text-white/90 leading-relaxed mb-4">
+          Queremos compreender melhor quais situações têm gerado preocupação, pressão ou desgaste
+          na rotina dos nossos colaboradores e como elas têm sido percebidas no dia a dia.
+        </p>
+        <p class="text-base text-white/75 leading-relaxed">
+          Esta pesquisa <strong class="text-white font-semibold">não tem finalidade de diagnóstico</strong>.
+          O objetivo é conhecer melhor a realidade dos nossos colaboradores e identificar
+          oportunidades de cuidado e orientação.
+        </p>
+      </div>
+      <!-- Formas decorativas -->
+      <div class="absolute -bottom-24 -left-16 w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
+      <div class="absolute -top-24 -right-10 w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
+    </div>
+  </div>
+
+  <!-- Cartão do formulário -->
+  <section class="max-w-3xl mx-auto px-4 sm:px-6 mt-8 mb-20">
+    <div class="bg-white rounded-[2rem] border border-neutral-150 shadow-sm p-6 md:p-10">
+
+      <!-- Barra de progresso (oculta na capa e no fim) -->
+      <div id="progresso" class="mb-8" hidden>
+        <div class="flex items-center justify-between mb-2">
+          <span id="progresso-rotulo" class="text-sm font-semibold text-gp-blue"></span>
+          <span id="progresso-contagem" class="text-sm text-neutral-400"></span>
+        </div>
+        <div class="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+          <div id="progresso-barra" class="h-full bg-gp-blue rounded-full transition-all duration-500" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Etapa: boas-vindas -->
+      <div id="etapa-capa" class="etapa">
+        <div class="text-center py-4">
+          <div class="w-16 h-16 bg-gp-light rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="w-8 h-8 text-gp-blue" data-lucide="messages-square"></i>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">Vamos começar?</h2>
+          <p class="text-neutral-500 leading-relaxed max-w-lg mx-auto mb-2">
+            São <strong class="text-neutral-700">4 perguntas</strong> e leva cerca de 3 minutos.
+            Não existe resposta certa ou errada — responda pensando na sua realidade atual.
+          </p>
+          <div class="bg-gp-light/60 rounded-2xl p-5 max-w-lg mx-auto my-8 text-left">
+            <div class="flex gap-3">
+              <i class="w-5 h-5 text-gp-blue shrink-0 mt-0.5" data-lucide="shield-check"></i>
+              <p class="text-sm text-neutral-600 leading-relaxed">
+                <strong class="text-gp-dark">Suas respostas são anônimas.</strong>
+                Pedimos o CPF apenas para garantir que cada pessoa responda uma única vez —
+                ele não é armazenado e não há como ligar as respostas a você.
+              </p>
+            </div>
+          </div>
+          <button type="button" onclick="irParaCpf()"
+                  class="bg-gp-blue text-white text-base font-medium px-8 py-3.5 rounded-full hover:bg-gp-dark transition-all hover:scale-[1.03] inline-flex items-center gap-2">
+            Iniciar
+            <i class="w-4 h-4" data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Etapa: CPF -->
+      <div id="etapa-cpf" class="etapa" hidden>
+        <div class="max-w-md mx-auto py-4">
+          <div class="w-14 h-14 bg-gp-light rounded-full flex items-center justify-center mb-6">
+            <i class="w-7 h-7 text-gp-blue" data-lucide="lock"></i>
+          </div>
+          <h2 class="text-2xl font-semibold tracking-tight mb-3">Identificação</h2>
+          <p class="text-neutral-500 leading-relaxed mb-6">
+            Informe seu CPF para liberar a pesquisa. Ele é usado só para evitar respostas
+            duplicadas e <strong class="text-neutral-700">não é gravado em lugar nenhum</strong>.
+          </p>
+          <label for="cpf" class="block text-sm font-medium text-neutral-700 mb-1.5">CPF</label>
+          <input type="text" id="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off"
+                 class="w-full px-4 py-3.5 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none transition-colors text-lg tracking-wide">
+          <p id="cpf-erro" class="text-sm text-red-600 mt-2" hidden></p>
+          <button type="button" id="btn-cpf" onclick="validarCpf()"
+                  class="w-full mt-6 bg-gp-blue text-white text-base font-medium px-8 py-3.5 rounded-full hover:bg-gp-dark transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+            Continuar
+            <i class="w-4 h-4" data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Etapas das perguntas: renderizadas por script.js -->
+      <div id="etapa-perguntas" class="etapa" hidden></div>
+
+      <!-- Etapa: agradecimento -->
+      <div id="etapa-fim" class="etapa" hidden>
+        <div class="text-center py-8">
+          <div class="w-20 h-20 bg-gp-light rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-once">
+            <i class="w-10 h-10 text-gp-blue" data-lucide="check"></i>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">Obrigado por participar!</h2>
+          <p class="text-neutral-500 leading-relaxed max-w-md mx-auto">
+            Sua resposta foi registrada com sucesso e de forma anônima.
+            O que você compartilhou nos ajuda a cuidar melhor de todos.
+          </p>
+          <div class="bg-gp-light/60 rounded-2xl p-5 max-w-md mx-auto mt-8 text-left">
+            <div class="flex gap-3">
+              <i class="w-5 h-5 text-gp-blue shrink-0 mt-0.5" data-lucide="life-buoy"></i>
+              <p class="text-sm text-neutral-600 leading-relaxed">
+                Se você está passando por um momento difícil, procure o RH.
+                Estamos aqui para orientar e apoiar.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navegação entre perguntas -->
+    <div id="navegacao" class="flex items-center justify-between mt-6" hidden>
+      <button type="button" id="btn-voltar" onclick="voltarEtapa()"
+              class="text-sm font-medium text-neutral-500 hover:text-gp-blue transition-colors inline-flex items-center gap-2 px-4 py-2">
+        <i class="w-4 h-4" data-lucide="arrow-left"></i>
+        Anterior
+      </button>
+      <button type="button" id="btn-avancar" onclick="avancarEtapa()"
+              class="bg-gp-blue text-white text-base font-medium px-7 py-3 rounded-full hover:bg-gp-dark transition-colors inline-flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gp-blue">
+        <span id="btn-avancar-texto">Próxima</span>
+        <i class="w-4 h-4" data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </section>
+
+  <footer class="border-t border-neutral-100 py-8">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <p class="text-sm text-neutral-400">© 2026 Grupo Paraná · Pesquisa interna e anônima</p>
+    </div>
+  </footer>
+</main>
+
+<!-- Aviso flutuante -->
+<div id="aviso" class="fixed inset-x-0 bottom-6 flex justify-center px-4 z-50 pointer-events-none" hidden>
+  <div id="aviso-caixa" class="bg-neutral-900 text-white text-sm px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 max-w-md">
+    <i id="aviso-icone" class="w-4 h-4 shrink-0" data-lucide="info"></i>
+    <span id="aviso-texto"></span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

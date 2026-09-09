@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultados | Pesquisa de Bem-Estar — Grupo Paraná</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { gp: { blue: '#004AC9', dark: '#003580', light: '#E8F2FF' } },
+        fontFamily: { sans: ['Plus Jakarta Sans', 'Segoe UI', 'sans-serif'] }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-neutral-50 text-neutral-900 antialiased">
+
+<header class="bg-gradient-to-br from-gp-blue to-gp-dark text-white">
+  <div class="max-w-5xl mx-auto px-5 sm:px-6 py-8">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <img src="../img/logo-grupo-parana.png"
+             alt="Grupo Paraná" class="h-8 w-auto bg-white rounded-lg p-1.5 mb-4">
+        <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">Resultados da Pesquisa de Bem-Estar</h1>
+        <p class="text-white/70 mt-1.5 text-sm">Dados agregados e anônimos · Grupo Paraná</p>
+      </div>
+      <div class="flex gap-2.5 no-print">
+        <button type="button" onclick="carregarDados()"
+                class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="refresh-cw"></i> Atualizar
+        </button>
+        <button type="button" onclick="exportarPdf()"
+                class="bg-white text-gp-dark text-sm font-medium px-4 py-2.5 rounded-full hover:bg-white/90 transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="download"></i> PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="relatorio" class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+
+  <div id="carregando" class="text-center py-24">
+    <div class="w-10 h-10 border-3 border-neutral-200 border-t-gp-blue rounded-full animate-spin mx-auto mb-4"></div>
+    <p class="text-neutral-400 text-sm">Carregando resultados...</p>
+  </div>
+
+  <div id="erro" class="text-center py-24" hidden>
+    <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="w-7 h-7 text-red-500" data-lucide="alert-circle"></i>
+    </div>
+    <p class="text-neutral-600 font-medium mb-1">Não foi possível carregar os resultados</p>
+    <p id="erro-detalhe" class="text-neutral-400 text-sm"></p>
+  </div>
+
+  <div id="conteudo" hidden>
+    <!-- Indicadores -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white rounded-2xl border border-neutral-150 p-6">
+        <p class="text-sm text-neutral-400 mb-1.5">Respostas recebidas</p>
+        <p id="kpi-total" class="text-4xl font-semibold tracking-tight text-gp-blue">0</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-neutral-150 p-6">
+        <p class="text-sm text-neutral-400 mb-1.5">Média de interferência</p>
+        <p class="text-4xl font-semibold tracking-tight text-gp-blue">
+          <span id="kpi-media">0</span><span class="text-xl text-neutral-300 font-normal"> / 10</span>
+        </p>
+      </div>
+      <div class="bg-white rounded-2xl border border-neutral-150 p-6">
+        <p class="text-sm text-neutral-400 mb-1.5">Interferência alta (7–10)</p>
+        <p class="text-4xl font-semibold tracking-tight text-gp-blue">
+          <span id="kpi-alta">0</span><span class="text-xl text-neutral-300 font-normal">%</span>
+        </p>
+      </div>
+    </div>
+
+    <div id="secoes" class="space-y-6"></div>
+
+    <p class="text-xs text-neutral-400 text-center mt-10 leading-relaxed">
+      Percentuais calculados sobre o total de respondentes. Como as perguntas 1, 2 e 4 permitem
+      marcar mais de uma opção, a soma ultrapassa 100%.
+    </p>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="script.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
