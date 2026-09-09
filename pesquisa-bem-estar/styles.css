@@ -92,16 +92,35 @@ body {
   100% { transform: scale(1); }
 }
 
-/* Botões da escala 0–10 */
+/* Botões da escala 0–10: os 11 cabem em uma linha só, inclusive no celular.
+   No mobile a célula fica estreita, então ganha altura para continuar
+   confortável de tocar. */
 .nota {
   min-height: 52px;
+  font-size: 1.125rem;
   cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .nota {
+    aspect-ratio: 1 / 1;
+  }
 }
 
 @media (max-width: 767px) {
   .nota {
-    aspect-ratio: auto;
-    min-height: 56px;
+    /* 44px é o alvo mínimo de toque; mais que isso deixa a célula
+       desproporcional, já que a largura fica em torno de 24px. */
+    min-height: 44px;
+    font-size: 0.9375rem;
+    padding: 0;
+    border-width: 1.5px;
+  }
+}
+
+@media (max-width: 400px) {
+  .nota {
+    font-size: 0.8125rem;
   }
 }
 

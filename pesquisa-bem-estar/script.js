@@ -300,12 +300,14 @@ function montarEscala(pergunta) {
   var botoes = '';
   for (var i = 0; i <= 10; i++) {
     botoes += '<button type="button" data-nota="' + i + '" onclick="selecionarNota(' + i + ')" ' +
-      'class="nota w-full aspect-square rounded-2xl border-2 font-semibold text-lg transition-all hover:scale-105" ' +
+      'class="nota w-full rounded-lg sm:rounded-2xl border-2 font-semibold transition-all hover:scale-105" ' +
       'style="border-color:' + CORES_ESCALA[i] + ';color:' + CORES_ESCALA[i] + ';background-color:' + CORES_ESCALA[i] + '14;">' +
       i + '</button>';
   }
 
-  return '<div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-11 gap-2 md:gap-1.5">' + botoes + '</div>' +
+  // Sempre 11 colunas: a escala precisa ser lida como uma régua contínua,
+  // e quebrada em fileiras ela perde esse sentido.
+  return '<div class="grid grid-cols-11 gap-[3px] sm:gap-1.5">' + botoes + '</div>' +
     '<div class="flex justify-between mt-4 text-xs text-neutral-400 font-medium">' +
       '<span>Não interferem</span><span>Interferem muito</span>' +
     '</div>';
