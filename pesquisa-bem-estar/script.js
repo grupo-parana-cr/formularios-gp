@@ -189,7 +189,10 @@ function compactarHero() {
 
 function irParaCpf() {
   compactarHero();
-  $('cartao').hidden = false;   // o cartão branco só existe a partir daqui
+  // Em versões anteriores o cartão já vinha visível; o if evita quebrar o
+  // fluxo se um HTML em cache antigo carregar este script.
+  var cartao = $('cartao');
+  if (cartao) cartao.hidden = false;
   mostrarEtapa('etapa-cpf');
   setTimeout(function () { $('cpf').focus(); }, 300);
 }
