@@ -75,6 +75,11 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
 
+    // Ping: só acorda o script. Não toca na planilha de propósito -- serve
+    // para pagar o cold start (que chega a 25s) enquanto a pessoa lê a capa,
+    // em vez de na hora de enviar a resposta.
+    if (data.action === 'ping') return json_({ ok: true });
+
     if (data.action === 'checkCPF') return handleCheckCPF(data);
     if (data.action === 'getAllData') return handleGetAllData();
     if (data.action === 'submit') return handleSubmit(data);

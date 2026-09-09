@@ -114,7 +114,7 @@ function avisar(mensagem, tipo) {
   desenharIcones();
 
   clearTimeout(timerAviso);
-  timerAviso = setTimeout(function () { $('aviso').hidden = true; }, 4000);
+  timerAviso = setTimeout(function () { $('aviso').hidden = true; }, tipo === 'info' ? 15000 : 4000);
 }
 
 /**
@@ -138,14 +138,32 @@ function mostrarEtapa(id) {
  * Envia ao Apps Script sem header Content-Type: o navegador aplica
  * text/plain, o que evita o preflight OPTIONS que o Apps Script não responde.
  */
-function enviarAoServidor(dados) {
+function enviarAoServidor(dados, tentativa) {
+  var controle = new AbortController();
+  var expirou = setTimeout(function () { controle.abort(); }, 60000);
+
   return fetch(URL_APPS_SCRIPT, {
     method: 'POST',
-    body: JSON.stringify(dados)
+    body: JSON.stringify(dados),
+    signal: controle.signal
   }).then(function (resposta) {
+    clearTimeout(expirou);
     if (!resposta.ok) throw new Error('HTTP ' + resposta.status);
     return resposta.json();
+  }).catch(function (falha) {
+    clearTimeout(expirou);
+    // Uma segunda tentativa cobre a falha de rede momentânea, comum no 4G.
+    if (!tentativa) return enviarAoServidor(dados, 1);
+    throw falha;
   });
+}
+
+/**
+ * Acorda o Apps Script assim que a página abre. Sem isso, a primeira chamada
+ * real paga o cold start -- medimos 23s -- e a pessoa acha que travou.
+ */
+function aquecerServidor() {
+  enviarAoServidor({ action: 'ping' }).catch(function () {});
 }
 
 /* ------------------------------------------------------------------ */
@@ -471,6 +489,12 @@ function enviarPesquisa() {
   botao.disabled = true;
   $('btn-avancar-texto').textContent = 'Enviando...';
 
+  // Se o servidor estiver frio a resposta pode demorar. Sem este aviso a
+  // pessoa acha que travou, fecha a página e perde o que preencheu.
+  var avisoDemora = setTimeout(function () {
+    avisar('Ainda enviando... não feche esta página.', 'info');
+  }, 6000);
+
   enviarAoServidor({
     action: 'submit',
     cpf: estado.cpf,
@@ -480,6 +504,8 @@ function enviarPesquisa() {
     q4: estado.respostas.q4, q4Outro: estado.outros.q4
   })
     .then(function (resultado) {
+      clearTimeout(avisoDemora);
+
       if (!resultado.success) {
         avisar(resultado.message || 'Não foi possível enviar.', 'erro');
         estado.enviando = false;
@@ -494,6 +520,7 @@ function enviarPesquisa() {
       desenharIcones();
     })
     .catch(function () {
+      clearTimeout(avisoDemora);
       avisar('Falha de conexão. Verifique sua internet e tente novamente.', 'erro');
       estado.enviando = false;
       botao.disabled = false;
@@ -507,6 +534,7 @@ function enviarPesquisa() {
 
 document.addEventListener('DOMContentLoaded', function () {
   desenharIcones();
+  aquecerServidor();
 
   // O dashboard reaproveita este arquivo (PERGUNTAS e URL_APPS_SCRIPT),
   // mas não tem o campo de CPF.
