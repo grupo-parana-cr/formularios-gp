@@ -117,11 +117,21 @@ function avisar(mensagem, tipo) {
   timerAviso = setTimeout(function () { $('aviso').hidden = true; }, 4000);
 }
 
+/**
+ * Volta ao topo a cada troca de tela. O segundo scrollTo é necessário porque
+ * o hero encolhe com transição de 500ms: a altura da página muda depois da
+ * primeira rolagem e, no celular, a tela acabava parando no meio.
+ */
+function rolarAoTopo() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(function () { window.scrollTo({ top: 0, behavior: 'auto' }); }, 550);
+}
+
 function mostrarEtapa(id) {
   var etapas = document.querySelectorAll('.etapa');
   for (var i = 0; i < etapas.length; i++) etapas[i].hidden = true;
   $(id).hidden = false;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  rolarAoTopo();
 }
 
 /**
@@ -179,6 +189,7 @@ function compactarHero() {
 
 function irParaCpf() {
   compactarHero();
+  $('cartao').hidden = false;   // o cartão branco só existe a partir daqui
   mostrarEtapa('etapa-cpf');
   setTimeout(function () { $('cpf').focus(); }, 300);
 }

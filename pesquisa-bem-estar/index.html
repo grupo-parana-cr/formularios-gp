@@ -44,24 +44,37 @@
 
   <!-- Hero -->
   <div class="max-w-5xl mx-auto px-4 sm:px-6 mt-4">
-    <div id="hero" class="relative bg-gp-blue rounded-[2.5rem] p-8 md:p-14 overflow-hidden text-white transition-all duration-500">
+    <div id="hero" class="relative bg-gp-blue rounded-[2.5rem] p-6 sm:p-8 md:p-14 overflow-hidden text-white transition-all duration-500">
       <div class="relative z-10 max-w-2xl">
-        <span class="hero-detalhe inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold tracking-wide uppercase px-4 py-1.5 rounded-full mb-6">
+        <span class="hero-detalhe inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold tracking-wide uppercase px-4 py-1.5 rounded-full mb-4 md:mb-6">
           <i class="w-3.5 h-3.5" data-lucide="heart-handshake"></i>
           Pesquisa interna
         </span>
-        <h1 id="hero-titulo" class="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.12] mb-5 transition-all duration-500">
+        <h1 id="hero-titulo" class="text-[1.75rem] sm:text-3xl md:text-5xl font-semibold tracking-tight leading-[1.15] mb-4 md:mb-5 transition-all duration-500">
           Bem-estar e fatores <br class="hero-quebra">de preocupação
         </h1>
-        <p class="hero-detalhe text-lg md:text-xl text-white/90 leading-relaxed mb-4">
+        <p class="hero-detalhe text-base sm:text-lg md:text-xl text-white/90 leading-relaxed mb-3 md:mb-4">
           Queremos compreender melhor quais situações têm gerado preocupação, pressão ou desgaste
           na rotina dos nossos colaboradores e como elas têm sido percebidas no dia a dia.
         </p>
-        <p class="hero-detalhe text-base text-white/75 leading-relaxed">
+        <p class="hero-detalhe text-sm sm:text-base text-white/75 leading-relaxed mb-6 md:mb-8">
           Esta pesquisa <strong class="text-white font-semibold">não tem finalidade de diagnóstico</strong>.
           O objetivo é conhecer melhor a realidade dos nossos colaboradores e identificar
           oportunidades de cuidado e orientação.
         </p>
+
+        <div id="hero-acao" class="hero-detalhe">
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-white/80 mb-5 md:mb-6">
+            <span class="inline-flex items-center gap-2"><i class="w-4 h-4" data-lucide="list-checks"></i>4 perguntas</span>
+            <span class="inline-flex items-center gap-2"><i class="w-4 h-4" data-lucide="clock"></i>Cerca de 3 minutos</span>
+            <span class="inline-flex items-center gap-2"><i class="w-4 h-4" data-lucide="shield-check"></i>Respostas anônimas</span>
+          </div>
+          <button type="button" onclick="irParaCpf()"
+                  class="bg-white text-gp-blue text-base font-semibold px-8 py-3.5 rounded-full hover:bg-white/90 transition-all hover:scale-[1.03] inline-flex items-center gap-2">
+            Iniciar pesquisa
+            <i class="w-4 h-4" data-lucide="arrow-right"></i>
+          </button>
+        </div>
       </div>
       <!-- Formas decorativas -->
       <div class="absolute -bottom-24 -left-16 w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
@@ -71,7 +84,7 @@
 
   <!-- Cartão do formulário -->
   <section class="max-w-3xl mx-auto px-4 sm:px-6 mt-8 mb-20">
-    <div class="bg-white rounded-[2rem] border border-neutral-150 shadow-sm p-6 md:p-10">
+    <div id="cartao" class="bg-white rounded-[2rem] border border-neutral-150 shadow-sm p-6 md:p-10" hidden>
 
       <!-- Barra de progresso (oculta na capa e no fim) -->
       <div id="progresso" class="mb-8" hidden>
@@ -81,30 +94,6 @@
         </div>
         <div class="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
           <div id="progresso-barra" class="h-full bg-gp-blue rounded-full transition-all duration-500" style="width:0%"></div>
-        </div>
-      </div>
-
-      <!-- Etapa: boas-vindas -->
-      <div id="etapa-capa" class="etapa">
-        <div class="text-center py-4">
-          <div class="w-16 h-16 bg-gp-light rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="w-8 h-8 text-gp-blue" data-lucide="messages-square"></i>
-          </div>
-          <h2 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">Vamos começar?</h2>
-          <p class="text-neutral-500 leading-relaxed max-w-lg mx-auto mb-6">
-            São <strong class="text-neutral-700">4 perguntas</strong> e leva cerca de 3 minutos.
-            Não existe resposta certa ou errada — responda pensando na sua realidade atual.
-          </p>
-          <p class="inline-flex items-center gap-2 text-sm text-gp-dark bg-gp-light/70 rounded-full px-4 py-2 mb-8">
-            <i class="w-4 h-4" data-lucide="shield-check"></i>
-            Respostas anônimas, analisadas apenas em conjunto
-          </p>
-          <div></div>
-          <button type="button" onclick="irParaCpf()"
-                  class="bg-gp-blue text-white text-base font-medium px-8 py-3.5 rounded-full hover:bg-gp-dark transition-all hover:scale-[1.03] inline-flex items-center gap-2">
-            Iniciar
-            <i class="w-4 h-4" data-lucide="arrow-right"></i>
-          </button>
         </div>
       </div>
 
