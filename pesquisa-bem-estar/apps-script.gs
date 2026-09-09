@@ -400,3 +400,44 @@ function limparDados() {
   SpreadsheetApp.flush();
   return 'Dados apagados.';
 }
+
+/* ------------------------------------------------------------------ */
+/* Aquecimento                                                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * O Apps Script "esfria" quando fica ocioso e a chamada seguinte chega a
+ * levar 25s -- tempo em que quem responde acha que a pesquisa travou.
+ * Um gatilho a cada 5 minutos mantem o script ativo enquanto a pesquisa
+ * estiver no ar. O custo e irrisorio: ~1s por execucao.
+ */
+function manterAquecido() {
+  PropertiesService.getScriptProperties().getProperty('CPF_SALT');
+}
+
+/** Execute UMA VEZ para ligar o aquecimento. Idempotente. */
+function instalarAquecimento() {
+  removerAquecimento();
+
+  ScriptApp.newTrigger('manterAquecido')
+    .timeBased()
+    .everyMinutes(5)
+    .create();
+
+  return 'Aquecimento ligado: o script sera acordado a cada 5 minutos.';
+}
+
+/** Execute quando a pesquisa terminar, para nao deixar o gatilho rodando a toa. */
+function removerAquecimento() {
+  var gatilhos = ScriptApp.getProjectTriggers();
+  var removidos = 0;
+
+  for (var i = 0; i < gatilhos.length; i++) {
+    if (gatilhos[i].getHandlerFunction() === 'manterAquecido') {
+      ScriptApp.deleteTrigger(gatilhos[i]);
+      removidos++;
+    }
+  }
+
+  return 'Gatilhos removidos: ' + removidos;
+}

@@ -79,6 +79,22 @@ npx @google/clasp deploy --deploymentId <ID_ATUAL>   # mantém a mesma URL /exec
 Reimplantar **sem** `--deploymentId` gera uma URL nova, que precisaria ser atualizada em
 `script.js` e `dashboard.js`.
 
+## Velocidade de resposta
+
+O Apps Script "esfria" quando fica ocioso: a primeira chamada depois disso
+chega a levar **25 segundos**, e quem responde interpreta como travamento.
+
+Duas defesas, nesta ordem:
+
+1. **Gatilho `manterAquecido`**, a cada 5 minutos. É o que resolve de fato.
+   Execute `instalarAquecimento()` uma vez no editor do Apps Script ao abrir a
+   pesquisa, e `removerAquecimento()` quando ela terminar.
+2. **`action: "ping"`** disparado pelo `script.js` assim que a página abre —
+   cobre o intervalo em que o gatilho ainda não passou.
+
+O `fetch` também tem limite de 60s e uma nova tentativa automática, e a tela
+avisa "Ainda enviando..." após 6s. Quente, cada chamada leva 2-3s.
+
 ## Alterar as perguntas
 
 Os textos vivem em **dois** lugares que precisam continuar iguais:
