@@ -171,7 +171,14 @@ function cpfValido(cpf) {
   return dv2 === parseInt(d.charAt(10), 10);
 }
 
+/** A partir da segunda tela o hero encolhe, para o conteúdo caber sem rolagem. */
+function compactarHero() {
+  var hero = $('hero');
+  if (hero) hero.classList.add('hero-compacto');
+}
+
 function irParaCpf() {
+  compactarHero();
   mostrarEtapa('etapa-cpf');
   setTimeout(function () { $('cpf').focus(); }, 300);
 }

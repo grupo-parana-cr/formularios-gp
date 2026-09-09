@@ -43,6 +43,34 @@ body {
   outline-offset: 2px;
 }
 
+/* O hero grande só faz sentido na abertura. Depois que a pessoa começa a
+   responder, ele vira uma faixa fina para não empurrar as perguntas
+   para fora da tela. O !important vence as classes de padding do Tailwind. */
+#hero.hero-compacto {
+  padding: 1.25rem 2rem !important;
+  border-radius: 1.5rem !important;
+}
+
+#hero.hero-compacto .hero-detalhe {
+  display: none !important;
+}
+
+#hero.hero-compacto #hero-titulo {
+  font-size: 1.25rem !important;
+  line-height: 1.3 !important;
+  margin-bottom: 0 !important;
+}
+
+#hero.hero-compacto .hero-quebra {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  #hero.hero-compacto #hero-titulo {
+    font-size: 1.5rem !important;
+  }
+}
+
 /* Cada etapa entra com um leve deslize */
 .etapa:not([hidden]),
 .pergunta:not([hidden]) {
