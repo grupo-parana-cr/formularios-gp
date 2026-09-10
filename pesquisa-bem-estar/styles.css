@@ -124,6 +124,12 @@ body {
   }
 }
 
+/* Blocos que não podem ser partidos entre duas páginas do PDF */
+.evitar-quebra {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
 /* Respeita quem prefere menos movimento */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

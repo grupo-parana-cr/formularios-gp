@@ -55,7 +55,7 @@ function cabecalhoSecao(pergunta, indice) {
   // O título tem <strong>; no dashboard queremos o texto simples.
   var titulo = pergunta.titulo.replace(/<[^>]+>/g, '');
 
-  return '<div class="flex items-start gap-3 mb-6">' +
+  return '<div class="flex items-start gap-3 mb-6 evitar-quebra">' +
       '<span class="w-8 h-8 rounded-full bg-gp-blue text-white text-sm font-semibold flex items-center justify-center shrink-0">' +
         (indice + 1) +
       '</span>' +
@@ -78,7 +78,7 @@ function secaoMultipla(pergunta, indice, dados, total) {
     var largura = maximo ? (linha.quantidade / maximo * 100) : 0;
     var destaque = linha.quantidade === maximo && maximo > 0;
 
-    return '<div class="mb-4">' +
+    return '<div class="mb-4 evitar-quebra">' +
         '<div class="flex items-baseline justify-between gap-4 mb-1.5">' +
           '<span class="text-sm text-neutral-700 leading-snug">' + escapar(linha.opcao) + '</span>' +
           '<span class="text-sm font-semibold shrink-0 ' + (destaque ? 'text-gp-blue' : 'text-neutral-400') + '">' +
@@ -121,7 +121,7 @@ function secaoEscala(pergunta, indice, dados) {
 
   return '<section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">' +
       cabecalhoSecao(pergunta, indice) +
-      '<div class="flex items-end gap-1.5 md:gap-2.5">' + colunas + '</div>' +
+      '<div class="flex items-end gap-1.5 md:gap-2.5 evitar-quebra">' + colunas + '</div>' +
       '<div class="flex justify-between mt-3 text-xs text-neutral-400 font-medium">' +
         '<span>Não interferem</span><span>Interferem muito</span>' +
       '</div>' +
@@ -137,7 +137,7 @@ function blocoOutros(outros) {
   if (!outros.length) return '';
 
   var itens = outros.map(function (texto) {
-    return '<li class="text-sm text-neutral-600 leading-relaxed border-l-2 border-gp-light pl-3 py-1">' +
+    return '<li class="text-sm text-neutral-600 leading-relaxed border-l-2 border-gp-light pl-3 py-1 evitar-quebra">' +
       escapar(texto) + '</li>';
   }).join('');
 
@@ -153,6 +153,7 @@ function blocoOutros(outros) {
 function exportarPdf() {
   var elemento = document.getElementById('relatorio');
   var detalhes = elemento.querySelectorAll('details');
+  var cabecalho = document.getElementById('cabecalho-pdf');
   var estadoAnterior = [];
   var i;
 
@@ -162,13 +163,22 @@ function exportarPdf() {
     detalhes[i].open = true;
   }
 
+  var hoje = new Date();
+  document.getElementById('pdf-rodape').textContent =
+    'Emitido em ' + hoje.toLocaleDateString('pt-BR') +
+    ' · ' + (dadosAtuais ? dadosAtuais.total : 0) + ' respostas';
+  cabecalho.hidden = false;
+
   html2pdf().set({
-    margin: 10,
-    filename: 'pesquisa-bem-estar-' + new Date().toISOString().slice(0, 10) + '.pdf',
+    margin: [12, 10, 14, 10],
+    filename: 'pesquisa-bem-estar-' + hoje.toISOString().slice(0, 10) + '.pdf',
     image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    // Sem isto, uma linha de resultado é partida ao meio na virada da página.
+    pagebreak: { mode: ['css', 'legacy'], avoid: ['.evitar-quebra'] }
   }).from(elemento).save().then(function () {
+    cabecalho.hidden = true;
     for (var j = 0; j < detalhes.length; j++) detalhes[j].open = estadoAnterior[j];
   });
 }
