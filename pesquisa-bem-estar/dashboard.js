@@ -137,6 +137,24 @@ function renderizar(dados) {
   desenharIcones();
 }
 
+/**
+ * html2pdf decide as quebras a partir da altura renderizada. Um cartao mais
+ * alto que a pagina util nao tem como caber inteiro -- nesse caso o avoid e
+ * removido dele, senao a biblioteca empurra o bloco e corta do mesmo jeito.
+ */
+function ajustarQuebrasParaPdf() {
+  var alturaUtilPx = 1000;   // A4 menos as margens, na escala da tela
+  var secoes = document.querySelectorAll('#secoes section');
+
+  for (var i = 0; i < secoes.length; i++) {
+    if (secoes[i].getBoundingClientRect().height > alturaUtilPx) {
+      secoes[i].classList.remove('evitar-quebra');
+    } else {
+      secoes[i].classList.add('evitar-quebra');
+    }
+  }
+}
+
 function cabecalhoSecao(pergunta, indice) {
   // O título tem <strong>; no dashboard queremos o texto simples.
   var titulo = pergunta.titulo.replace(/<[^>]+>/g, '');
@@ -178,7 +196,7 @@ function secaoMultipla(pergunta, indice, dados, total) {
       '</div>';
   }).join('');
 
-  return '<section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">' +
+  return '<section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">' +
       cabecalhoSecao(pergunta, indice) +
       (linhas.length ? barras : '<p class="text-sm text-neutral-400">Sem respostas ainda.</p>') +
       blocoOutros(dados[pergunta.id + 'Outros'] || []) +
@@ -205,9 +223,9 @@ function secaoEscala(pergunta, indice, dados) {
       '</div>';
   }).join('');
 
-  return '<section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">' +
+  return '<section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">' +
       cabecalhoSecao(pergunta, indice) +
-      '<div class="flex items-end gap-1.5 md:gap-2.5 evitar-quebra">' + colunas + '</div>' +
+      '<div class="flex items-end gap-1.5 md:gap-2.5">' + colunas + '</div>' +
       '<div class="flex justify-between mt-3 text-xs text-neutral-400 font-medium">' +
         '<span>Não interferem</span><span>Interferem muito</span>' +
       '</div>' +
@@ -248,6 +266,8 @@ function exportarPdf() {
     estadoAnterior.push(detalhes[i].open);
     detalhes[i].open = true;
   }
+
+  ajustarQuebrasParaPdf();
 
   var hoje = new Date();
   document.getElementById('pdf-rodape').textContent =
