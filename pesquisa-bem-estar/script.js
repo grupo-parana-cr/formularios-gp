@@ -140,7 +140,9 @@ function mostrarEtapa(id) {
  */
 function enviarAoServidor(dados, tentativa) {
   var controle = new AbortController();
-  var expirou = setTimeout(function () { controle.abort(); }, 60000);
+  // 90s = o mesmo tempo que o servidor espera na fila. Desistir antes disso
+  // descartaria uma resposta que ainda seria gravada.
+  var expirou = setTimeout(function () { controle.abort(); }, 90000);
 
   return fetch(URL_APPS_SCRIPT, {
     method: 'POST',

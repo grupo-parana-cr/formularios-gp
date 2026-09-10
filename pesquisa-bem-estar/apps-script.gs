@@ -227,47 +227,53 @@ function limparTextoOutro_(texto) {
 }
 
 function handleSubmit(data) {
+  // Tudo que nao mexe em estado compartilhado fica FORA do lock: hash,
+  // validacao e abertura da planilha. Como os envios sao serializados, cada
+  // segundo gasto aqui dentro vira espera para todo mundo na fila.
+  var hash = hashCpf_(data.cpf);
+  if (!hash) return json_({ success: false, message: 'CPF inválido.' });
+
+  var q3 = parseInt(data.q3, 10);
+  if (isNaN(q3) || q3 < 0 || q3 > 10) {
+    return json_({ success: false, message: 'Responda a pergunta 3 antes de enviar.' });
+  }
+
+  var q1 = filtrarOpcoes_(data.q1, OPCOES.q1);
+  var q2 = filtrarOpcoes_(data.q2, OPCOES.q2);
+  var q4 = filtrarOpcoes_(data.q4, OPCOES.q4);
+  var q1Outro = limparTextoOutro_(data.q1Outro);
+  var q2Outro = limparTextoOutro_(data.q2Outro);
+  var q4Outro = limparTextoOutro_(data.q4Outro);
+
+  if (!q1.length && !q1Outro) return json_({ success: false, message: 'Responda a pergunta 1 antes de enviar.' });
+  if (!q2.length && !q2Outro) return json_({ success: false, message: 'Responda a pergunta 2 antes de enviar.' });
+  if (!q4.length && !q4Outro) return json_({ success: false, message: 'Responda a pergunta 4 antes de enviar.' });
+
+  var sheets;
+  try {
+    sheets = ensureSheets_();
+  } catch (error) {
+    return json_({ success: false, message: 'Não foi possível registrar sua resposta. Tente novamente.' });
+  }
+
+  var linha = [
+    Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy'),
+    q1.join('; '), q1Outro,
+    q2.join('; '), q2Outro,
+    q3,
+    q4.join('; '), q4Outro
+  ];
+
   var lock = LockService.getScriptLock();
 
   try {
-    lock.waitLock(30000);
-
-    var hash = hashCpf_(data.cpf);
-    if (!hash) return json_({ success: false, message: 'CPF inválido.' });
-
-    var sheets = ensureSheets_();
+    // 90s: com muita gente enviando ao mesmo tempo, esperar na fila é melhor
+    // do que devolver erro para quem acabou de preencher tudo.
+    lock.waitLock(90000);
 
     if (hashJaRespondeu_(sheets.controle, hash)) {
       return json_({ success: false, message: 'Esta pesquisa já foi respondida com este CPF. Obrigado por participar!' });
     }
-
-    var q3 = parseInt(data.q3, 10);
-    if (isNaN(q3) || q3 < 0 || q3 > 10) {
-      return json_({ success: false, message: 'Responda a pergunta 3 antes de enviar.' });
-    }
-
-    var q1 = filtrarOpcoes_(data.q1, OPCOES.q1);
-    var q2 = filtrarOpcoes_(data.q2, OPCOES.q2);
-    var q4 = filtrarOpcoes_(data.q4, OPCOES.q4);
-    var q1Outro = limparTextoOutro_(data.q1Outro);
-    var q2Outro = limparTextoOutro_(data.q2Outro);
-    var q4Outro = limparTextoOutro_(data.q4Outro);
-
-    if (!q1.length && !q1Outro) return json_({ success: false, message: 'Responda a pergunta 1 antes de enviar.' });
-    if (!q2.length && !q2Outro) return json_({ success: false, message: 'Responda a pergunta 2 antes de enviar.' });
-    if (!q4.length && !q4Outro) return json_({ success: false, message: 'Responda a pergunta 4 antes de enviar.' });
-
-    var hoje = Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy');
-    var linha = [
-      hoje,
-      q1.join('; '),
-      q1Outro,
-      q2.join('; '),
-      q2Outro,
-      q3,
-      q4.join('; '),
-      q4Outro
-    ];
 
     inserirEmLinhaAleatoria_(sheets.respostas, linha);
 
@@ -276,8 +282,6 @@ function handleSubmit(data) {
       hash,
       Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss')
     ]);
-
-    SpreadsheetApp.flush();
 
     return json_({ success: true, message: 'Resposta registrada com sucesso!' });
   } catch (error) {
@@ -288,9 +292,12 @@ function handleSubmit(data) {
 }
 
 /**
- * Grava a resposta em uma posicao aleatoria em vez do fim da aba. Assim a
- * ordem das linhas nao corresponde a ordem dos hashes na aba Controle, e
- * nao da para correlacionar quem respondeu o que pela sequencia de envio.
+ * Grava a resposta em uma posicao aleatoria em vez do fim da aba, para que a
+ * ordem das linhas nao corresponda a ordem dos hashes na aba Controle.
+ *
+ * Em vez de abrir espaco com insertRowBefore -- que reestrutura a planilha e
+ * segura a fila de envios -- a nova resposta ocupa o lugar de uma linha
+ * sorteada, e a que estava ali vai para o fim. Mesmo efeito, bem mais barato.
  */
 function inserirEmLinhaAleatoria_(sheet, linha) {
   var ultimaLinha = sheet.getLastRow();
@@ -300,15 +307,12 @@ function inserirEmLinhaAleatoria_(sheet, linha) {
     return;
   }
 
-  var alvo = 2 + Math.floor(Math.random() * ultimaLinha);
+  var alvo = 2 + Math.floor(Math.random() * (ultimaLinha - 1));
+  var faixa = sheet.getRange(alvo, 1, 1, linha.length);
+  var deslocada = faixa.getValues()[0];
 
-  if (alvo > ultimaLinha) {
-    sheet.appendRow(linha);
-    return;
-  }
-
-  sheet.insertRowBefore(alvo);
-  sheet.getRange(alvo, 1, 1, linha.length).setValues([linha]);
+  faixa.setValues([linha]);
+  sheet.appendRow(deslocada);
 }
 
 /* ------------------------------------------------------------------ */
