@@ -81,7 +81,7 @@ function doPost(e) {
     if (data.action === 'ping') return json_({ ok: true });
 
     if (data.action === 'checkCPF') return handleCheckCPF(data);
-    if (data.action === 'getAllData') return handleGetAllData();
+    if (data.action === 'getAllData') return handleGetAllData(data);
     if (data.action === 'submit') return handleSubmit(data);
 
     return json_({ success: false, message: 'Ação desconhecida.' });
@@ -319,7 +319,14 @@ function inserirEmLinhaAleatoria_(sheet, linha) {
 /* Dashboard - devolve apenas dados agregados                          */
 /* ------------------------------------------------------------------ */
 
-function handleGetAllData() {
+function handleGetAllData(data) {
+  // Fail-closed: enquanto ninguem rodar gerarAcessoDashboard(), o endpoint
+  // nao devolve dado nenhum. Melhor um dashboard inacessivel do que aberto.
+  if (!credenciaisValidas_(data)) {
+    Utilities.sleep(1500);   // desestimula tentativa de senha em massa
+    return json_({ error: 'nao-autorizado' });
+  }
+
   try {
     var sheets = ensureSheets_();
     var sheet = sheets.respostas;
@@ -444,4 +451,52 @@ function removerAquecimento() {
   }
 
   return 'Gatilhos removidos: ' + removidos;
+}
+
+/* ------------------------------------------------------------------ */
+/* Acesso ao dashboard                                                 */
+/* ------------------------------------------------------------------ */
+
+var PROP_USUARIO = 'DASHBOARD_USUARIO';
+var PROP_SENHA = 'DASHBOARD_SENHA';
+
+/**
+ * A senha vive nas propriedades do script, NUNCA no codigo: este projeto
+ * esta em repositorio publico, e uma senha no JavaScript seria lida por
+ * qualquer pessoa que abrisse o arquivo.
+ */
+function credenciaisValidas_(data) {
+  var props = PropertiesService.getScriptProperties();
+  var usuario = props.getProperty(PROP_USUARIO);
+  var senha = props.getProperty(PROP_SENHA);
+
+  if (!usuario || !senha) return false;
+
+  return String(data.usuario == null ? '' : data.usuario).trim().toLowerCase() === usuario.toLowerCase() &&
+         String(data.senha == null ? '' : data.senha) === senha;
+}
+
+/**
+ * Execute UMA VEZ para liberar o dashboard. A senha aparece no resultado da
+ * execucao -- copie e guarde, porque ela nao e exibida de novo.
+ * Rodar de novo gera uma senha nova e invalida a anterior.
+ */
+function gerarAcessoDashboard() {
+  var senha = Utilities.getUuid().replace(/-/g, '').slice(0, 14);
+  var props = PropertiesService.getScriptProperties();
+
+  props.setProperty(PROP_USUARIO, 'rh');
+  props.setProperty(PROP_SENHA, senha);
+
+  var recado = 'Usuario: rh   |   Senha: ' + senha;
+  Logger.log(recado);
+  return recado;
+}
+
+/** Fecha o dashboard para todo mundo, ate gerar um acesso novo. */
+function revogarAcessoDashboard() {
+  var props = PropertiesService.getScriptProperties();
+  props.deleteProperty(PROP_USUARIO);
+  props.deleteProperty(PROP_SENHA);
+  return 'Acesso ao dashboard revogado.';
 }

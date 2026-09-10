@@ -7,18 +7,104 @@
 
 var dadosAtuais = null;
 
-function carregarDados() {
+/**
+ * As credenciais ficam só na aba aberta (sessionStorage) e são conferidas no
+ * servidor a cada chamada. Nada de senha no código: este repositório é
+ * público, e qualquer pessoa leria o arquivo.
+ */
+function credenciais() {
+  try {
+    var guardado = sessionStorage.getItem('acesso-dashboard');
+    return guardado ? JSON.parse(guardado) : null;
+  } catch (erro) {
+    return null;
+  }
+}
+
+function guardarCredenciais(usuario, senha) {
+  try {
+    sessionStorage.setItem('acesso-dashboard', JSON.stringify({ usuario: usuario, senha: senha }));
+  } catch (erro) { /* navegador com armazenamento bloqueado: segue só em memória */ }
+}
+
+function mostrarLogin(mensagem) {
+  document.getElementById('login').hidden = false;
+  document.getElementById('carregando').hidden = true;
+  document.getElementById('conteudo').hidden = true;
+  document.getElementById('erro').hidden = true;
+  document.getElementById('acoes').hidden = true;
+
+  var erro = document.getElementById('login-erro');
+  erro.textContent = mensagem || '';
+  erro.hidden = !mensagem;
+
+  desenharIcones();
+}
+
+function entrar() {
+  var usuario = document.getElementById('usuario').value.trim();
+  var senha = document.getElementById('senha').value;
+
+  if (!usuario || !senha) {
+    mostrarLogin('Informe usuário e senha.');
+    return;
+  }
+
+  var botao = document.getElementById('btn-entrar');
+  botao.disabled = true;
+  botao.textContent = 'Entrando...';
+
+  guardarCredenciais(usuario, senha);
+  carregarDados(true);
+}
+
+function sair() {
+  try { sessionStorage.removeItem('acesso-dashboard'); } catch (erro) {}
+  document.getElementById('senha').value = '';
+  dadosAtuais = null;
+  mostrarLogin();
+}
+
+function restaurarBotaoEntrar() {
+  var botao = document.getElementById('btn-entrar');
+  botao.disabled = false;
+  botao.innerHTML = 'Entrar <i class="w-4 h-4" data-lucide="arrow-right"></i>';
+  desenharIcones();
+}
+
+function carregarDados(vindoDoLogin) {
+  var acesso = credenciais();
+  if (!acesso) { mostrarLogin(); return; }
+
+  document.getElementById('login').hidden = true;
   document.getElementById('carregando').hidden = false;
   document.getElementById('conteudo').hidden = true;
   document.getElementById('erro').hidden = true;
 
-  enviarAoServidor({ action: 'getAllData' })
+  enviarAoServidor({ action: 'getAllData', usuario: acesso.usuario, senha: acesso.senha })
     .then(function (dados) {
+      if (dados.error === 'nao-autorizado') {
+        try { sessionStorage.removeItem('acesso-dashboard'); } catch (erro) {}
+        restaurarBotaoEntrar();
+        mostrarLogin('Usuário ou senha incorretos.');
+        return;
+      }
+
       if (dados.error) throw new Error(dados.error);
+
+      restaurarBotaoEntrar();
+      document.getElementById('acoes').hidden = false;
       dadosAtuais = dados;
       renderizar(dados);
     })
     .catch(function (falha) {
+      restaurarBotaoEntrar();
+
+      if (vindoDoLogin) {
+        mostrarLogin('Não foi possível conectar. Tente novamente.');
+        return;
+      }
+
       document.getElementById('carregando').hidden = true;
       document.getElementById('erro').hidden = false;
       document.getElementById('erro-detalhe').textContent =
@@ -183,4 +269,16 @@ function exportarPdf() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', carregarDados);
+document.addEventListener('DOMContentLoaded', function () {
+  desenharIcones();
+
+  if (credenciais()) {
+    carregarDados();
+  } else {
+    mostrarLogin();
+  }
+
+  document.getElementById('senha').addEventListener('keydown', function (evento) {
+    if (evento.key === 'Enter') entrar();
+  });
+});

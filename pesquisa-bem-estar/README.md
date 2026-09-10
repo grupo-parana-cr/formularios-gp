@@ -79,6 +79,23 @@ npx @google/clasp deploy --deploymentId <ID_ATUAL>   # mantém a mesma URL /exec
 Reimplantar **sem** `--deploymentId` gera uma URL nova, que precisaria ser atualizada em
 `script.js` e `dashboard.js`.
 
+## Acesso ao dashboard
+
+Os resultados exigem usuário e senha. A validação é **no servidor**: o
+`getAllData` não devolve nada sem credenciais válidas, então abrir o
+`dashboard.html` ou chamar o endpoint direto não expõe dado nenhum.
+
+A senha fica em `PropertiesService` — **nunca no código**, porque este
+repositório é público e uma senha no JavaScript seria lida por qualquer um.
+
+- `gerarAcessoDashboard()` — execute uma vez no editor. Devolve usuário e senha;
+  copie, porque a senha não é exibida de novo. Rodar de novo troca a senha.
+- `revogarAcessoDashboard()` — fecha o acesso para todos.
+
+Enquanto ninguém rodar `gerarAcessoDashboard()`, o dashboard fica inacessível
+(fail-closed). No navegador, as credenciais ficam apenas em `sessionStorage`,
+válidas enquanto a aba estiver aberta.
+
 ## Velocidade de resposta
 
 O Apps Script "esfria" quando fica ocioso: a primeira chamada depois disso
