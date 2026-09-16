@@ -102,7 +102,7 @@ formularios/
 
 Todos os campos do formulário são enviados como **FormData** para:
 ```
-https://grupoparana-n8n.qkcade.easypanel.host/webhook/solicitacao-contrato
+https://app.gparana.com.br/api/n8n/webhook/solicitacao-contrato
 ```
 
 **Veja `ESTRUTURA_JSON.md` para detalhes completos dos campos.**
@@ -176,7 +176,7 @@ Todos os textos estão no HTML em `index.html`. Procure e edite diretamente.
 ## 📌 Notas Importantes
 
 1. **Webhook N8N**: A URL do webhook está hardcoded em `script.js` linha 1306
-   - Para mudar, edite: `https://grupoparana-n8n.qkcade.easypanel.host/webhook/solicitacao-contrato`
+   - Para mudar, edite: `https://app.gparana.com.br/api/n8n/webhook/solicitacao-contrato`
 
 2. **Logo**: Referencia arquivo em `../../img/logo-grupo-parana.png`
    - Ajuste o caminho se sua estrutura de pastas for diferente

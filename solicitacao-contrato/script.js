@@ -1647,7 +1647,7 @@ function showCNPJSuccessModal(data) {
           finalFormData.append(`documento_${index}`, file);
         });
         
-        const resp = await fetch('https://grupoparana-n8n.qkcade.easypanel.host/webhook/solicitacao-contrato', {
+        const resp = await fetch('https://app.gparana.com.br/api/n8n/webhook/solicitacao-contrato', {
           method: 'POST',
           body: finalFormData
         });

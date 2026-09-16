@@ -234,7 +234,7 @@ whatsapp: string (formato: 99999999999 - apenas números)
 
 ```javascript
 // FormData enviado como multipart/form-data
-POST https://grupoparana-n8n.qkcade.easypanel.host/webhook/solicitacao-contrato
+POST https://app.gparana.com.br/api/n8n/webhook/solicitacao-contrato
 
 {
   // Seção 1
