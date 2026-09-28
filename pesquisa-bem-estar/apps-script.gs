@@ -83,6 +83,8 @@ function doPost(e) {
     if (data.action === 'checkCPF') return handleCheckCPF(data);
     if (data.action === 'getAllData') return handleGetAllData(data);
     if (data.action === 'submit') return handleSubmit(data);
+    if (data.action === 'inscricao') return handleInscricao(data);
+    if (data.action === 'listarInscricoes') return handleListarInscricoes(data);
 
     return json_({ success: false, message: 'Ação desconhecida.' });
   } catch (error) {
@@ -499,4 +501,105 @@ function revogarAcessoDashboard() {
   props.deleteProperty(PROP_USUARIO);
   props.deleteProperty(PROP_SENHA);
   return 'Acesso ao dashboard revogado.';
+}
+
+/* ------------------------------------------------------------------ */
+/* Inscricoes nos encontros                                            */
+/* ------------------------------------------------------------------ */
+
+var ABA_INSCRICOES = 'Inscricoes';
+var CABECALHO_INSCRICOES = ['Data/Hora', 'Nome', 'Data de Nascimento', 'Departamento'];
+
+/**
+ * Aba separada das respostas da pesquisa. A inscricao e IDENTIFICADA (tem
+ * nome); a pesquisa e anonima. Manter as duas coisas em abas distintas, sem
+ * nenhuma chave em comum, e o que impede cruzar uma com a outra.
+ */
+function ensureInscricoes_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(ABA_INSCRICOES);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(ABA_INSCRICOES);
+    escreverCabecalho_(sheet, CABECALHO_INSCRICOES);
+    sheet.setColumnWidth(2, 280);
+    sheet.setColumnWidth(4, 240);
+  }
+
+  return sheet;
+}
+
+function textoLimitado_(valor, limite) {
+  var limpo = String(valor == null ? '' : valor).trim().replace(/\s+/g, ' ');
+  return limpo.length > limite ? limpo.slice(0, limite) : limpo;
+}
+
+/** Converte aaaa-mm-dd (formato do campo de data) para dd/mm/aaaa. */
+function formatarNascimento_(valor) {
+  var texto = String(valor == null ? '' : valor).trim();
+  var partes = texto.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!partes) return null;
+
+  var ano = parseInt(partes[1], 10);
+  var mes = parseInt(partes[2], 10);
+  var dia = parseInt(partes[3], 10);
+
+  if (mes < 1 || mes > 12 || dia < 1 || dia > 31) return null;
+  if (ano < 1920 || ano > new Date().getFullYear()) return null;
+
+  return partes[3] + '/' + partes[2] + '/' + partes[1];
+}
+
+function handleInscricao(data) {
+  var lock = LockService.getScriptLock();
+
+  try {
+    lock.waitLock(30000);
+
+    var nome = textoLimitado_(data.nome, 120);
+    var departamento = textoLimitado_(data.departamento, 120);
+    var nascimento = formatarNascimento_(data.nascimento);
+
+    if (nome.length < 3) return json_({ success: false, message: 'Informe seu nome completo.' });
+    if (!nascimento) return json_({ success: false, message: 'Informe uma data de nascimento válida.' });
+    if (!departamento) return json_({ success: false, message: 'Informe seu departamento.' });
+
+    var sheet = ensureInscricoes_();
+    sheet.appendRow([
+      Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss'),
+      nome,
+      nascimento,
+      departamento
+    ]);
+
+    SpreadsheetApp.flush();
+    return json_({ success: true, message: 'Inscrição confirmada!' });
+  } catch (error) {
+    return json_({ success: false, message: 'Não foi possível registrar sua inscrição. Tente novamente.' });
+  } finally {
+    try { lock.releaseLock(); } catch (ignore) {}
+  }
+}
+
+/** Lista as inscricoes. Exige as mesmas credenciais do dashboard. */
+function handleListarInscricoes(data) {
+  if (!credenciaisValidas_(data)) {
+    Utilities.sleep(1500);
+    return json_({ error: 'nao-autorizado' });
+  }
+
+  try {
+    var sheet = ensureInscricoes_();
+    var ultimaLinha = sheet.getLastRow();
+    if (ultimaLinha < 2) return json_({ total: 0, inscritos: [] });
+
+    var valores = sheet.getRange(2, 1, ultimaLinha - 1, CABECALHO_INSCRICOES.length).getValues();
+    var inscritos = valores.map(function (linha) {
+      return { quando: linha[0], nome: linha[1], nascimento: linha[2], departamento: linha[3] };
+    });
+
+    return json_({ total: inscritos.length, inscritos: inscritos });
+  } catch (error) {
+    return json_({ error: 'Não foi possível carregar as inscrições.' });
+  }
 }
