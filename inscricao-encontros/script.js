@@ -65,9 +65,9 @@ function inscrever() {
     return;
   }
 
-  var ano = parseInt(nascimento.slice(0, 4), 10);
-  if (ano < 1920 || ano > new Date().getFullYear()) {
-    mostrarErro('Verifique a data de nascimento.');
+  var nascimentoISO = converterNascimento(nascimento);
+  if (!nascimentoISO) {
+    mostrarErro('Informe a data no formato dia/mês/ano. Exemplo: 25/08/1990.');
     $('nascimento').focus();
     return;
   }
@@ -89,7 +89,7 @@ function inscrever() {
   enviarAoServidor({
     action: 'inscricao',
     nome: nome,
-    nascimento: nascimento,
+    nascimento: nascimentoISO,
     departamento: departamento
   })
     .then(function (resultado) {
@@ -115,6 +115,37 @@ function inscrever() {
     });
 }
 
+/** Vai escrevendo dd/mm/aaaa conforme a pessoa digita os números. */
+function formatarData(valor) {
+  var d = valor.replace(/\D/g, '').slice(0, 8);
+  if (d.length > 4) return d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4);
+  if (d.length > 2) return d.slice(0, 2) + '/' + d.slice(2);
+  return d;
+}
+
+/**
+ * Converte dd/mm/aaaa para aaaa-mm-dd, que é o formato esperado pelo servidor.
+ * Devolve null se a data não existir de fato (31/02, por exemplo) ou se a
+ * idade for implausível para um colaborador.
+ */
+function converterNascimento(texto) {
+  var partes = String(texto).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!partes) return null;
+
+  var dia = parseInt(partes[1], 10);
+  var mes = parseInt(partes[2], 10);
+  var ano = parseInt(partes[3], 10);
+
+  var data = new Date(ano, mes - 1, dia);
+  var existe = data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia;
+  if (!existe) return null;
+
+  var idade = (new Date() - data) / (365.25 * 24 * 60 * 60 * 1000);
+  if (idade < 14 || idade > 100) return null;
+
+  return partes[3] + '-' + partes[2] + '-' + partes[1];
+}
+
 function restaurarBotao() {
   enviando = false;
   $('btn-inscrever').disabled = false;
@@ -124,8 +155,9 @@ function restaurarBotao() {
 document.addEventListener('DOMContentLoaded', function () {
   desenharIcones();
 
-  // Não faz sentido nascer no futuro.
-  $('nascimento').max = new Date().toISOString().slice(0, 10);
+  $('nascimento').addEventListener('input', function () {
+    this.value = formatarData(this.value);
+  });
 
   // Acorda o Apps Script enquanto a pessoa lê o convite, para o envio não
   // pegar o script "frio".
