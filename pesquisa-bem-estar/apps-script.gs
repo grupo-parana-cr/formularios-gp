@@ -9,6 +9,7 @@
  * pessoa ao que ela respondeu.
  */
 
+var FUSO = 'America/Campo_Grande';   // Grupo Paraná fica em MS (UTC-4)
 var ABA_RESPOSTAS = 'Respostas';
 var ABA_CONTROLE = 'Controle';
 var LIMITE_TEXTO_OUTRO = 500;
@@ -259,7 +260,7 @@ function handleSubmit(data) {
   }
 
   var linha = [
-    Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy'),
+    Utilities.formatDate(new Date(), FUSO, 'dd/MM/yyyy'),
     q1.join('; '), q1Outro,
     q2.join('; '), q2Outro,
     q3,
@@ -282,7 +283,7 @@ function handleSubmit(data) {
     // O controle guarda so o hash: nada aqui identifica a resposta acima.
     sheets.controle.appendRow([
       hash,
-      Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss')
+      Utilities.formatDate(new Date(), FUSO, 'dd/MM/yyyy HH:mm:ss')
     ]);
 
     return json_({ success: true, message: 'Resposta registrada com sucesso!' });
@@ -574,7 +575,7 @@ function handleInscricao(data) {
     }
 
     sheet.appendRow([
-      Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss'),
+      Utilities.formatDate(new Date(), FUSO, 'dd/MM/yyyy HH:mm:ss'),
       nome,
       nascimento,
       departamento
@@ -601,9 +602,18 @@ function handleListarInscricoes(data) {
     var ultimaLinha = sheet.getLastRow();
     if (ultimaLinha < 2) return json_({ total: 0, inscritos: [] });
 
-    var valores = sheet.getRange(2, 1, ultimaLinha - 1, CABECALHO_INSCRICOES.length).getValues();
+    // getDisplayValues, e nao getValues: devolve o texto exatamente como
+    // aparece na planilha. Com getValues o Sheets entrega um Date, que virava
+    // "1985-11-14T03:00:00.000Z" no JSON e ainda podia mudar de dia ao ser
+    // convertido entre fusos.
+    var valores = sheet.getRange(2, 1, ultimaLinha - 1, CABECALHO_INSCRICOES.length).getDisplayValues();
     var inscritos = valores.map(function (linha) {
-      return { quando: linha[0], nome: linha[1], nascimento: linha[2], departamento: linha[3] };
+      return {
+        quando: String(linha[0] || ''),
+        nome: String(linha[1] || ''),
+        nascimento: String(linha[2] || ''),
+        departamento: String(linha[3] || '')
+      };
     });
 
     return json_({ total: inscritos.length, inscritos: inscritos });
@@ -617,11 +627,15 @@ function handleListarInscricoes(data) {
  * um objeto Date e nao o texto gravado. Sem normalizar isso, a comparacao
  * nunca bate e a deduplicacao passa batido -- foi o que aconteceu.
  */
-function normalizarNascimento_(valor) {
+function formatarCelula_(valor, padrao) {
   if (valor instanceof Date) {
-    return Utilities.formatDate(valor, 'America/Sao_Paulo', 'dd/MM/yyyy');
+    return Utilities.formatDate(valor, FUSO, padrao);
   }
   return String(valor == null ? '' : valor).trim();
+}
+
+function normalizarNascimento_(valor) {
+  return formatarCelula_(valor, 'dd/MM/yyyy');
 }
 
 /**
@@ -641,7 +655,7 @@ function jaInscrito_(sheet, nome, nascimento) {
   if (ultimaLinha < 2) return false;
 
   var alvo = chaveInscrito_(nome, nascimento);
-  var valores = sheet.getRange(2, 2, ultimaLinha - 1, 2).getValues();   // Nome, Nascimento
+  var valores = sheet.getRange(2, 2, ultimaLinha - 1, 2).getDisplayValues();   // Nome, Nascimento
 
   for (var i = 0; i < valores.length; i++) {
     if (chaveInscrito_(valores[i][0], valores[i][1]) === alvo) return true;
