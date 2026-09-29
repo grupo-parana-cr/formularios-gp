@@ -26,9 +26,12 @@ function mostrarErro(mensagem) {
  * Sem header Content-Type de propósito: o navegador aplica text/plain e evita
  * o preflight OPTIONS, que o Apps Script não responde.
  */
-function enviarAoServidor(dados, tempoLimite) {
+function enviarAoServidor(dados, tempoLimite, tentativa) {
   var controle = new AbortController();
-  var relogio = setTimeout(function () { controle.abort(); }, tempoLimite || 60000);
+  // 90s: o cold start do Apps Script chegou a 43s nas medições. Desistir antes
+  // faz a pessoa reenviar uma inscrição que já foi gravada.
+  var relogio = setTimeout(function () { controle.abort(); }, tempoLimite || 90000);
+  var numero = tentativa || 1;
 
   return fetch(URL_APPS_SCRIPT, {
     method: 'POST',
@@ -36,10 +39,28 @@ function enviarAoServidor(dados, tempoLimite) {
     signal: controle.signal
   }).then(function (resposta) {
     clearTimeout(relogio);
-    if (!resposta.ok) throw new Error('HTTP ' + resposta.status);
-    return resposta.json();
+    return resposta.text();
+  }).then(function (texto) {
+    // O Apps Script às vezes devolve uma página de erro do Google em vez de
+    // JSON ("Erro", "Página não encontrada"), sempre depois de ~33s.
+    try {
+      return JSON.parse(texto);
+    } catch (erro) {
+      throw new Error('resposta-invalida');
+    }
   }).catch(function (falha) {
     clearTimeout(relogio);
+
+    // Repetir é seguro: o servidor reconhece a mesma pessoa e confirma em vez
+    // de gravar de novo. Foi a falta disso que gerou inscrições repetidas.
+    if (numero < 3) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, 1500 * numero);
+      }).then(function () {
+        return enviarAoServidor(dados, tempoLimite, numero + 1);
+      });
+    }
+
     throw falha;
   });
 }
@@ -84,7 +105,7 @@ function inscrever() {
   $('btn-inscrever-texto').textContent = 'Enviando...';
 
   // O Apps Script pode demorar quando está ocioso; avisa em vez de parecer travado.
-  timerDemora = setTimeout(function () { $('demora').hidden = false; }, 6000);
+  timerDemora = setTimeout(function () { $('demora').hidden = false; }, 5000);
 
   enviarAoServidor({
     action: 'inscricao',
@@ -100,6 +121,12 @@ function inscrever() {
         mostrarErro(resultado.message || 'Não foi possível registrar sua inscrição.');
         restaurarBotao();
         return;
+      }
+
+      if (resultado.jaInscrito) {
+        $('titulo-fim').textContent = 'Você já estava inscrito!';
+        $('texto-fim').textContent =
+          'Encontramos sua inscrição registrada anteriormente. Não é preciso enviar de novo.';
       }
 
       $('etapa-ficha').hidden = true;

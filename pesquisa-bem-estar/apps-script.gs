@@ -565,6 +565,14 @@ function handleInscricao(data) {
     if (!departamento) return json_({ success: false, message: 'Informe seu departamento.' });
 
     var sheet = ensureInscricoes_();
+
+    // Idempotente de propósito. Quando o Apps Script está lento, a pessoa
+    // acha que falhou e envia de novo -- mas a primeira gravação já
+    // aconteceu. Reenviar precisa confirmar, não duplicar.
+    if (jaInscrito_(sheet, nome, nascimento)) {
+      return json_({ success: true, jaInscrito: true, message: 'Você já está inscrito!' });
+    }
+
     sheet.appendRow([
       Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss'),
       nome,
@@ -602,4 +610,73 @@ function handleListarInscricoes(data) {
   } catch (error) {
     return json_({ error: 'Não foi possível carregar as inscrições.' });
   }
+}
+
+/**
+ * O Sheets converte "12/04/1990" em data de verdade, entao a leitura devolve
+ * um objeto Date e nao o texto gravado. Sem normalizar isso, a comparacao
+ * nunca bate e a deduplicacao passa batido -- foi o que aconteceu.
+ */
+function normalizarNascimento_(valor) {
+  if (valor instanceof Date) {
+    return Utilities.formatDate(valor, 'America/Sao_Paulo', 'dd/MM/yyyy');
+  }
+  return String(valor == null ? '' : valor).trim();
+}
+
+/**
+ * Chave de uma pessoa: nome sem acentos, maiusculas ou espacos extras, mais a
+ * data de nascimento. Nome e nascimento iguais e, na pratica, a mesma pessoa.
+ */
+function chaveInscrito_(nome, nascimento) {
+  var limpo = String(nome == null ? '' : nome)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim().replace(/\s+/g, ' ');
+
+  return limpo + '|' + normalizarNascimento_(nascimento);
+}
+
+function jaInscrito_(sheet, nome, nascimento) {
+  var ultimaLinha = sheet.getLastRow();
+  if (ultimaLinha < 2) return false;
+
+  var alvo = chaveInscrito_(nome, nascimento);
+  var valores = sheet.getRange(2, 2, ultimaLinha - 1, 2).getValues();   // Nome, Nascimento
+
+  for (var i = 0; i < valores.length; i++) {
+    if (chaveInscrito_(valores[i][0], valores[i][1]) === alvo) return true;
+  }
+  return false;
+}
+
+/**
+ * Apaga as inscricoes repetidas que entraram antes da checagem existir,
+ * mantendo sempre a primeira de cada pessoa. Execute no editor.
+ */
+function removerInscricoesDuplicadas() {
+  var sheet = ensureInscricoes_();
+  var ultimaLinha = sheet.getLastRow();
+  if (ultimaLinha < 3) return 'Nada a remover.';
+
+  var valores = sheet.getRange(2, 1, ultimaLinha - 1, CABECALHO_INSCRICOES.length).getValues();
+  var vistos = {};
+  var apagar = [];
+
+  for (var i = 0; i < valores.length; i++) {
+    var chave = chaveInscrito_(valores[i][1], valores[i][2]);
+    if (vistos[chave]) {
+      apagar.push(i + 2);        // numero da linha na planilha
+    } else {
+      vistos[chave] = true;
+    }
+  }
+
+  // De baixo para cima, senao cada remocao desloca as linhas seguintes.
+  for (var j = apagar.length - 1; j >= 0; j--) {
+    sheet.deleteRow(apagar[j]);
+  }
+
+  SpreadsheetApp.flush();
+  return 'Removidas ' + apagar.length + ' inscrições repetidas. Restaram ' +
+         Object.keys(vistos).length + ' pessoas.';
 }
