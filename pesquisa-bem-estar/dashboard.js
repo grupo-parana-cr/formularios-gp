@@ -81,8 +81,18 @@ function carregarDados(vindoDoLogin) {
   document.getElementById('conteudo').hidden = true;
   document.getElementById('erro').hidden = true;
 
+  // Sem isto a tela fica em "Carregando..." por até 3 minutos (90s de espera
+  // mais uma nova tentativa) sem explicar nada a quem está olhando.
+  var avisoDemora = setTimeout(function () {
+    var aviso = document.getElementById('carregando-demora');
+    if (aviso) aviso.hidden = false;
+  }, 5000);
+
   enviarAoServidor({ action: 'getAllData', usuario: acesso.usuario, senha: acesso.senha })
     .then(function (dados) {
+      clearTimeout(avisoDemora);
+      document.getElementById('carregando-demora').hidden = true;
+
       if (dados.error === 'nao-autorizado') {
         try { sessionStorage.removeItem('acesso-dashboard'); } catch (erro) {}
         restaurarBotaoEntrar();
@@ -96,8 +106,12 @@ function carregarDados(vindoDoLogin) {
       document.getElementById('acoes').hidden = false;
       dadosAtuais = dados;
       renderizar(dados);
+      abrirAba(abaAtual);
+      carregarInscricoes(acesso);
     })
     .catch(function (falha) {
+      clearTimeout(avisoDemora);
+      document.getElementById('carregando-demora').hidden = true;
       restaurarBotaoEntrar();
 
       if (vindoDoLogin) {
@@ -292,6 +306,10 @@ function exportarPdf() {
 document.addEventListener('DOMContentLoaded', function () {
   desenharIcones();
 
+  // Acorda o Apps Script enquanto a pessoa digita a senha, para a consulta
+  // não pagar o cold start depois.
+  enviarAoServidor({ action: 'ping' }).catch(function () {});
+
   if (credenciais()) {
     carregarDados();
   } else {
@@ -302,3 +320,90 @@ document.addEventListener('DOMContentLoaded', function () {
     if (evento.key === 'Enter') entrar();
   });
 });
+
+/* ------------------------------------------------------------------ */
+/* Inscrições nos encontros                                            */
+/* ------------------------------------------------------------------ */
+
+var abaAtual = 'pesquisa';
+
+function abrirAba(qual) {
+  abaAtual = qual;
+
+  document.getElementById('painel-pesquisa').hidden = (qual !== 'pesquisa');
+  document.getElementById('painel-inscricoes').hidden = (qual !== 'inscricoes');
+
+  var botoes = document.querySelectorAll('.aba');
+  for (var i = 0; i < botoes.length; i++) {
+    var ativa = botoes[i].dataset.aba === qual;
+    botoes[i].className = 'aba text-sm font-medium px-5 py-2.5 rounded-full transition-colors ' +
+      (ativa ? 'bg-gp-blue text-white' : 'bg-white text-neutral-500 border border-neutral-150 hover:text-gp-blue');
+  }
+}
+
+function carregarInscricoes(acesso) {
+  enviarAoServidor({ action: 'listarInscricoes', usuario: acesso.usuario, senha: acesso.senha })
+    .then(function (dados) {
+      if (dados.error) return;
+      renderizarInscricoes(dados);
+    })
+    .catch(function () { /* a aba da pesquisa continua utilizável */ });
+}
+
+function renderizarInscricoes(dados) {
+  var inscritos = dados.inscritos || [];
+
+  document.getElementById('kpi-inscritos').textContent = inscritos.length;
+
+  // Departamento é campo livre: agrupa ignorando maiúsculas e espaços, e
+  // mostra a grafia mais usada de cada grupo.
+  var grupos = {};
+  inscritos.forEach(function (pessoa) {
+    var bruto = String(pessoa.departamento || '').trim();
+    if (!bruto) return;
+
+    var chave = bruto.toLowerCase().replace(/\s+/g, ' ');
+    if (!grupos[chave]) grupos[chave] = { total: 0, grafias: {} };
+    grupos[chave].total++;
+    grupos[chave].grafias[bruto] = (grupos[chave].grafias[bruto] || 0) + 1;
+  });
+
+  var linhas = Object.keys(grupos).map(function (chave) {
+    var g = grupos[chave];
+    var rotulo = Object.keys(g.grafias).sort(function (a, b) { return g.grafias[b] - g.grafias[a]; })[0];
+    return { rotulo: rotulo, total: g.total };
+  }).sort(function (a, b) { return b.total - a.total; });
+
+  document.getElementById('kpi-departamentos').textContent = linhas.length;
+
+  var maximo = linhas.length ? linhas[0].total : 0;
+  document.getElementById('por-departamento').innerHTML = linhas.length
+    ? linhas.map(function (linha) {
+        var largura = maximo ? (linha.total / maximo * 100) : 0;
+        var destaque = linha.total === maximo;
+        return '<div class="mb-4 evitar-quebra">' +
+            '<div class="flex items-baseline justify-between gap-4 mb-1.5">' +
+              '<span class="text-sm text-neutral-700">' + escapar(linha.rotulo) + '</span>' +
+              '<span class="text-sm font-semibold ' + (destaque ? 'text-gp-blue' : 'text-neutral-400') + '">' +
+                linha.total + '</span>' +
+            '</div>' +
+            '<div class="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">' +
+              '<div class="h-full rounded-full" style="width:' + largura + '%;background-color:' +
+                (destaque ? '#004AC9' : '#7EA6E8') + '"></div>' +
+            '</div>' +
+          '</div>';
+      }).join('')
+    : '<p class="text-sm text-neutral-400">Nenhuma inscrição ainda.</p>';
+
+  document.getElementById('lista-inscritos').innerHTML = inscritos.map(function (pessoa, i) {
+    return '<tr class="border-b border-neutral-100 evitar-quebra">' +
+        '<td class="py-3 pr-4 text-neutral-400">' + (i + 1) + '</td>' +
+        '<td class="py-3 pr-4 font-medium">' + escapar(pessoa.nome) + '</td>' +
+        '<td class="py-3 pr-4 text-neutral-500">' + escapar(pessoa.nascimento) + '</td>' +
+        '<td class="py-3 pr-4 text-neutral-500">' + escapar(pessoa.departamento) + '</td>' +
+        '<td class="py-3 text-neutral-400">' + escapar(pessoa.quando) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  document.getElementById('sem-inscritos').hidden = inscritos.length > 0;
+}
