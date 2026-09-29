@@ -81,17 +81,19 @@ function carregarDados(vindoDoLogin) {
   document.getElementById('conteudo').hidden = true;
   document.getElementById('erro').hidden = true;
 
-  // Sem isto a tela fica em "Carregando..." por até 3 minutos (90s de espera
-  // mais uma nova tentativa) sem explicar nada a quem está olhando.
   var avisoDemora = setTimeout(function () {
-    var aviso = document.getElementById('carregando-demora');
-    if (aviso) aviso.hidden = false;
-  }, 5000);
+    mostrarAvisoCarregamento('Ainda carregando. O servidor do Google está lento agora — seguimos tentando.');
+  }, 6000);
 
-  enviarAoServidor({ action: 'getAllData', usuario: acesso.usuario, senha: acesso.senha })
+  buscarComHedge(
+    { action: 'getAllData', usuario: acesso.usuario, senha: acesso.senha },
+    function () {
+      mostrarAvisoCarregamento('Ainda carregando. O servidor do Google está lento agora — seguimos tentando.');
+    }
+  )
     .then(function (dados) {
       clearTimeout(avisoDemora);
-      document.getElementById('carregando-demora').hidden = true;
+      esconderAvisoCarregamento();
 
       if (dados.error === 'nao-autorizado') {
         try { sessionStorage.removeItem('acesso-dashboard'); } catch (erro) {}
@@ -111,7 +113,7 @@ function carregarDados(vindoDoLogin) {
     })
     .catch(function (falha) {
       clearTimeout(avisoDemora);
-      document.getElementById('carregando-demora').hidden = true;
+      esconderAvisoCarregamento();
       restaurarBotaoEntrar();
 
       if (vindoDoLogin) {
@@ -324,6 +326,18 @@ document.addEventListener('DOMContentLoaded', function () {
 /* ------------------------------------------------------------------ */
 /* Inscrições nos encontros                                            */
 /* ------------------------------------------------------------------ */
+
+function mostrarAvisoCarregamento(texto) {
+  var aviso = document.getElementById('carregando-demora');
+  if (!aviso) return;
+  aviso.textContent = texto;
+  aviso.hidden = false;
+}
+
+function esconderAvisoCarregamento() {
+  var aviso = document.getElementById('carregando-demora');
+  if (aviso) aviso.hidden = true;
+}
 
 var abaAtual = 'pesquisa';
 

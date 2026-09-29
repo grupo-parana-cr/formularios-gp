@@ -30,7 +30,10 @@ function enviarAoServidor(dados, tempoLimite, tentativa) {
   var controle = new AbortController();
   // 90s: o cold start do Apps Script chegou a 43s nas medições. Desistir antes
   // faz a pessoa reenviar uma inscrição que já foi gravada.
-  var relogio = setTimeout(function () { controle.abort(); }, tempoLimite || 90000);
+  // 40s: acima disso a resposta praticamente sempre vem como página de erro.
+  // Desistir cedo e repetir é melhor -- e seguro, porque o servidor reconhece
+  // a mesma pessoa e confirma em vez de gravar de novo.
+  var relogio = setTimeout(function () { controle.abort(); }, tempoLimite || 40000);
   var numero = tentativa || 1;
 
   return fetch(URL_APPS_SCRIPT, {

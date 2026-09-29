@@ -183,6 +183,50 @@ function aquecerServidor() {
   enviarAoServidor({ action: 'ping' }).catch(function () {});
 }
 
+/**
+ * Só para LEITURA. As falhas do Apps Script são aleatórias e independentes:
+ * a mesma chamada pode levar 1s ou 33s e falhar. Em vez de esperar uma
+ * tentativa inteira antes da próxima, dispara tentativas escalonadas e usa a
+ * primeira que voltar com JSON válido.
+ */
+function buscarComHedge(dados, aoDemorar) {
+  var ATRASOS = [0, 8000, 20000];
+  var pendentes = ATRASOS.length;
+
+  return new Promise(function (resolve, reject) {
+    var resolvido = false;
+
+    function tentar(indice) {
+      if (resolvido) return;
+
+      if (indice > 0 && typeof aoDemorar === 'function') aoDemorar(indice);
+
+      var controle = new AbortController();
+      var expirou = setTimeout(function () { controle.abort(); }, 40000);
+
+      fetch(URL_APPS_SCRIPT, {
+        method: 'POST',
+        body: JSON.stringify(dados),
+        signal: controle.signal
+      })
+        .then(function (r) { clearTimeout(expirou); return r.text(); })
+        .then(function (texto) {
+          var json = JSON.parse(texto);   // página de erro do Google cai no catch
+          if (!resolvido) { resolvido = true; resolve(json); }
+        })
+        .catch(function (falha) {
+          clearTimeout(expirou);
+          pendentes--;
+          if (!resolvido && pendentes === 0) reject(falha);
+        });
+    }
+
+    ATRASOS.forEach(function (atraso, i) {
+      setTimeout(function () { tentar(i); }, atraso);
+    });
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* CPF                                                                 */
 /* ------------------------------------------------------------------ */
