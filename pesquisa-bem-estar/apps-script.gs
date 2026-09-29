@@ -371,6 +371,10 @@ function handleGetAllData(data) {
 
     resultado.q3.media = totalQ3 ? Math.round((somaQ3 / totalQ3) * 10) / 10 : 0;
 
+    // Vai junto para o dashboard fazer uma requisição em vez de duas. Com o
+    // Apps Script levando 20-40s por chamada, isso corta a espera pela metade.
+    resultado.inscricoes = lerInscricoes_();
+
     return json_(resultado);
   } catch (error) {
     return json_({ error: 'Não foi possível carregar os resultados.' });
@@ -598,28 +602,34 @@ function handleListarInscricoes(data) {
   }
 
   try {
-    var sheet = ensureInscricoes_();
-    var ultimaLinha = sheet.getLastRow();
-    if (ultimaLinha < 2) return json_({ total: 0, inscritos: [] });
-
-    // getDisplayValues, e nao getValues: devolve o texto exatamente como
-    // aparece na planilha. Com getValues o Sheets entrega um Date, que virava
-    // "1985-11-14T03:00:00.000Z" no JSON e ainda podia mudar de dia ao ser
-    // convertido entre fusos.
-    var valores = sheet.getRange(2, 1, ultimaLinha - 1, CABECALHO_INSCRICOES.length).getDisplayValues();
-    var inscritos = valores.map(function (linha) {
-      return {
-        quando: String(linha[0] || ''),
-        nome: String(linha[1] || ''),
-        nascimento: String(linha[2] || ''),
-        departamento: String(linha[3] || '')
-      };
-    });
-
+    var inscritos = lerInscricoes_();
     return json_({ total: inscritos.length, inscritos: inscritos });
   } catch (error) {
     return json_({ error: 'Não foi possível carregar as inscrições.' });
   }
+}
+
+/**
+ * getDisplayValues, e nao getValues: devolve o texto exatamente como aparece
+ * na planilha. Com getValues o Sheets entrega um Date, que virava
+ * "1985-11-14T03:00:00.000Z" no JSON e ainda podia mudar de dia ao ser
+ * convertido entre fusos.
+ */
+function lerInscricoes_() {
+  var sheet = ensureInscricoes_();
+  var ultimaLinha = sheet.getLastRow();
+  if (ultimaLinha < 2) return [];
+
+  var valores = sheet.getRange(2, 1, ultimaLinha - 1, CABECALHO_INSCRICOES.length).getDisplayValues();
+
+  return valores.map(function (linha) {
+    return {
+      quando: String(linha[0] || ''),
+      nome: String(linha[1] || ''),
+      nascimento: String(linha[2] || ''),
+      departamento: String(linha[3] || '')
+    };
+  });
 }
 
 /**

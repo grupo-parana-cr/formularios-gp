@@ -150,12 +150,27 @@ function enviarAoServidor(dados, tentativa) {
     signal: controle.signal
   }).then(function (resposta) {
     clearTimeout(expirou);
-    if (!resposta.ok) throw new Error('HTTP ' + resposta.status);
-    return resposta.json();
+    return resposta.text();
+  }).then(function (texto) {
+    // O Apps Script às vezes devolve uma página de erro do Google em vez de
+    // JSON, depois de ~35s. Tratar como falha para que a repetição cubra.
+    try {
+      return JSON.parse(texto);
+    } catch (erro) {
+      throw new Error('resposta-invalida');
+    }
   }).catch(function (falha) {
     clearTimeout(expirou);
-    // Uma segunda tentativa cobre a falha de rede momentânea, comum no 4G.
-    if (!tentativa) return enviarAoServidor(dados, 1);
+
+    var numero = tentativa || 1;
+    if (numero < 3) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, 1500 * numero);
+      }).then(function () {
+        return enviarAoServidor(dados, numero + 1);
+      });
+    }
+
     throw falha;
   });
 }

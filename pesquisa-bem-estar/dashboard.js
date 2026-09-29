@@ -107,7 +107,7 @@ function carregarDados(vindoDoLogin) {
       dadosAtuais = dados;
       renderizar(dados);
       abrirAba(abaAtual);
-      carregarInscricoes(acesso);
+      renderizarInscricoes({ inscritos: dados.inscricoes || [] });
     })
     .catch(function (falha) {
       clearTimeout(avisoDemora);
@@ -339,15 +339,6 @@ function abrirAba(qual) {
     botoes[i].className = 'aba text-sm font-medium px-5 py-2.5 rounded-full transition-colors ' +
       (ativa ? 'bg-gp-blue text-white' : 'bg-white text-neutral-500 border border-neutral-150 hover:text-gp-blue');
   }
-}
-
-function carregarInscricoes(acesso) {
-  enviarAoServidor({ action: 'listarInscricoes', usuario: acesso.usuario, senha: acesso.senha })
-    .then(function (dados) {
-      if (dados.error) return;
-      renderizarInscricoes(dados);
-    })
-    .catch(function () { /* a aba da pesquisa continua utilizável */ });
 }
 
 function renderizarInscricoes(dados) {
