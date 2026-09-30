@@ -940,17 +940,15 @@
             const formData = new FormData(this);
 
             // Enviar para webhook n8n
+            // O servidor só libera CORS para app.gparana.com.br, então a resposta não pode
+            // ser lida daqui (github.io). Com no-cors a vistoria é entregue normalmente e o
+            // fetch só falha se não houver conexão.
             fetch('https://app.gparana.com.br/api/n8n/webhook/checklist-veicular', {
                 method: 'POST',
+                mode: 'no-cors',
                 body: formData
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao enviar formulário');
-                }
-                return response.json();
-            })
-            .then(data => {
+            .then(() => {
                 alert('Vistoria registrada com sucesso!');
                 this.reset();
                 
