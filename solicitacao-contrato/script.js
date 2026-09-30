@@ -1647,27 +1647,14 @@ function showCNPJSuccessModal(data) {
           finalFormData.append(`documento_${index}`, file);
         });
         
-        const resp = await fetch('https://app.gparana.com.br/api/n8n/webhook/solicitacao-contrato', {
+        // O n8n só libera CORS para app.gparana.com.br, então a resposta não pode ser lida daqui (github.io). Com no-cors o envio chega normalmente e o fetch só falha sem conexão.
+        await fetch('https://app.gparana.com.br/api/n8n/webhook/solicitacao-contrato', {
           method: 'POST',
+          mode: 'no-cors',
           body: finalFormData
         });
-        
-        // 🔥 CORREÇÃO: Melhor tratamento de erro com detalhes do servidor
-        if (!resp.ok) {
-          const errorData = await resp.text().catch(() => 'Erro desconhecido');
-          throw new Error(`Erro ${resp.status}: ${errorData}`);
-        }
 
-        // 🔥 Parse da resposta
-        let responseData;
-        try {
-          responseData = await resp.json();
-        } catch (e) {
-          responseData = { success: true };
-        }
-
-        // 🔥 Mostrar modal de sucesso com os dados
-        showSuccessModal(responseData);
+        showSuccessModal({});
         
         this.reset();
         uploadedFiles = [];
@@ -1720,6 +1707,7 @@ function showCNPJSuccessModal(data) {
       const tipo = selectedContractType || data?.type || 'Não especificado';
       
       successId.textContent = id;
+      successId.parentElement.style.display = id === 'N/A' ? 'none' : '';
       successType.textContent = tipo;
       
       modal.classList.add('show');

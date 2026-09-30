@@ -1850,18 +1850,13 @@
             });
 
             // Enviar para webhook n8n
+            // O n8n só libera CORS para app.gparana.com.br, então a resposta não pode ser lida daqui (github.io). Com no-cors o envio chega normalmente e o fetch só falha sem conexão.
             fetch('https://app.gparana.com.br/api/n8n/webhook/registro-acidente', {
                 method: 'POST',
+                mode: 'no-cors',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                // Preenche o ID do registro se vier do webhook
-                if (data && data.id) {
-                    document.getElementById('idValue').textContent = data.id;
-                    document.getElementById('registroId').style.display = 'block';
-                }
-                
+            .then(() => {
                 // Mostra modal de sucesso
                 document.getElementById('successModal').classList.add('show');
                 

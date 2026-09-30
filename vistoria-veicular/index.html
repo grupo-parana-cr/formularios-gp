@@ -969,7 +969,7 @@
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao enviar vistoria. Verifique sua conexão e tente novamente.');
+                alert('Não foi possível enviar a vistoria. Verifique sua conexão e tente novamente.\n\n(' + error.message + ')');
                 submitBtn.textContent = 'Enviar';
                 submitBtn.disabled = false;
             });

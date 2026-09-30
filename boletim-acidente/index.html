@@ -292,6 +292,7 @@
       const proto = (data?.data?.registroId || data?.registroId || 'N/A');
       const tipo  = ((data?.data?.tipo || data?.tipo || 'N/A') + '').toUpperCase();
       document.getElementById('proto').textContent = proto;
+      document.getElementById('proto').parentElement.style.display = proto==='N/A' ? 'none' : '';
       document.getElementById('tipo').textContent = tipo;
 
       modal.classList.add('show');
@@ -344,13 +345,12 @@
       uploadedPhotos.forEach((p,i)=>fd.append(`foto_${i}`,p));
 
       try{
-        const r=await fetch('https://app.gparana.com.br/api/n8n/webhook/boletim-acidente',{method:'POST',body:fd});
-        const data=await r.json();
-        if(r.ok && (data.success || data.data)){ showSuccessModal(data); }
-        else { throw new Error(data?.message || 'Erro ao enviar formulário'); }
+        // O n8n só libera CORS para app.gparana.com.br, então a resposta não pode ser lida daqui (github.io). Com no-cors o envio chega normalmente e o fetch só falha sem conexão.
+        await fetch('https://app.gparana.com.br/api/n8n/webhook/boletim-acidente',{method:'POST',mode:'no-cors',body:fd});
+        showSuccessModal({tipo:fd.get('tipo')});
       }catch(err){
         console.error(err);
-        alert('Ops, algo saiu do previsto. Tente novamente.');
+        alert('Não foi possível enviar o boletim. Verifique sua conexão e tente novamente.\n\n('+err.message+')');
       }finally{
         btn.disabled=false;
         btn.classList.remove('loading');
