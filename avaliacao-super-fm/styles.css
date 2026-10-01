@@ -1,0 +1,126 @@
+/* Complementos ao Tailwind — Avaliação Interna Super FM, Grupo Paraná */
+
+:root {
+  --gp-blue: #004AC9;
+  --gp-dark: #003580;
+  --gp-light: #E8F2FF;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* As classes de display do Tailwind (.flex, .grid) têm a mesma especificidade
+   que o [hidden] do navegador e vêm depois na cascata — sem o !important,
+   elementos marcados como hidden continuariam visíveis. */
+[hidden] {
+  display: none !important;
+}
+
+/* Tailwind não tem neutral-150 */
+.border-neutral-150 {
+  border-color: #ececec;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+
+/* O hero grande só faz sentido na abertura. Depois que a pessoa começa a
+   responder, ele vira uma faixa fina para não empurrar as perguntas
+   para fora da tela. O !important vence as classes de padding do Tailwind. */
+#hero.hero-compacto {
+  padding: 1.25rem 2rem !important;
+  border-radius: 1.5rem !important;
+}
+
+#hero.hero-compacto .hero-detalhe {
+  display: none !important;
+}
+
+#hero.hero-compacto #hero-titulo {
+  font-size: 1.25rem !important;
+  line-height: 1.3 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 768px) {
+  #hero.hero-compacto #hero-titulo {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Cada etapa entra com um leve deslize */
+.etapa:not([hidden]),
+.secao:not([hidden]) {
+  animation: surgir 0.35s ease-out;
+}
+
+@keyframes surgir {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pulse-once {
+  animation: pulsar 0.6s ease-out;
+}
+
+@keyframes pulsar {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Botões da escala 1–5: os cinco ficam sempre numa linha, inclusive no
+   celular, para a escala ser lida como uma régua contínua. */
+.nota {
+  min-height: 72px;
+  padding: 0.75rem 0.25rem;
+  cursor: pointer;
+}
+
+.nota-rotulo {
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+
+.nota.selecionada {
+  transform: scale(1.04);
+}
+
+@media (max-width: 480px) {
+  .nota {
+    min-height: 60px;
+    padding: 0.5rem 0.125rem;
+    border-width: 1.5px;
+  }
+
+  .nota-rotulo {
+    font-size: 0.625rem;
+  }
+}
+
+/* Pergunta sem nota quando a pessoa tentou avançar */
+.bloco-pergunta.pendente {
+  background: #fef2f2;
+  border-radius: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+/* Blocos que não podem ser partidos entre duas páginas do PDF */
+.evitar-quebra {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Respeita quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultados | Avaliação Interna Super FM — Grupo Paraná</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { gp: { blue: '#004AC9', dark: '#003580', light: '#E8F2FF' } },
+        fontFamily: { sans: ['Plus Jakarta Sans', 'Segoe UI', 'sans-serif'] }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body class="bg-neutral-50 text-neutral-900 antialiased">
+
+<header class="bg-gradient-to-br from-gp-blue to-gp-dark text-white">
+  <div class="max-w-6xl mx-auto px-5 sm:px-6 py-8">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <img src="../img/logo-grupo-parana.png"
+             alt="Grupo Paraná" class="h-8 w-auto bg-white rounded-lg p-1.5 mb-4">
+        <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">Avaliação Interna · Rádio Super FM</h1>
+        <p class="text-white/70 mt-1.5 text-sm">Resultados · acesso restrito à Diretoria</p>
+      </div>
+      <div id="acoes" class="flex flex-wrap gap-2.5" hidden>
+        <button type="button" onclick="carregarDados()"
+                class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="refresh-cw"></i> Atualizar
+        </button>
+        <button type="button" onclick="exportarCsv()"
+                class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="sheet"></i> CSV
+        </button>
+        <button type="button" onclick="exportarPdf()"
+                class="bg-white text-gp-dark text-sm font-medium px-4 py-2.5 rounded-full hover:bg-white/90 transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="download"></i> PDF
+        </button>
+        <button type="button" onclick="sair()"
+                class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="log-out"></i> Sair
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+
+  <div id="login" class="max-w-sm mx-auto py-16" hidden>
+    <div class="bg-white rounded-2xl border border-neutral-150 p-8">
+      <div class="w-14 h-14 bg-gp-light rounded-full flex items-center justify-center mb-6">
+        <i class="w-7 h-7 text-gp-blue" data-lucide="lock"></i>
+      </div>
+      <h2 class="text-xl font-semibold tracking-tight mb-1.5">Acesso restrito</h2>
+      <p class="text-sm text-neutral-500 mb-6">Os resultados são visíveis apenas para a Diretoria.</p>
+
+      <label for="usuario" class="block text-sm font-medium text-neutral-700 mb-1.5">Usuário</label>
+      <input type="text" id="usuario" autocomplete="username"
+             class="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none transition-colors mb-4">
+
+      <label for="senha" class="block text-sm font-medium text-neutral-700 mb-1.5">Senha</label>
+      <input type="password" id="senha" autocomplete="current-password"
+             class="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none transition-colors">
+
+      <p id="login-erro" class="text-sm text-red-600 mt-3" hidden></p>
+
+      <button type="button" id="btn-entrar" onclick="entrar()"
+              class="w-full mt-6 bg-gp-blue text-white text-base font-medium px-8 py-3.5 rounded-full hover:bg-gp-dark transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-60">
+        Entrar
+        <i class="w-4 h-4" data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="carregando" class="text-center py-24" hidden>
+    <div class="w-10 h-10 border-[3px] border-neutral-200 border-t-gp-blue rounded-full animate-spin mx-auto mb-4"></div>
+    <p class="text-neutral-400 text-sm">Carregando resultados...</p>
+    <p id="carregando-demora" class="text-neutral-400 text-sm mt-2 max-w-xs mx-auto leading-relaxed" hidden></p>
+  </div>
+
+  <div id="erro" class="text-center py-24" hidden>
+    <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="w-7 h-7 text-red-500" data-lucide="alert-circle"></i>
+    </div>
+    <p class="text-neutral-600 font-medium mb-1">Não foi possível carregar os resultados</p>
+    <p id="erro-detalhe" class="text-neutral-400 text-sm"></p>
+  </div>
+
+  <div id="conteudo" hidden>
+
+    <!-- Abas -->
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-1" id="abas">
+      <button type="button" onclick="abrirAba('geral')" data-aba="geral" class="aba">Visão geral</button>
+      <button type="button" onclick="abrirAba('perguntas')" data-aba="perguntas" class="aba">Por pergunta</button>
+      <button type="button" onclick="abrirAba('abertas')" data-aba="abertas" class="aba">Respostas abertas</button>
+      <button type="button" onclick="abrirAba('participantes')" data-aba="participantes" class="aba">Por participante</button>
+    </div>
+
+    <!-- Área exportada no PDF -->
+    <div id="relatorio">
+
+      <!-- Só aparece no PDF -->
+      <div id="cabecalho-pdf" class="mb-8 pb-5 border-b border-neutral-200" hidden>
+        <h1 class="text-2xl font-semibold tracking-tight text-gp-blue">Avaliação Interna · Rádio Super FM</h1>
+        <p id="pdf-subtitulo" class="text-sm text-neutral-500 mt-1.5"></p>
+        <p id="pdf-rodape" class="text-sm text-neutral-400 mt-0.5"></p>
+      </div>
+
+      <!-- Indicadores: aparecem em todas as abas -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 evitar-quebra">
+        <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
+          <p class="text-sm text-neutral-400 mb-1.5">Avaliações recebidas</p>
+          <p id="kpi-total" class="text-4xl font-semibold tracking-tight text-gp-blue">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
+          <p class="text-sm text-neutral-400 mb-1.5">Média geral</p>
+          <p class="text-4xl font-semibold tracking-tight">
+            <span id="kpi-media" class="text-gp-blue">–</span><span class="text-xl text-neutral-300 font-normal"> / 5</span>
+          </p>
+        </div>
+        <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
+          <p class="text-sm text-neutral-400 mb-1.5">Seção mais bem avaliada</p>
+          <p id="kpi-melhor" class="text-base font-semibold leading-snug text-emerald-700">–</p>
+          <p id="kpi-melhor-nota" class="text-sm text-neutral-400 mt-1"></p>
+        </div>
+        <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
+          <p class="text-sm text-neutral-400 mb-1.5">Seção mais crítica</p>
+          <p id="kpi-pior" class="text-base font-semibold leading-snug text-red-700">–</p>
+          <p id="kpi-pior-nota" class="text-sm text-neutral-400 mt-1"></p>
+        </div>
+      </div>
+
+      <!-- Visão geral -->
+      <div id="painel-geral" class="painel space-y-6">
+        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+          <h2 class="text-lg font-semibold tracking-tight mb-1">Média por seção</h2>
+          <p class="text-sm text-neutral-400 mb-6">Média das notas de 1 a 5 de cada seção. Seções só com perguntas abertas não aparecem.</p>
+          <div id="medias-secoes"></div>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+            <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
+              <i class="w-5 h-5 text-emerald-600" data-lucide="thumbs-up"></i> Pontos mais fortes
+            </h2>
+            <p class="text-sm text-neutral-400 mb-5">As 5 perguntas com maior média.</p>
+            <div id="ranking-melhores"></div>
+          </section>
+          <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+            <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
+              <i class="w-5 h-5 text-red-600" data-lucide="alert-triangle"></i> Pontos de atenção
+            </h2>
+            <p class="text-sm text-neutral-400 mb-5">As 5 perguntas com menor média.</p>
+            <div id="ranking-piores"></div>
+          </section>
+        </div>
+
+        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+          <h2 class="text-lg font-semibold tracking-tight mb-1">Equipe de locução × autoavaliação</h2>
+          <p class="text-sm text-neutral-400 mb-6">
+            Compara como a equipe é vista (seção 8) com como cada um se vê (seção 9), nos temas equivalentes.
+          </p>
+          <div id="comparativo"></div>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+          <h2 class="text-lg font-semibold tracking-tight mb-6">Distribuição de todas as notas</h2>
+          <div id="distribuicao-geral"></div>
+        </section>
+      </div>
+
+      <!-- Por pergunta -->
+      <div id="painel-perguntas" class="painel space-y-6" hidden></div>
+
+      <!-- Respostas abertas -->
+      <div id="painel-abertas" class="painel" hidden>
+        <div class="flex flex-col sm:flex-row gap-3 mb-6 sem-pdf">
+          <div class="relative flex-1">
+            <i class="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" data-lucide="search"></i>
+            <input type="search" id="busca-abertas" placeholder="Buscar nas respostas..." oninput="renderizarAbertas()"
+                   class="w-full pl-11 pr-4 py-3 rounded-xl border border-neutral-200 bg-white focus:border-gp-blue focus:ring-0 outline-none">
+          </div>
+          <select id="filtro-secao" onchange="renderizarAbertas()"
+                  class="px-4 py-3 rounded-xl border border-neutral-200 bg-white focus:border-gp-blue outline-none text-sm"></select>
+        </div>
+        <div id="lista-abertas" class="space-y-6"></div>
+      </div>
+
+      <!-- Por participante -->
+      <div id="painel-participantes" class="painel" hidden>
+        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sem-pdf">
+            <h2 class="text-lg font-semibold tracking-tight">Participantes</h2>
+            <div class="relative sm:w-72">
+              <i class="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" data-lucide="search"></i>
+              <input type="search" id="busca-cpf" placeholder="Buscar CPF..." oninput="renderizarParticipantes()"
+                     class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none text-sm">
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-neutral-400 border-b border-neutral-150">
+                  <th class="pb-3 pr-4 font-medium">#</th>
+                  <th class="pb-3 pr-4 font-medium">CPF</th>
+                  <th class="pb-3 pr-4 font-medium">Enviada em</th>
+                  <th class="pb-3 pr-4 font-medium">Média dada</th>
+                  <th class="pb-3 pr-4 font-medium">Autoavaliação</th>
+                  <th class="pb-3 font-medium"></th>
+                </tr>
+              </thead>
+              <tbody id="lista-participantes"></tbody>
+            </table>
+          </div>
+          <p id="sem-participantes" class="text-sm text-neutral-400 mt-4" hidden>Nenhuma avaliação encontrada.</p>
+        </section>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- Detalhe de um participante -->
+<div id="detalhe" class="fixed inset-0 z-50 bg-black/40 flex justify-end" hidden onclick="if (event.target === this) fecharDetalhe()">
+  <div class="bg-white w-full max-w-2xl h-full overflow-y-auto shadow-2xl">
+    <div class="sticky top-0 bg-white border-b border-neutral-100 px-6 py-4 flex items-center justify-between z-10">
+      <div>
+        <p class="text-xs text-neutral-400">Avaliação de</p>
+        <p id="detalhe-cpf" class="text-lg font-semibold tracking-tight"></p>
+      </div>
+      <button type="button" onclick="fecharDetalhe()" class="w-10 h-10 rounded-full hover:bg-neutral-100 flex items-center justify-center" aria-label="Fechar">
+        <i class="w-5 h-5" data-lucide="x"></i>
+      </button>
+    </div>
+    <div id="detalhe-corpo" class="px-6 py-6"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="script.js?v=1"></script>
+<script src="dashboard.js?v=1"></script>
+</body>
+</html>
