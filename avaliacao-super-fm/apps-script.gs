@@ -3,9 +3,10 @@
  *
  * Backend Apps Script vinculado a planilha de respostas (container-bound).
  *
- * Avaliacao IDENTIFICADA: o participante e avisado, antes de comecar, de que
- * o CPF fica registrado junto as respostas e que o acesso e restrito a
- * Diretoria. O CPF tambem impede resposta duplicada.
+ * ANONIMA: nao recebe nem grava nada que identifique quem respondeu -- sem
+ * nome, sem CPF, sem horario (so a data). Cada resposta entra numa linha
+ * aleatoria da aba, para que a ordem nao revele quem enviou primeiro.
+ * Qualquer alteracao precisa preservar isso: o formulario promete anonimato.
  */
 
 var FUSO = 'America/Campo_Grande';   // Grupo Paraná fica em MS (UTC-4)
@@ -23,20 +24,17 @@ var TIPOS = 'eeee' + 'a' + 'ee' + 'aaa' + 'eeeee' + 'c' + 'eeee' + 'a' + 'eee' +
 
 /** Colunas da aba Respostas: chave usada no JSON e titulo do cabecalho. */
 function colunas_() {
-  var lista = [
-    { chave: 'quando', titulo: 'Data/Hora' },
-    { chave: 'cpf', titulo: 'CPF' }
-  ];
+  var lista = [{ chave: 'quando', titulo: 'Data' }];
 
   for (var i = 0; i < TIPOS.length; i++) {
     var n = i + 1;
     var tipo = TIPOS.charAt(i);
 
     if (tipo === 'a') {
-      lista.push({ chave: 'p' + n, titulo: 'P' + n + ' (aberta)' });
+      lista.push({ chave: 'p' + n, titulo: 'P' + n + ' (aberta)', nota: false });
     } else {
-      lista.push({ chave: 'p' + n, titulo: 'P' + n + ' (1-5)' });
-      if (tipo === 'c') lista.push({ chave: 'p' + n + 'c', titulo: 'P' + n + ' - Comentario' });
+      lista.push({ chave: 'p' + n, titulo: 'P' + n + ' (1-5)', nota: true });
+      if (tipo === 'c') lista.push({ chave: 'p' + n + 'c', titulo: 'P' + n + ' - Comentario', nota: false });
     }
   }
 
@@ -55,7 +53,6 @@ function doPost(e) {
     // para pagar o cold start enquanto a pessoa le a capa.
     if (data.action === 'ping') return json_({ ok: true });
 
-    if (data.action === 'checkCPF') return handleCheckCPF(data);
     if (data.action === 'submit') return handleSubmit(data);
     if (data.action === 'getAllData') return handleGetAllData(data);
 
@@ -74,27 +71,34 @@ function json_(obj) {
 /* Planilha                                                            */
 /* ------------------------------------------------------------------ */
 
-/** Cria a aba e o cabecalho se ainda nao existirem. Idempotente. */
+/**
+ * Cria a aba e o cabecalho se ainda nao existirem. Se encontrar uma aba
+ * Respostas com outro cabecalho (a versao de teste que tinha CPF), ela e
+ * renomeada e deixada de lado: nao se mistura com as respostas anonimas.
+ */
 function ensureSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var cabecalho = colunas_().map(function (c) { return c.titulo; });
   var sheet = ss.getSheetByName(ABA_RESPOSTAS);
 
+  if (sheet) {
+    var atual = sheet.getRange(1, 1, 1, cabecalho.length).getDisplayValues()[0];
+    if (atual.join('|') !== cabecalho.join('|')) {
+      sheet.setName('Teste antigo (com CPF) - apagar');
+      sheet = null;
+    }
+  }
+
   if (!sheet) {
-    sheet = ss.insertSheet(ABA_RESPOSTAS);
-    var cabecalho = colunas_().map(function (c) { return c.titulo; });
+    sheet = ss.insertSheet(ABA_RESPOSTAS, 0);
     var range = sheet.getRange(1, 1, 1, cabecalho.length);
     range.setValues([cabecalho]);
     range.setFontWeight('bold');
     range.setBackground('#004AC9');
     range.setFontColor('#FFFFFF');
     sheet.setFrozenRows(1);
-    sheet.setFrozenColumns(2);
-    sheet.setColumnWidth(1, 140);
-    sheet.setColumnWidth(2, 130);
-
-    // CPF como texto: sem isso o Sheets transforma em numero e come o zero
-    // da esquerda.
-    sheet.getRange('B:B').setNumberFormat('@');
+    sheet.setFrozenColumns(1);
+    sheet.setColumnWidth(1, 100);
   }
 
   // Remove a aba padrao vazia criada junto com a planilha.
@@ -104,62 +108,15 @@ function ensureSheet_() {
   return sheet;
 }
 
-/** Executa uma vez no editor para autorizar o script e preparar a planilha. */
+/** Executa no editor para autorizar o script e preparar a planilha. */
 function setup() {
   ensureSheet_();
   return 'Planilha preparada.';
 }
 
 /* ------------------------------------------------------------------ */
-/* CPF                                                                 */
+/* Envio                                                               */
 /* ------------------------------------------------------------------ */
-
-function cpfValido_(cpf) {
-  var d = String(cpf == null ? '' : cpf).replace(/\D/g, '');
-  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
-
-  var soma = 0, i, dv;
-  for (i = 0; i < 9; i++) soma += parseInt(d.charAt(i), 10) * (10 - i);
-  dv = (soma * 10) % 11;
-  if (dv === 10) dv = 0;
-  if (dv !== parseInt(d.charAt(9), 10)) return false;
-
-  soma = 0;
-  for (i = 0; i < 10; i++) soma += parseInt(d.charAt(i), 10) * (11 - i);
-  dv = (soma * 10) % 11;
-  if (dv === 10) dv = 0;
-  return dv === parseInt(d.charAt(10), 10);
-}
-
-function formatarCpf_(cpf) {
-  var d = String(cpf).replace(/\D/g, '');
-  return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-}
-
-function cpfJaRespondeu_(sheet, cpf) {
-  var ultimaLinha = sheet.getLastRow();
-  if (ultimaLinha < 2) return false;
-
-  var alvo = String(cpf).replace(/\D/g, '');
-  var valores = sheet.getRange(2, 2, ultimaLinha - 1, 1).getDisplayValues();
-  for (var i = 0; i < valores.length; i++) {
-    if (String(valores[i][0]).replace(/\D/g, '') === alvo) return true;
-  }
-  return false;
-}
-
-/* ------------------------------------------------------------------ */
-/* Acoes                                                               */
-/* ------------------------------------------------------------------ */
-
-function handleCheckCPF(data) {
-  try {
-    if (!cpfValido_(data.cpf)) return json_({ exists: false, valid: false, message: 'CPF inválido.' });
-    return json_({ exists: cpfJaRespondeu_(ensureSheet_(), data.cpf), valid: true });
-  } catch (error) {
-    return json_({ exists: false, valid: true });
-  }
-}
 
 /**
  * Texto livre vai para a planilha como texto. Um "=" no inicio seria lido
@@ -172,29 +129,38 @@ function textoSeguro_(valor) {
   return limpo;
 }
 
-function handleSubmit(data) {
-  if (!cpfValido_(data.cpf)) return json_({ success: false, message: 'CPF inválido.' });
+/**
+ * O envioId e um codigo aleatorio gerado pelo navegador a cada avaliacao.
+ * Nao identifica ninguem e NAO vai para a planilha: fica so no cache por 6h,
+ * para que a repeticao automatica do cliente (quando a conexao falha depois
+ * de o servidor ja ter gravado) nao duplique a avaliacao.
+ */
+function chaveEnvio_(envioId) {
+  var id = String(envioId == null ? '' : envioId).replace(/[^A-Za-z0-9-]/g, '').slice(0, 64);
+  return id ? 'envio_' + id : null;
+}
 
+function handleSubmit(data) {
   var respostas = data.respostas || {};
-  var linha = [];
   var cols = colunas_();
+  var linha = [];
 
   // Validacao fora do lock: cada segundo dentro dele vira espera para a fila.
   for (var i = 0; i < cols.length; i++) {
-    var chave = cols[i].chave;
+    var col = cols[i];
 
-    if (chave === 'quando') {
-      linha.push(Utilities.formatDate(new Date(), FUSO, 'dd/MM/yyyy HH:mm:ss'));
-    } else if (chave === 'cpf') {
-      linha.push(formatarCpf_(data.cpf));
-    } else if (/\(1-5\)$/.test(cols[i].titulo)) {
-      var nota = parseInt(respostas[chave], 10);
+    if (col.chave === 'quando') {
+      // So a data. Com o horario, daria para cruzar com quem estava no
+      // computador naquele momento.
+      linha.push(Utilities.formatDate(new Date(), FUSO, 'dd/MM/yyyy'));
+    } else if (col.nota) {
+      var nota = parseInt(respostas[col.chave], 10);
       if (isNaN(nota) || nota < 1 || nota > 5) {
-        return json_({ success: false, message: 'Responda a pergunta ' + chave.slice(1) + ' antes de enviar.' });
+        return json_({ success: false, message: 'Responda a pergunta ' + col.chave.slice(1) + ' antes de enviar.' });
       }
       linha.push(nota);
     } else {
-      linha.push(textoSeguro_(respostas[chave]));
+      linha.push(textoSeguro_(respostas[col.chave]));
     }
   }
 
@@ -205,19 +171,21 @@ function handleSubmit(data) {
     return json_({ success: false, message: 'Não foi possível registrar sua avaliação. Tente novamente.' });
   }
 
+  var cache = CacheService.getScriptCache();
+  var chave = chaveEnvio_(data.envioId);
   var lock = LockService.getScriptLock();
 
   try {
     lock.waitLock(90000);
 
-    // Idempotente: se o primeiro envio gravou mas a resposta se perdeu no
-    // caminho, o reenvio automatico do cliente confirma em vez de falhar.
-    if (cpfJaRespondeu_(sheet, data.cpf)) {
-      return json_({ success: true, jaRespondido: true, message: 'Avaliação já registrada. Obrigado!' });
+    if (chave && cache.get(chave)) {
+      return json_({ success: true, repetido: true, message: 'Avaliação registrada com sucesso!' });
     }
 
-    sheet.appendRow(linha);
+    inserirEmLinhaAleatoria_(sheet, linha);
     SpreadsheetApp.flush();
+    if (chave) cache.put(chave, '1', 21600);
+
     return json_({ success: true, message: 'Avaliação registrada com sucesso!' });
   } catch (error) {
     return json_({ success: false, message: 'Não foi possível registrar sua avaliação. Tente novamente.' });
@@ -226,12 +194,34 @@ function handleSubmit(data) {
   }
 }
 
+/**
+ * Grava a resposta numa posicao aleatoria em vez do fim da aba, para que a
+ * ordem das linhas nao revele quem enviou primeiro. A nova resposta ocupa o
+ * lugar de uma linha sorteada, e a que estava ali vai para o fim -- mesmo
+ * efeito de inserir no meio, sem reestruturar a planilha.
+ */
+function inserirEmLinhaAleatoria_(sheet, linha) {
+  var ultimaLinha = sheet.getLastRow();
+
+  if (ultimaLinha < 2) {
+    sheet.appendRow(linha);
+    return;
+  }
+
+  var alvo = 2 + Math.floor(Math.random() * (ultimaLinha - 1));
+  var faixa = sheet.getRange(alvo, 1, 1, linha.length);
+  var deslocada = faixa.getValues()[0];
+
+  faixa.setValues([linha]);
+  sheet.appendRow(deslocada);
+}
+
 /* ------------------------------------------------------------------ */
 /* Dashboard                                                           */
 /* ------------------------------------------------------------------ */
 
 /**
- * Devolve todas as respostas, com CPF. O dashboard agrega no navegador.
+ * Devolve todas as avaliacoes (anonimas). O dashboard agrega no navegador.
  * Fail-closed: sem credenciais validas, nada sai daqui.
  */
 function handleGetAllData(data) {
@@ -249,19 +239,19 @@ function handleGetAllData(data) {
     var valores = sheet.getRange(2, 1, ultimaLinha - 1, cols.length).getDisplayValues();
 
     var participantes = valores.map(function (linha) {
-      var registro = { respostas: {} };
+      var registro = { quando: '', respostas: {} };
 
       for (var i = 0; i < cols.length; i++) {
-        var chave = cols[i].chave;
+        var col = cols[i];
         var valor = String(linha[i] == null ? '' : linha[i]);
 
-        if (chave === 'quando' || chave === 'cpf') {
-          registro[chave] = valor;
-        } else if (/\(1-5\)$/.test(cols[i].titulo)) {
+        if (col.chave === 'quando') {
+          registro.quando = valor;
+        } else if (col.nota) {
           var nota = parseInt(valor, 10);
-          if (!isNaN(nota)) registro.respostas[chave] = nota;
+          if (!isNaN(nota)) registro.respostas[col.chave] = nota;
         } else if (valor) {
-          registro.respostas[chave] = valor;
+          registro.respostas[col.chave] = valor;
         }
       }
 

@@ -131,7 +131,7 @@ var LIMITE_TEXTO = 2000;
 var CHAVE_RASCUNHO = 'rascunho-avaliacao-super-fm';
 
 var estado = {
-  cpf: '',
+  envioId: '',
   indice: 0,
   respostas: {},   // p1: 4, p5: 'texto', p16: 3, p16c: 'comentário'
   enviando: false
@@ -287,63 +287,45 @@ function buscarComHedge(dados, aoDemorar) {
 /* ------------------------------------------------------------------ */
 
 /**
- * São 51 perguntas e uns 15 minutos de preenchimento. Se a aba fechar ou o
- * celular recarregar a página, perder tudo faz a pessoa desistir. O rascunho
- * fica só neste navegador e é apagado quando o envio dá certo.
+ * São 51 perguntas e uns 15 minutos de preenchimento: se a página recarregar,
+ * perder tudo faz a pessoa desistir. O rascunho fica em sessionStorage, e não
+ * em localStorage, de propósito: some quando a aba fecha. No computador
+ * compartilhado do estúdio, o próximo colega não vê o que o anterior deixou
+ * pela metade.
  */
 function salvarRascunho() {
   try {
-    localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify({
-      cpf: estado.cpf, indice: estado.indice, respostas: estado.respostas
+    sessionStorage.setItem(CHAVE_RASCUNHO, JSON.stringify({
+      envioId: estado.envioId, indice: estado.indice, respostas: estado.respostas
     }));
   } catch (erro) { /* armazenamento bloqueado: segue sem rascunho */ }
 }
 
-function lerRascunho(cpf) {
+function lerRascunho() {
   try {
-    var guardado = JSON.parse(localStorage.getItem(CHAVE_RASCUNHO) || 'null');
-    return guardado && guardado.cpf === cpf ? guardado : null;
+    return JSON.parse(sessionStorage.getItem(CHAVE_RASCUNHO) || 'null');
   } catch (erro) {
     return null;
   }
 }
 
 function apagarRascunho() {
-  try { localStorage.removeItem(CHAVE_RASCUNHO); } catch (erro) {}
+  try { sessionStorage.removeItem(CHAVE_RASCUNHO); } catch (erro) {}
+}
+
+/**
+ * Código aleatório do envio. Não identifica ninguém: serve só para o servidor
+ * reconhecer uma repetição automática (quando a conexão falha depois de já ter
+ * gravado) e não registrar a mesma avaliação duas vezes.
+ */
+function novoEnvioId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
 /* ------------------------------------------------------------------ */
-/* CPF                                                                 */
+/* Início                                                              */
 /* ------------------------------------------------------------------ */
-
-function formatarCpf(valor) {
-  var d = String(valor).replace(/\D/g, '').slice(0, 11);
-  if (d.length > 9) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
-  if (d.length > 6) return d.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
-  if (d.length > 3) return d.replace(/(\d{3})(\d{1,3})/, '$1.$2');
-  return d;
-}
-
-/** Valida os dígitos verificadores do CPF. */
-function cpfValido(cpf) {
-  var d = String(cpf).replace(/\D/g, '');
-  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
-
-  var soma = 0;
-  var i;
-
-  for (i = 0; i < 9; i++) soma += parseInt(d.charAt(i), 10) * (10 - i);
-  var dv1 = (soma * 10) % 11;
-  if (dv1 === 10) dv1 = 0;
-  if (dv1 !== parseInt(d.charAt(9), 10)) return false;
-
-  soma = 0;
-  for (i = 0; i < 10; i++) soma += parseInt(d.charAt(i), 10) * (11 - i);
-  var dv2 = (soma * 10) % 11;
-  if (dv2 === 10) dv2 = 0;
-
-  return dv2 === parseInt(d.charAt(10), 10);
-}
 
 /** A partir da segunda tela o hero encolhe, para o conteúdo caber sem rolagem. */
 function compactarHero() {
@@ -351,66 +333,23 @@ function compactarHero() {
   if (hero) hero.classList.add('hero-compacto');
 }
 
-function irParaCpf() {
+function iniciarAvaliacao() {
   compactarHero();
   $('cartao').hidden = false;
-  mostrarEtapa('etapa-cpf');
-  setTimeout(function () { $('cpf').focus(); }, 300);
-}
+  renderizarSecoes();
 
-function validarCpf() {
-  var campo = $('cpf');
-  var erro = $('cpf-erro');
-  var botao = $('btn-cpf');
-  var valor = campo.value;
-
-  if (!cpfValido(valor)) {
-    erro.textContent = 'Informe um CPF válido.';
-    erro.hidden = false;
-    campo.classList.add('border-red-400');
+  var rascunho = lerRascunho();
+  if (rascunho && rascunho.respostas && Object.keys(rascunho.respostas).length) {
+    estado.envioId = rascunho.envioId || novoEnvioId();
+    estado.respostas = rascunho.respostas;
+    restaurarRespostasNaTela();
+    irParaSecao(Math.min(rascunho.indice || 0, SECOES.length - 1));
+    avisar('Recuperamos as respostas que você já tinha preenchido.', 'ok');
     return;
   }
 
-  erro.hidden = true;
-  campo.classList.remove('border-red-400');
-  botao.disabled = true;
-  botao.innerHTML = 'Validando...';
-
-  var cpfLimpo = valor.replace(/\D/g, '');
-
-  function restaurarBotao() {
-    botao.disabled = false;
-    botao.innerHTML = 'Continuar <i class="w-4 h-4" data-lucide="arrow-right"></i>';
-    desenharIcones();
-  }
-
-  enviarAoServidor({ action: 'checkCPF', cpf: cpfLimpo })
-    .then(function (resultado) {
-      if (resultado.exists) {
-        erro.textContent = 'Esta avaliação já foi respondida com este CPF. Obrigado por participar!';
-        erro.hidden = false;
-        restaurarBotao();
-        return;
-      }
-
-      estado.cpf = cpfLimpo;
-      renderizarSecoes();
-
-      var rascunho = lerRascunho(cpfLimpo);
-      if (rascunho) {
-        estado.respostas = rascunho.respostas || {};
-        restaurarRespostasNaTela();
-        irParaSecao(Math.min(rascunho.indice || 0, SECOES.length - 1));
-        avisar('Recuperamos as respostas que você já tinha preenchido.', 'ok');
-      } else {
-        irParaSecao(0);
-      }
-    })
-    .catch(function () {
-      erro.textContent = 'Não foi possível validar agora. Verifique sua conexão e tente novamente.';
-      erro.hidden = false;
-      restaurarBotao();
-    });
+  estado.envioId = novoEnvioId();
+  irParaSecao(0);
 }
 
 /* ------------------------------------------------------------------ */
@@ -628,7 +567,7 @@ function enviarAvaliacao() {
     $('btn-avancar-texto').textContent = 'Enviar avaliação';
   }
 
-  enviarAoServidor({ action: 'submit', cpf: estado.cpf, respostas: estado.respostas })
+  enviarAoServidor({ action: 'submit', envioId: estado.envioId, respostas: estado.respostas })
     .then(function (resultado) {
       clearTimeout(avisoDemora);
 
@@ -659,22 +598,11 @@ function enviarAvaliacao() {
 document.addEventListener('DOMContentLoaded', function () {
   desenharIcones();
 
-  // O dashboard reaproveita este arquivo (SECOES e URL_APPS_SCRIPT), mas
-  // não tem o campo de CPF nem precisa do ping daqui.
-  var campoCpf = $('cpf');
-  if (!campoCpf) return;
+  // O dashboard reaproveita este arquivo (SECOES e URL_APPS_SCRIPT) e faz
+  // o próprio ping.
+  if (!$('etapa-perguntas')) return;
 
   // Acorda o Apps Script enquanto a pessoa lê a capa. Sem isso, a primeira
   // chamada real paga o cold start (~23s) e a pessoa acha que travou.
   enviarAoServidor({ action: 'ping' }).catch(function () {});
-
-  campoCpf.addEventListener('input', function () {
-    this.value = formatarCpf(this.value);
-    $('cpf-erro').hidden = true;
-    this.classList.remove('border-red-400');
-  });
-
-  campoCpf.addEventListener('keydown', function (evento) {
-    if (evento.key === 'Enter') validarCpf();
-  });
 });

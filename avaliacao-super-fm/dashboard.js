@@ -1,7 +1,7 @@
 /**
  * Dashboard da Avaliação Interna Super FM - Grupo Paraná
  *
- * O Apps Script devolve as avaliações (com CPF) só com credenciais válidas;
+ * O Apps Script devolve as avaliações (anônimas) só com credenciais válidas;
  * todas as médias e contagens são calculadas aqui. Perguntas e seções vêm de
  * SECOES, em script.js, para não duplicar os textos.
  *
@@ -251,11 +251,11 @@ function secaoDaPergunta(n) {
   return null;
 }
 
-/** Respostas de texto de uma chave (p5, p16c...), com o CPF de quem escreveu. */
+/** Respostas de texto de uma chave (p5, p16c...), com o número da avaliação. */
 function textosDa(chave) {
   return participantes()
     .filter(function (p) { return p.respostas[chave]; })
-    .map(function (p) { return { cpf: p.cpf, texto: p.respostas[chave] }; });
+    .map(function (p) { return { numero: p.numero, texto: p.respostas[chave] }; });
 }
 
 /* ------------------------------------------------------------------ */
@@ -263,6 +263,10 @@ function textosDa(chave) {
 /* ------------------------------------------------------------------ */
 
 function renderizar() {
+  // Número só para referência na tela: a planilha já guarda as linhas em
+  // ordem aleatória, então ele não diz quem respondeu primeiro.
+  participantes().forEach(function (p, i) { p.numero = i + 1; });
+
   var total = participantes().length;
   var radio = resumo(notasDe(perguntasDaRadio()));
 
@@ -465,8 +469,8 @@ function barraDistribuicao(contagem, comLegenda) {
 function itemTexto(item) {
   return '<li class="border-l-2 border-gp-light pl-3 py-1 evitar-quebra">' +
       '<p class="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">' + escapar(item.texto) + '</p>' +
-      '<button type="button" onclick="abrirDetalhe(\'' + escapar(item.cpf) + '\')" ' +
-        'class="text-xs text-gp-blue/80 hover:text-gp-blue mt-1 font-medium">' + escapar(item.cpf) + '</button>' +
+      '<button type="button" onclick="abrirDetalhe(' + item.numero + ')" ' +
+        'class="text-xs text-gp-blue/80 hover:text-gp-blue mt-1 font-medium">Avaliação #' + item.numero + '</button>' +
     '</li>';
 }
 
@@ -568,7 +572,7 @@ function renderizarAbertas() {
 
       var chave = p.tipo === 'comentario' ? 'p' + p.n + 'c' : 'p' + p.n;
       var itens = textosDa(chave).filter(function (item) {
-        return !busca || item.texto.toLowerCase().indexOf(busca) !== -1 || item.cpf.indexOf(busca) !== -1;
+        return !busca || item.texto.toLowerCase().indexOf(busca) !== -1;
       });
 
       if (busca && !itens.length) return;
@@ -616,14 +620,13 @@ function celulaCalor(valor) {
 }
 
 function renderizarParticipantes() {
-  var busca = $('busca-cpf').value.replace(/\D/g, '');
   var ordem = $('ordem-participantes').value;
   var secoes = secoesDaRadio();
   var daRadio = perguntasDaRadio();
   var auto = SECOES[INDICE_AUTOAVALIACAO].perguntas.filter(temNota);
 
   $('cabecalho-calor').innerHTML =
-    '<th class="pb-3 pr-3 font-medium text-left">CPF</th>' +
+    '<th class="pb-3 pr-3 font-medium text-left">Avaliação</th>' +
     secoes.map(function (s) {
       return '<th class="pb-3 px-1 font-medium text-center" title="' + escapar(s.secao.titulo) + '">' + (s.indice + 1) + '</th>';
     }).join('') +
@@ -632,7 +635,6 @@ function renderizarParticipantes() {
     '<th class="pb-3 pl-3 font-medium text-left sem-pdf">Enviada em</th>';
 
   var lista = participantes()
-    .filter(function (p) { return !busca || String(p.cpf).replace(/\D/g, '').indexOf(busca) !== -1; })
     .map(function (p) { return { pessoa: p, radio: mediaDoParticipante(p, daRadio) }; });
 
   if (ordem === 'critico') lista.sort(function (a, b) { return (a.radio || 0) - (b.radio || 0); });
@@ -640,8 +642,8 @@ function renderizarParticipantes() {
 
   $('lista-participantes').innerHTML = lista.map(function (item) {
     var p = item.pessoa;
-    return '<tr class="border-b border-neutral-100 hover:bg-neutral-50 cursor-pointer evitar-quebra" onclick="abrirDetalhe(\'' + escapar(p.cpf) + '\')">' +
-        '<td class="py-2 pr-3 font-medium tabular-nums whitespace-nowrap text-gp-blue">' + escapar(p.cpf) + '</td>' +
+    return '<tr class="border-b border-neutral-100 hover:bg-neutral-50 cursor-pointer evitar-quebra" onclick="abrirDetalhe(' + p.numero + ')">' +
+        '<td class="py-2 pr-3 font-medium tabular-nums whitespace-nowrap text-gp-blue">#' + p.numero + '</td>' +
         secoes.map(function (s) { return celulaCalor(mediaDoParticipante(p, s.secao.perguntas.filter(temNota))); }).join('') +
         celulaCalor(item.radio) +
         celulaCalor(mediaDoParticipante(p, auto)) +
@@ -658,14 +660,14 @@ function renderizarParticipantes() {
   $('sem-participantes').hidden = lista.length > 0;
 }
 
-function abrirDetalhe(cpf) {
-  var pessoa = participantes().filter(function (p) { return p.cpf === cpf; })[0];
+function abrirDetalhe(numero) {
+  var pessoa = participantes().filter(function (p) { return p.numero === numero; })[0];
   if (!pessoa) return;
 
   var mRadio = mediaDoParticipante(pessoa, perguntasDaRadio());
   var mAuto = mediaDoParticipante(pessoa, SECOES[INDICE_AUTOAVALIACAO].perguntas.filter(temNota));
 
-  $('detalhe-cpf').textContent = pessoa.cpf;
+  $('detalhe-titulo').textContent = 'Avaliação #' + pessoa.numero;
   $('detalhe-corpo').innerHTML =
     '<p class="text-sm text-neutral-400 mb-6">Enviada em ' + escapar(pessoa.quando) +
       ' · média dada à rádio <strong style="color:' + corDaMedia(mRadio) + '">' + formatarMedia(mRadio) + '</strong>' +
@@ -736,7 +738,7 @@ function abrirAba(qual) {
 
 /** CSV com uma linha por participante: abre direto no Excel (separador ;). */
 function exportarCsv() {
-  var colunas = ['CPF', 'Data/Hora'];
+  var colunas = ['Avaliação', 'Data'];
   var chaves = [];
 
   todasPerguntas().forEach(function (p) {
@@ -754,7 +756,7 @@ function exportarCsv() {
   }
 
   var linhas = [colunas.map(celula).join(';')].concat(participantes().map(function (p) {
-    return [p.cpf, p.quando].concat(chaves.map(function (k) { return p.respostas[k]; })).map(celula).join(';');
+    return [p.numero, p.quando].concat(chaves.map(function (k) { return p.respostas[k]; })).map(celula).join(';');
   }));
 
   // BOM para o Excel reconhecer UTF-8 e não estragar os acentos.
@@ -780,7 +782,6 @@ function exportarCsv() {
 function exportarPdf() {
   var busca = $('busca-abertas').value;
   var filtro = $('filtro-secao').value;
-  var buscaCpf = $('busca-cpf').value;
   var detalhes = document.querySelectorAll('#relatorio details');
   var abertos = [];
   var i;
@@ -788,7 +789,6 @@ function exportarPdf() {
   // O relatório sai completo, sem os filtros que estiverem aplicados na tela.
   $('busca-abertas').value = '';
   $('filtro-secao').value = '';
-  $('busca-cpf').value = '';
   renderizarAbertas();
   renderizarParticipantes();
 
@@ -813,7 +813,6 @@ function exportarPdf() {
     for (var j = 0; j < detalhes.length; j++) detalhes[j].open = abertos[j];
     $('busca-abertas').value = busca;
     $('filtro-secao').value = filtro;
-    $('busca-cpf').value = buscaCpf;
     renderizarAbertas();
     renderizarParticipantes();
   }

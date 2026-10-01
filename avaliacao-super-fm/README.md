@@ -5,15 +5,26 @@ Avaliação interna da equipe sobre a Rádio Super FM: 51 perguntas em 10 seçõ
 - **Formulário:** https://grupo-parana-cr.github.io/formularios-gp/avaliacao-super-fm/
 - **Resultados:** https://grupo-parana-cr.github.io/formularios-gp/avaliacao-super-fm/dashboard.html
 
-**Avaliação identificada.** O participante informa o CPF e é avisado, na abertura e na tela
-do CPF, de que as respostas ficam ligadas ao CPF e são acessíveis apenas à Diretoria. O CPF
-também impede que a mesma pessoa responda duas vezes.
+**Avaliação anônima.** Não pede nome nem CPF e não grava nada que identifique quem
+respondeu. Qualquer alteração precisa preservar isso — o formulário promete anonimato:
+
+- a planilha guarda só a **data** (sem horário: com ele, daria para cruzar com quem estava
+  no computador naquele momento);
+- cada resposta entra numa **linha aleatória** da aba, para a ordem não revelar quem enviou
+  primeiro;
+- o rascunho fica em `sessionStorage` (some ao fechar a aba), para o próximo colega no
+  computador compartilhado do estúdio não ver respostas alheias;
+- no dashboard as avaliações aparecem como "Avaliação #1, #2…", números só de tela.
+
+Sem identificação, **não há como impedir que a mesma pessoa responda duas vezes**. O que
+existe é proteção contra envio duplicado por falha de conexão: o navegador manda um
+`envioId` aleatório, que o servidor guarda só no cache por 6h (não vai para a planilha).
 
 ## Arquivos
 
 | Arquivo | Papel |
 |---|---|
-| `index.html` | formulário: capa, CPF e uma etapa por seção |
+| `index.html` | formulário: capa e uma etapa por seção |
 | `script.js` | perguntas (`SECOES`), validação e envio — **fonte única dos textos** |
 | `styles.css` | complementos ao Tailwind |
 | `dashboard.html` / `dashboard.js` | resultados: visão geral, por pergunta, respostas abertas e mapa por participante; exporta CSV e PDF (pela impressão do navegador — o layout do papel está no `@media print` de `styles.css`) |
@@ -28,13 +39,15 @@ Plus Jakarta Sans e html2pdf vêm de CDN.
 - **Abertas**: opcionais.
 - **P16**: nota obrigatória + comentário opcional.
 
-O formulário guarda um rascunho no navegador (`localStorage`) enquanto a pessoa responde e
-apaga ao enviar — são ~15 minutos, e perder tudo num recarregamento faria desistir.
+O formulário guarda um rascunho na aba (`sessionStorage`) enquanto a pessoa responde e apaga
+ao enviar — são ~15 minutos, e perder tudo num recarregamento faria desistir.
 
 ## Planilha
 
-Aba `Respostas`: `Data/Hora`, `CPF`, uma coluna por pergunta (`P1 (1-5)`, `P5 (aberta)`…) e
-`P16 - Comentario`. 54 colunas.
+Aba `Respostas`: `Data`, uma coluna por pergunta (`P1 (1-5)`, `P5 (aberta)`…) e
+`P16 - Comentario`. 53 colunas. Se o script encontrar uma aba `Respostas` com outro
+cabeçalho (a versão de teste que tinha CPF), ele a renomeia para
+`Teste antigo (com CPF) - apagar` e cria uma nova.
 
 Os tipos das perguntas vivem em **dois** lugares que precisam continuar iguais:
 
@@ -51,8 +64,7 @@ Script *container-bound* na planilha. Só `doPost`, com roteamento por `action`:
 
 ```jsonc
 { "action": "ping" }                                  → { "ok": true }
-{ "action": "checkCPF", "cpf": "..." }                → { "exists": bool, "valid": bool }
-{ "action": "submit", "cpf": "...", "respostas": { "p1": 4, "p5": "...", "p16c": "..." } }
+{ "action": "submit", "envioId": "...", "respostas": { "p1": 4, "p5": "...", "p16c": "..." } }
                                                       → { "success": bool, "message": "..." }
 { "action": "getAllData", "usuario": "...", "senha": "..." }
                                                       → { "total": n, "participantes": [...] }
@@ -60,8 +72,8 @@ Script *container-bound* na planilha. Só `doPost`, com roteamento por `action`:
 
 - **CORS:** o `fetch` vai **sem** header `Content-Type` (vira `text/plain` e evita o
   preflight `OPTIONS`, que o Apps Script não responde).
-- **Envio idempotente:** reenviar com um CPF que já está gravado devolve sucesso em vez de
-  duplicar — cobre o caso em que o Apps Script grava mas a resposta se perde.
+- **Envio idempotente:** reenviar o mesmo `envioId` devolve sucesso em vez de duplicar —
+  cobre o caso em que o Apps Script grava mas a resposta se perde no caminho.
 - Texto que começa com `=`, `+`, `-` ou `@` é gravado com apóstrofo, para o Sheets não
   interpretar como fórmula.
 
