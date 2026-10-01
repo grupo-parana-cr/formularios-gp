@@ -16,7 +16,7 @@ também impede que a mesma pessoa responda duas vezes.
 | `index.html` | formulário: capa, CPF e uma etapa por seção |
 | `script.js` | perguntas (`SECOES`), validação e envio — **fonte única dos textos** |
 | `styles.css` | complementos ao Tailwind |
-| `dashboard.html` / `dashboard.js` | resultados: visão geral, por pergunta, respostas abertas e por participante; exporta PDF e CSV |
+| `dashboard.html` / `dashboard.js` | resultados: visão geral, por pergunta, respostas abertas e mapa por participante; exporta CSV e PDF (pela impressão do navegador — o layout do papel está no `@media print` de `styles.css`) |
 | `apps-script.gs` | cópia versionada do backend que roda no Apps Script |
 
 Sem build step: HTML/CSS/JS estático, servido pelo GitHub Pages. Tailwind, Lucide,
@@ -94,3 +94,13 @@ A validação é **no servidor**: sem usuário e senha válidos o `getAllData` n
 A senha fica em `PropertiesService`, nunca no código — o repositório é público. Enquanto
 ninguém rodar `gerarAcessoDashboard()`, o dashboard fica fechado. `revogarAcessoDashboard()`
 fecha para todos.
+
+## Leitura dos resultados
+
+A **autoavaliação (seção 9) fica fora da "média da rádio"**, dos rankings e da seção mais
+bem avaliada: é cada pessoa dando nota a si mesma, e misturada às demais tomava o topo dos
+pontos fortes. Ela aparece à parte e no comparativo com a seção 8.
+
+"Positivo" = notas 4 e 5; "negativo" = 1 e 2. "Opinião dividida" lista as perguntas com
+maior desvio padrão (a partir de 3 avaliações). Com menos de 5 avaliações o dashboard avisa
+que as médias ainda são instáveis.

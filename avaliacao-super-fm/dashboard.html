@@ -19,11 +19,11 @@
     }
   };
 </script>
-<link rel="stylesheet" href="styles.css?v=1">
+<link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body class="bg-neutral-50 text-neutral-900 antialiased">
 
-<header class="bg-gradient-to-br from-gp-blue to-gp-dark text-white">
+<header class="sem-pdf bg-gradient-to-br from-gp-blue to-gp-dark text-white">
   <div class="max-w-6xl mx-auto px-5 sm:px-6 py-8">
     <div class="flex items-start justify-between gap-4 flex-wrap">
       <div>
@@ -43,7 +43,7 @@
         </button>
         <button type="button" onclick="exportarPdf()"
                 class="bg-white text-gp-dark text-sm font-medium px-4 py-2.5 rounded-full hover:bg-white/90 transition-colors inline-flex items-center gap-2">
-          <i class="w-4 h-4" data-lucide="download"></i> PDF
+          <i class="w-4 h-4" data-lucide="printer"></i> PDF
         </button>
         <button type="button" onclick="sair()"
                 class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
@@ -99,52 +99,71 @@
   <div id="conteudo" hidden>
 
     <!-- Abas -->
-    <div class="flex gap-2 mb-6 overflow-x-auto pb-1" id="abas">
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-1 sem-pdf" id="abas">
       <button type="button" onclick="abrirAba('geral')" data-aba="geral" class="aba">Visão geral</button>
       <button type="button" onclick="abrirAba('perguntas')" data-aba="perguntas" class="aba">Por pergunta</button>
       <button type="button" onclick="abrirAba('abertas')" data-aba="abertas" class="aba">Respostas abertas</button>
       <button type="button" onclick="abrirAba('participantes')" data-aba="participantes" class="aba">Por participante</button>
     </div>
 
-    <!-- Área exportada no PDF -->
+    <!-- Área do relatório (também é o que sai no PDF) -->
     <div id="relatorio">
 
       <!-- Só aparece no PDF -->
-      <div id="cabecalho-pdf" class="mb-8 pb-5 border-b border-neutral-200" hidden>
-        <h1 class="text-2xl font-semibold tracking-tight text-gp-blue">Avaliação Interna · Rádio Super FM</h1>
-        <p id="pdf-subtitulo" class="text-sm text-neutral-500 mt-1.5"></p>
-        <p id="pdf-rodape" class="text-sm text-neutral-400 mt-0.5"></p>
+      <div id="cabecalho-pdf" class="so-pdf mb-6 pb-4 border-b-2 border-gp-blue">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-gp-blue">Avaliação Interna · Rádio Super FM</h1>
+            <p class="text-sm text-neutral-500 mt-1">Relatório de resultados · Grupo Paraná</p>
+            <p id="pdf-rodape" class="text-xs text-neutral-400 mt-1"></p>
+          </div>
+          <img src="../img/logo-grupo-parana.png" alt="Grupo Paraná" class="h-9 w-auto">
+        </div>
+      </div>
+
+      <!-- Poucas respostas: médias ainda instáveis -->
+      <div id="aviso-amostra" class="bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl px-5 py-3.5 mb-6 flex gap-3 text-sm evitar-quebra" hidden>
+        <i class="w-4 h-4 shrink-0 mt-0.5" data-lucide="info"></i>
+        <span id="aviso-amostra-texto"></span>
       </div>
 
       <!-- Indicadores: aparecem em todas as abas -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 evitar-quebra">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 evitar-quebra" id="kpis">
         <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
           <p class="text-sm text-neutral-400 mb-1.5">Avaliações recebidas</p>
           <p id="kpi-total" class="text-4xl font-semibold tracking-tight text-gp-blue">0</p>
         </div>
         <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
-          <p class="text-sm text-neutral-400 mb-1.5">Média geral</p>
+          <p class="text-sm text-neutral-400 mb-1.5">Média da rádio</p>
           <p class="text-4xl font-semibold tracking-tight">
             <span id="kpi-media" class="text-gp-blue">–</span><span class="text-xl text-neutral-300 font-normal"> / 5</span>
           </p>
+          <p id="kpi-positivo" class="text-xs text-neutral-400 mt-1"></p>
         </div>
         <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
           <p class="text-sm text-neutral-400 mb-1.5">Seção mais bem avaliada</p>
           <p id="kpi-melhor" class="text-base font-semibold leading-snug text-emerald-700">–</p>
-          <p id="kpi-melhor-nota" class="text-sm text-neutral-400 mt-1"></p>
+          <p id="kpi-melhor-nota" class="text-xs text-neutral-400 mt-1"></p>
         </div>
         <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
           <p class="text-sm text-neutral-400 mb-1.5">Seção mais crítica</p>
           <p id="kpi-pior" class="text-base font-semibold leading-snug text-red-700">–</p>
-          <p id="kpi-pior-nota" class="text-sm text-neutral-400 mt-1"></p>
+          <p id="kpi-pior-nota" class="text-xs text-neutral-400 mt-1"></p>
         </div>
       </div>
 
       <!-- Visão geral -->
       <div id="painel-geral" class="painel space-y-6">
-        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
-          <h2 class="text-lg font-semibold tracking-tight mb-1">Média por seção</h2>
-          <p class="text-sm text-neutral-400 mb-6">Média das notas de 1 a 5 de cada seção. Seções só com perguntas abertas não aparecem.</p>
+        <h2 class="so-pdf titulo-pdf">Visão geral</h2>
+
+        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">
+          <div class="evitar-quebra">
+            <h2 class="text-lg font-semibold tracking-tight mb-1">Resultado por seção</h2>
+            <p class="text-sm text-neutral-400 mb-6">
+              Média das notas de 1 a 5 e quanto delas foi positivo (4 ou 5). A barra mostra a
+              distribuição das notas. A seção 10 só tem perguntas abertas.
+            </p>
+          </div>
           <div id="medias-secoes"></div>
         </section>
 
@@ -153,17 +172,28 @@
             <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
               <i class="w-5 h-5 text-emerald-600" data-lucide="thumbs-up"></i> Pontos mais fortes
             </h2>
-            <p class="text-sm text-neutral-400 mb-5">As 5 perguntas com maior média.</p>
+            <p class="text-sm text-neutral-400 mb-4">Perguntas sobre a rádio com maior média.</p>
             <div id="ranking-melhores"></div>
           </section>
           <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
             <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
               <i class="w-5 h-5 text-red-600" data-lucide="alert-triangle"></i> Pontos de atenção
             </h2>
-            <p class="text-sm text-neutral-400 mb-5">As 5 perguntas com menor média.</p>
+            <p class="text-sm text-neutral-400 mb-4">Perguntas sobre a rádio com menor média.</p>
             <div id="ranking-piores"></div>
           </section>
         </div>
+
+        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+          <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
+            <i class="w-5 h-5 text-amber-600" data-lucide="split"></i> Opinião dividida
+          </h2>
+          <p class="text-sm text-neutral-400 mb-4">
+            Perguntas em que a equipe discorda entre si — parte dá nota alta, parte dá nota baixa.
+            A média esconde isso, e costuma ser bom assunto para conversar.
+          </p>
+          <div id="divididas"></div>
+        </section>
 
         <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
           <h2 class="text-lg font-semibold tracking-tight mb-1">Equipe de locução × autoavaliação</h2>
@@ -172,18 +202,17 @@
           </p>
           <div id="comparativo"></div>
         </section>
-
-        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
-          <h2 class="text-lg font-semibold tracking-tight mb-6">Distribuição de todas as notas</h2>
-          <div id="distribuicao-geral"></div>
-        </section>
       </div>
 
       <!-- Por pergunta -->
-      <div id="painel-perguntas" class="painel space-y-6" hidden></div>
+      <div id="painel-perguntas" class="painel" hidden>
+        <h2 class="so-pdf titulo-pdf">Resultado por pergunta</h2>
+        <div id="lista-perguntas" class="space-y-6"></div>
+      </div>
 
       <!-- Respostas abertas -->
       <div id="painel-abertas" class="painel" hidden>
+        <h2 class="so-pdf titulo-pdf">Respostas abertas</h2>
         <div class="flex flex-col sm:flex-row gap-3 mb-6 sem-pdf">
           <div class="relative flex-1">
             <i class="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" data-lucide="search"></i>
@@ -198,31 +227,39 @@
 
       <!-- Por participante -->
       <div id="painel-participantes" class="painel" hidden>
+        <h2 class="so-pdf titulo-pdf">Participantes</h2>
         <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sem-pdf">
-            <h2 class="text-lg font-semibold tracking-tight">Participantes</h2>
-            <div class="relative sm:w-72">
-              <i class="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" data-lucide="search"></i>
-              <input type="search" id="busca-cpf" placeholder="Buscar CPF..." oninput="renderizarParticipantes()"
-                     class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none text-sm">
+          <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-lg font-semibold tracking-tight mb-1">Mapa por participante</h2>
+              <p class="text-sm text-neutral-400">
+                Média que cada pessoa deu a cada seção<span class="sem-pdf">. Clique numa linha para ver todas as respostas</span>.
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2.5 sem-pdf">
+              <select id="ordem-participantes" onchange="renderizarParticipantes()"
+                      class="px-4 py-2.5 rounded-xl border border-neutral-200 bg-white focus:border-gp-blue outline-none text-sm">
+                <option value="envio">Ordem de envio</option>
+                <option value="critico">Mais críticos primeiro</option>
+                <option value="positivo">Mais positivos primeiro</option>
+              </select>
+              <div class="relative sm:w-56">
+                <i class="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" data-lucide="search"></i>
+                <input type="search" id="busca-cpf" placeholder="Buscar CPF..." oninput="renderizarParticipantes()"
+                       class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none text-sm">
+              </div>
             </div>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
-                <tr class="text-left text-neutral-400 border-b border-neutral-150">
-                  <th class="pb-3 pr-4 font-medium">#</th>
-                  <th class="pb-3 pr-4 font-medium">CPF</th>
-                  <th class="pb-3 pr-4 font-medium">Enviada em</th>
-                  <th class="pb-3 pr-4 font-medium">Média dada</th>
-                  <th class="pb-3 pr-4 font-medium">Autoavaliação</th>
-                  <th class="pb-3 font-medium"></th>
-                </tr>
+                <tr id="cabecalho-calor" class="text-neutral-400 border-b border-neutral-150 text-xs"></tr>
               </thead>
               <tbody id="lista-participantes"></tbody>
             </table>
           </div>
           <p id="sem-participantes" class="text-sm text-neutral-400 mt-4" hidden>Nenhuma avaliação encontrada.</p>
+          <div id="legenda-calor" class="flex flex-wrap gap-x-4 gap-y-1 mt-5 text-xs text-neutral-400 evitar-quebra"></div>
         </section>
       </div>
 
@@ -231,7 +268,7 @@
 </main>
 
 <!-- Detalhe de um participante -->
-<div id="detalhe" class="fixed inset-0 z-50 bg-black/40 flex justify-end" hidden onclick="if (event.target === this) fecharDetalhe()">
+<div id="detalhe" class="sem-pdf fixed inset-0 z-50 bg-black/40 flex justify-end" hidden onclick="if (event.target === this) fecharDetalhe()">
   <div class="bg-white w-full max-w-2xl h-full overflow-y-auto shadow-2xl">
     <div class="sticky top-0 bg-white border-b border-neutral-100 px-6 py-4 flex items-center justify-between z-10">
       <div>
@@ -247,8 +284,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="script.js?v=1"></script>
-<script src="dashboard.js?v=1"></script>
+<script src="script.js?v=2"></script>
+<script src="dashboard.js?v=2"></script>
 </body>
 </html>

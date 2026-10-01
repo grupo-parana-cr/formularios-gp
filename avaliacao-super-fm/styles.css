@@ -117,6 +117,134 @@ body {
   page-break-inside: avoid;
 }
 
+/* ------------------------------------------------------------------ */
+/* Relatório em PDF (dashboard) — impressão nativa do navegador        */
+/* ------------------------------------------------------------------ */
+
+/* Só existe no papel: cabeçalho do relatório e títulos de cada parte. */
+.so-pdf {
+  display: none !important;
+}
+
+@page {
+  size: A4;
+  margin: 14mm 12mm;
+}
+
+@media print {
+  html, body {
+    background: #ffffff !important;
+    /* Sem isto o navegador descarta os fundos coloridos das barras. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sem-pdf,
+  #login, #carregando, #erro {
+    display: none !important;
+  }
+
+  .so-pdf {
+    display: block !important;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  /* O relatório sai completo: todas as abas, uma após a outra. O seletor
+     com [hidden] vence a regra global que esconde elementos ocultos. */
+  #relatorio .painel[hidden] {
+    display: block !important;
+  }
+
+  .titulo-pdf {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gp-blue);
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Cada parte começa em página nova, menos a primeira. */
+  #painel-perguntas,
+  #painel-abertas,
+  #painel-participantes {
+    break-before: page;
+  }
+
+  /* No papel, cartões sem sombra e com menos respiro. */
+  section {
+    box-shadow: none !important;
+    padding: 1.1rem 1.25rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+
+  /* Cartão inteiro só não quebra se couber numa página; os grandes
+     (seções do "por pergunta") quebram entre as perguntas, que têm
+     evitar-quebra próprio. */
+  #painel-geral > section,
+  #painel-geral > .grid > section,
+  #kpis {
+    break-inside: avoid;
+  }
+
+  /* Exceção: o resultado por seção é alto e, preso inteiro, deixava a
+     primeira página quase vazia. Ele pode quebrar entre as linhas. */
+  #painel-geral > section:first-of-type {
+    break-inside: auto;
+  }
+
+  /* A tabela do mapa precisa caber na largura do papel: sem rolagem e sem
+     a coluna de data (que está na planilha e no CSV). */
+  #painel-participantes .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  #painel-participantes .celula-calor span {
+    width: 2.25rem !important;
+    padding: 0.2rem 0 !important;
+  }
+
+  /* Pontos fortes e de atenção lado a lado também no papel. */
+  #painel-geral > .grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  #kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.6rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  #kpis > div {
+    padding: 0.8rem 0.9rem !important;
+  }
+
+  #kpis .text-4xl {
+    font-size: 1.75rem !important;
+  }
+
+  details > summary {
+    list-style: none;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}
+
 /* Respeita quem prefere menos movimento */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

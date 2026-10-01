@@ -4,10 +4,20 @@
  * O Apps Script devolve as avaliações (com CPF) só com credenciais válidas;
  * todas as médias e contagens são calculadas aqui. Perguntas e seções vêm de
  * SECOES, em script.js, para não duplicar os textos.
+ *
+ * A autoavaliação (seção 9) fica FORA dos indicadores da rádio: é cada
+ * pessoa dando nota a si mesma, e misturada às demais ela inflava a média e
+ * tomava o ranking de pontos fortes.
  */
 
 var dadosAtuais = null;
 var abaAtual = 'geral';
+
+var INDICE_AUTOAVALIACAO = 8;
+var NUMEROS_AUTOAVALIACAO = [42, 43, 44, 45, 46];
+
+/** Abaixo disso, médias mudam muito a cada nova resposta. */
+var MINIMO_CONFIAVEL = 5;
 
 /** Pares de temas equivalentes entre a seção 8 (equipe) e a 9 (autoavaliação). */
 var COMPARATIVO = [
@@ -15,8 +25,6 @@ var COMPARATIVO = [
   { tema: 'Conexão com os ouvintes', equipe: 39, auto: 44 },
   { tema: 'Compromisso com anunciantes', equipe: 40, auto: 45 }
 ];
-
-var NUMEROS_AUTOAVALIACAO = [42, 43, 44, 45, 46];
 
 /* ------------------------------------------------------------------ */
 /* Acesso                                                              */
@@ -27,26 +35,26 @@ var NUMEROS_AUTOAVALIACAO = [42, 43, 44, 45, 46];
  * servidor a cada chamada. Nada de senha no código: este repositório é
  * público, e qualquer pessoa leria o arquivo.
  */
-function credenciais() {
-  try {
-    var guardado = sessionStorage.getItem('acesso-super-fm');
-    return guardado ? JSON.parse(guardado) : null;
-  } catch (erro) {
-    return null;
-  }
-}
-
-function guardarCredenciais(usuario, senha) {
-  try {
-    sessionStorage.setItem('acesso-super-fm', JSON.stringify({ usuario: usuario, senha: senha }));
-  } catch (erro) { /* armazenamento bloqueado: segue só em memória */ }
-  credenciaisEmMemoria = { usuario: usuario, senha: senha };
-}
-
 var credenciaisEmMemoria = null;
 
 function acessoAtual() {
-  return credenciais() || credenciaisEmMemoria;
+  try {
+    var guardado = sessionStorage.getItem('acesso-super-fm');
+    if (guardado) return JSON.parse(guardado);
+  } catch (erro) { /* armazenamento bloqueado */ }
+  return credenciaisEmMemoria;
+}
+
+function guardarCredenciais(usuario, senha) {
+  credenciaisEmMemoria = { usuario: usuario, senha: senha };
+  try {
+    sessionStorage.setItem('acesso-super-fm', JSON.stringify(credenciaisEmMemoria));
+  } catch (erro) { /* segue só em memória */ }
+}
+
+function esquecerCredenciais() {
+  credenciaisEmMemoria = null;
+  try { sessionStorage.removeItem('acesso-super-fm'); } catch (erro) {}
 }
 
 function mostrarLogin(mensagem) {
@@ -81,8 +89,7 @@ function entrar() {
 }
 
 function sair() {
-  try { sessionStorage.removeItem('acesso-super-fm'); } catch (erro) {}
-  credenciaisEmMemoria = null;
+  esquecerCredenciais();
   $('senha').value = '';
   dadosAtuais = null;
   mostrarLogin();
@@ -120,20 +127,19 @@ function carregarDados(vindoDoLogin) {
     .then(function (dados) {
       clearTimeout(avisoDemora);
       $('carregando-demora').hidden = true;
+      restaurarBotaoEntrar();
 
       if (dados.error === 'nao-autorizado') {
-        sair();
-        restaurarBotaoEntrar();
+        esquecerCredenciais();
         mostrarLogin('Usuário ou senha incorretos.');
         return;
       }
 
       if (dados.error) throw new Error(dados.error);
 
-      restaurarBotaoEntrar();
       $('acoes').hidden = false;
       dadosAtuais = dados;
-      renderizar(dados);
+      renderizar();
     })
     .catch(function (falha) {
       clearTimeout(avisoDemora);
@@ -160,6 +166,21 @@ function participantes() {
   return (dadosAtuais && dadosAtuais.participantes) || [];
 }
 
+function ehAutoavaliacao(n) {
+  return NUMEROS_AUTOAVALIACAO.indexOf(n) !== -1;
+}
+
+/** Perguntas com nota que dizem respeito à rádio (tudo menos a autoavaliação). */
+function perguntasDaRadio() {
+  return todasPerguntas().filter(function (p) { return temNota(p) && !ehAutoavaliacao(p.n); });
+}
+
+function secoesDaRadio() {
+  return SECOES
+    .map(function (secao, indice) { return { secao: secao, indice: indice }; })
+    .filter(function (s) { return s.indice !== INDICE_AUTOAVALIACAO && s.secao.perguntas.some(temNota); });
+}
+
 /** Notas dadas a uma pergunta, ignorando quem não respondeu. */
 function notasDa(n) {
   return participantes()
@@ -167,9 +188,42 @@ function notasDa(n) {
     .filter(function (v) { return typeof v === 'number'; });
 }
 
+function notasDe(perguntas) {
+  var todas = [];
+  perguntas.forEach(function (p) { todas = todas.concat(notasDa(p.n)); });
+  return todas;
+}
+
+/**
+ * Resumo de um conjunto de notas. "Positivo" = 4 ou 5; "negativo" = 1 ou 2.
+ * O percentual favorável costuma dizer mais que a média: 3,0 pode ser todo
+ * mundo no "Regular" ou metade no 1 e metade no 5.
+ */
+function resumo(notas) {
+  var n = notas.length;
+  if (!n) return { n: 0, media: null, positivo: 0, negativo: 0, desvio: 0 };
+
+  var soma = 0, positivo = 0, negativo = 0;
+  notas.forEach(function (v) {
+    soma += v;
+    if (v >= 4) positivo++;
+    if (v <= 2) negativo++;
+  });
+
+  var media = soma / n;
+  var variancia = notas.reduce(function (s, v) { return s + (v - media) * (v - media); }, 0) / n;
+
+  return {
+    n: n,
+    media: media,
+    positivo: Math.round(positivo / n * 100),
+    negativo: Math.round(negativo / n * 100),
+    desvio: Math.sqrt(variancia)
+  };
+}
+
 function media(valores) {
-  if (!valores.length) return null;
-  return valores.reduce(function (s, v) { return s + v; }, 0) / valores.length;
+  return resumo(valores).media;
 }
 
 function formatarMedia(valor) {
@@ -182,15 +236,10 @@ function corDaMedia(valor) {
   return ESCALA[Math.min(4, Math.max(0, Math.round(valor) - 1))].cor;
 }
 
-function perguntasComNota(secao) {
-  return secao.perguntas.filter(temNota);
-}
-
-/** Média da seção = média de todas as notas dadas às perguntas dela. */
-function mediaDaSecao(secao) {
-  var todas = [];
-  perguntasComNota(secao).forEach(function (p) { todas = todas.concat(notasDa(p.n)); });
-  return media(todas);
+function contagemDa(n) {
+  var contagem = [0, 0, 0, 0, 0];
+  notasDa(n).forEach(function (v) { contagem[v - 1]++; });
+  return contagem;
 }
 
 function secaoDaPergunta(n) {
@@ -202,37 +251,47 @@ function secaoDaPergunta(n) {
   return null;
 }
 
+/** Respostas de texto de uma chave (p5, p16c...), com o CPF de quem escreveu. */
+function textosDa(chave) {
+  return participantes()
+    .filter(function (p) { return p.respostas[chave]; })
+    .map(function (p) { return { cpf: p.cpf, texto: p.respostas[chave] }; });
+}
+
 /* ------------------------------------------------------------------ */
 /* Renderização                                                        */
 /* ------------------------------------------------------------------ */
 
-function renderizar(dados) {
-  $('kpi-total').textContent = dados.total || 0;
+function renderizar() {
+  var total = participantes().length;
+  var radio = resumo(notasDe(perguntasDaRadio()));
 
-  var todas = [];
-  todasPerguntas().filter(temNota).forEach(function (p) { todas = todas.concat(notasDa(p.n)); });
-  var mediaGeral = media(todas);
-  $('kpi-media').textContent = formatarMedia(mediaGeral);
-  $('kpi-media').style.color = corDaMedia(mediaGeral);
+  $('kpi-total').textContent = total;
+  $('kpi-media').textContent = formatarMedia(radio.media);
+  $('kpi-media').style.color = corDaMedia(radio.media);
+  $('kpi-positivo').textContent = radio.n ? radio.positivo + '% das notas são 4 ou 5' : '';
 
-  var secoesComMedia = SECOES
-    .map(function (s, i) { return { secao: s, indice: i, media: mediaDaSecao(s) }; })
-    .filter(function (s) { return s.media != null; })
-    .sort(function (a, b) { return b.media - a.media; });
+  var secoes = secoesDaRadio()
+    .map(function (s) { s.resumo = resumo(notasDe(s.secao.perguntas.filter(temNota))); return s; })
+    .filter(function (s) { return s.resumo.n; })
+    .sort(function (a, b) { return b.resumo.media - a.resumo.media; });
 
-  if (secoesComMedia.length) {
-    var melhor = secoesComMedia[0];
-    var pior = secoesComMedia[secoesComMedia.length - 1];
+  if (secoes.length) {
+    var melhor = secoes[0];
+    var pior = secoes[secoes.length - 1];
     $('kpi-melhor').textContent = melhor.secao.titulo;
-    $('kpi-melhor-nota').textContent = 'Média ' + formatarMedia(melhor.media);
+    $('kpi-melhor-nota').textContent = 'Média ' + formatarMedia(melhor.resumo.media) + ' · ' + melhor.resumo.positivo + '% positivo';
     $('kpi-pior').textContent = pior.secao.titulo;
-    $('kpi-pior-nota').textContent = 'Média ' + formatarMedia(pior.media);
+    $('kpi-pior-nota').textContent = 'Média ' + formatarMedia(pior.resumo.media) + ' · ' + pior.resumo.negativo + '% negativo';
   } else {
-    $('kpi-melhor').textContent = '–';
-    $('kpi-melhor-nota').textContent = '';
-    $('kpi-pior').textContent = '–';
-    $('kpi-pior-nota').textContent = '';
+    ['kpi-melhor', 'kpi-pior'].forEach(function (id) { $(id).textContent = '–'; });
+    ['kpi-melhor-nota', 'kpi-pior-nota'].forEach(function (id) { $(id).textContent = ''; });
   }
+
+  var poucas = total > 0 && total < MINIMO_CONFIAVEL;
+  $('aviso-amostra').hidden = !poucas;
+  $('aviso-amostra-texto').textContent = 'Apenas ' + total + (total === 1 ? ' avaliação' : ' avaliações') +
+    ' até agora. Com tão poucas respostas, cada nova avaliação muda bastante as médias.';
 
   renderizarGeral();
   renderizarPerguntas();
@@ -246,36 +305,71 @@ function renderizar(dados) {
   desenharIcones();
 }
 
-function barraMedia(rotulo, valor, detalhe) {
-  var largura = valor == null ? 0 : (valor / 5 * 100);
-  return '<div class="mb-4 evitar-quebra">' +
+/** Linha com rótulo, média, % positivo e barra de distribuição das notas. */
+function linhaResumo(rotulo, notas, contagem) {
+  var r = resumo(notas);
+  return '<div class="mb-5 last:mb-0 evitar-quebra">' +
       '<div class="flex items-baseline justify-between gap-4 mb-1.5">' +
         '<span class="text-sm text-neutral-700 leading-snug">' + rotulo + '</span>' +
-        '<span class="text-sm font-semibold shrink-0" style="color:' + corDaMedia(valor) + '">' +
-          formatarMedia(valor) + (detalhe ? ' <span class="font-normal text-neutral-300">' + detalhe + '</span>' : '') +
+        '<span class="text-sm shrink-0 text-right">' +
+          '<strong style="color:' + corDaMedia(r.media) + '">' + formatarMedia(r.media) + '</strong>' +
+          (r.n ? ' <span class="text-neutral-400 text-xs ml-1">' + r.positivo + '% positivo</span>' : '') +
         '</span>' +
       '</div>' +
-      '<div class="w-full h-2.5 bg-neutral-100 rounded-full overflow-hidden">' +
-        '<div class="h-full rounded-full transition-all duration-700" style="width:' + largura + '%;background-color:' + corDaMedia(valor) + '"></div>' +
-      '</div>' +
+      barraDistribuicao(contagem, false) +
     '</div>';
 }
 
+function contagemDeNotas(notas) {
+  var c = [0, 0, 0, 0, 0];
+  notas.forEach(function (v) { c[v - 1]++; });
+  return c;
+}
+
 function renderizarGeral() {
-  // Média por seção
-  $('medias-secoes').innerHTML = SECOES.map(function (secao, i) {
-    if (!perguntasComNota(secao).length) return '';
-    return barraMedia('<span class="text-neutral-400 mr-1">' + (i + 1) + '.</span> ' + escapar(secao.titulo), mediaDaSecao(secao));
+  // Média por seção (só a rádio) e, à parte, a autoavaliação.
+  var linhas = secoesDaRadio().map(function (s) {
+    var notas = notasDe(s.secao.perguntas.filter(temNota));
+    return linhaResumo('<span class="text-neutral-400 mr-1">' + (s.indice + 1) + '.</span> ' + escapar(s.secao.titulo),
+      notas, contagemDeNotas(notas));
   }).join('');
 
-  // Rankings
-  var ranking = todasPerguntas().filter(temNota)
-    .map(function (p) { return { p: p, media: media(notasDa(p.n)) }; })
-    .filter(function (r) { return r.media != null; });
+  var notasAuto = notasDe(SECOES[INDICE_AUTOAVALIACAO].perguntas.filter(temNota));
+  $('medias-secoes').innerHTML = linhas +
+    '<div class="mt-6 pt-5 border-t border-dashed border-neutral-200">' +
+      '<p class="text-xs text-neutral-400 mb-3">Não entra na média da rádio — cada pessoa avaliando a si mesma:</p>' +
+      linhaResumo('<span class="text-neutral-400 mr-1">9.</span> Autoavaliação', notasAuto, contagemDeNotas(notasAuto)) +
+    '</div>' +
+    legendaEscala();
 
-  var porMedia = ranking.slice().sort(function (a, b) { return b.media - a.media; });
-  $('ranking-melhores').innerHTML = listaRanking(porMedia.slice(0, 5));
-  $('ranking-piores').innerHTML = listaRanking(porMedia.slice().reverse().slice(0, 5));
+  // Rankings: só perguntas sobre a rádio, e uma pergunta nunca aparece nas duas listas.
+  var ranking = perguntasDaRadio()
+    .map(function (p) { return { p: p, r: resumo(notasDa(p.n)) }; })
+    .filter(function (item) { return item.r.n; });
+
+  var porMedia = ranking.slice().sort(function (a, b) { return b.r.media - a.r.media || b.r.positivo - a.r.positivo; });
+  var metade = Math.floor(porMedia.length / 2);
+  var melhores = porMedia.slice(0, Math.min(5, metade));
+  var piores = porMedia.slice().reverse().slice(0, Math.min(5, metade));
+
+  $('ranking-melhores').innerHTML = listaRanking(melhores, 'positivo');
+  $('ranking-piores').innerHTML = listaRanking(piores, 'negativo');
+
+  // Opinião dividida: maior desvio padrão. Só faz sentido com algumas respostas.
+  var divididas = ranking
+    .filter(function (item) { return item.r.n >= 3 && item.r.desvio >= 1; })
+    .sort(function (a, b) { return b.r.desvio - a.r.desvio; })
+    .slice(0, 5);
+
+  $('divididas').innerHTML = divididas.length
+    ? divididas.map(function (item) {
+        return '<div class="py-3 border-b border-neutral-100 last:border-b-0 evitar-quebra">' +
+            '<p class="text-sm text-neutral-600 leading-snug mb-2"><span class="text-neutral-400">P' + item.p.n + '.</span> ' + escapar(item.p.texto) + '</p>' +
+            barraDistribuicao(contagemDa(item.p.n), false) +
+          '</div>';
+      }).join('')
+    : '<p class="text-sm text-neutral-400">Nenhuma pergunta com opinião muito dividida' +
+        (participantes().length < 3 ? ' (precisa de pelo menos 3 avaliações).' : '.') + '</p>';
 
   // Comparativo equipe × autoavaliação
   $('comparativo').innerHTML = COMPARATIVO.map(function (par) {
@@ -295,19 +389,23 @@ function renderizarGeral() {
         linhaComparativo('Autoavaliação (P' + par.auto + ')', mAuto, '#004AC9') +
       '</div>';
   }).join('');
+}
 
-  // Distribuição de todas as notas
-  var contagem = [0, 0, 0, 0, 0];
-  todasPerguntas().filter(temNota).forEach(function (p) {
-    notasDa(p.n).forEach(function (v) { contagem[v - 1]++; });
-  });
-  $('distribuicao-geral').innerHTML = barraDistribuicao(contagem, true);
+function legendaEscala() {
+  return '<div class="flex flex-wrap gap-x-4 gap-y-1 mt-6 text-xs text-neutral-400">' +
+      ESCALA.map(function (item) {
+        return '<span class="inline-flex items-center gap-1.5">' +
+            '<span class="w-2.5 h-2.5 rounded-sm" style="background-color:' + item.cor + '"></span>' +
+            item.valor + ' ' + item.rotulo +
+          '</span>';
+      }).join('') +
+    '</div>';
 }
 
 function linhaComparativo(rotulo, valor, cor) {
   var largura = valor == null ? 0 : (valor / 5 * 100);
   return '<div class="flex items-center gap-3 mb-1.5">' +
-      '<span class="text-xs text-neutral-500 w-36 shrink-0">' + rotulo + '</span>' +
+      '<span class="text-xs text-neutral-500 w-32 sm:w-36 shrink-0">' + rotulo + '</span>' +
       '<div class="flex-1 h-2.5 bg-neutral-100 rounded-full overflow-hidden">' +
         '<div class="h-full rounded-full" style="width:' + largura + '%;background-color:' + cor + '"></div>' +
       '</div>' +
@@ -315,13 +413,20 @@ function linhaComparativo(rotulo, valor, cor) {
     '</div>';
 }
 
-function listaRanking(itens) {
-  if (!itens.length) return '<p class="text-sm text-neutral-400">Sem avaliações ainda.</p>';
+function listaRanking(itens, destaque) {
+  if (!itens.length) return '<p class="text-sm text-neutral-400">Sem avaliações suficientes ainda.</p>';
 
   return itens.map(function (item) {
+    var pct = destaque === 'positivo'
+      ? item.r.positivo + '% deram 4 ou 5'
+      : item.r.negativo + '% deram 1 ou 2';
+
     return '<div class="flex items-start gap-3 py-3 border-b border-neutral-100 last:border-b-0 evitar-quebra">' +
-        '<span class="text-sm font-semibold w-10 shrink-0 pt-0.5" style="color:' + corDaMedia(item.media) + '">' + formatarMedia(item.media) + '</span>' +
-        '<p class="text-sm text-neutral-600 leading-snug"><span class="text-neutral-400">P' + item.p.n + '.</span> ' + escapar(item.p.texto) + '</p>' +
+        '<span class="text-base font-semibold w-9 shrink-0" style="color:' + corDaMedia(item.r.media) + '">' + formatarMedia(item.r.media) + '</span>' +
+        '<div>' +
+          '<p class="text-sm text-neutral-600 leading-snug"><span class="text-neutral-400">P' + item.p.n + '.</span> ' + escapar(item.p.texto) + '</p>' +
+          '<p class="text-xs text-neutral-400 mt-1">' + pct + '</p>' +
+        '</div>' +
       '</div>';
   }).join('');
 }
@@ -332,42 +437,29 @@ function listaRanking(itens) {
  */
 function barraDistribuicao(contagem, comLegenda) {
   var total = contagem.reduce(function (s, v) { return s + v; }, 0);
-  if (!total) return '<p class="text-sm text-neutral-400">Sem notas ainda.</p>';
+  if (!total) return '<div class="w-full h-2.5 rounded-full bg-neutral-100"></div>';
 
   var fatias = contagem.map(function (qtd, i) {
     if (!qtd) return '';
     var pct = qtd / total * 100;
-    return '<div class="h-full flex items-center justify-center text-[11px] font-semibold text-white" ' +
+    return '<div class="h-full flex items-center justify-center text-[10px] font-semibold text-white" ' +
         'style="width:' + pct + '%;background-color:' + ESCALA[i].cor + '" title="' + ESCALA[i].rotulo + ': ' + qtd + '">' +
-        (pct >= 8 ? Math.round(pct) + '%' : '') +
+        (comLegenda && pct >= 9 ? Math.round(pct) + '%' : '') +
       '</div>';
   }).join('');
 
   var legenda = comLegenda
-    ? '<div class="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-xs text-neutral-500">' +
+    ? '<div class="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-xs text-neutral-500">' +
         contagem.map(function (qtd, i) {
           return '<span class="inline-flex items-center gap-1.5">' +
               '<span class="w-2.5 h-2.5 rounded-sm" style="background-color:' + ESCALA[i].cor + '"></span>' +
-              (i + 1) + ' ' + ESCALA[i].rotulo + ': <strong class="text-neutral-700">' + qtd + '</strong> (' + Math.round(qtd / total * 100) + '%)' +
+              ESCALA[i].rotulo + ': <strong class="text-neutral-700">' + qtd + '</strong>' +
             '</span>';
         }).join('') +
       '</div>'
     : '';
 
-  return '<div class="w-full h-6 rounded-lg overflow-hidden flex bg-neutral-100">' + fatias + '</div>' + legenda;
-}
-
-function contagemDa(n) {
-  var contagem = [0, 0, 0, 0, 0];
-  notasDa(n).forEach(function (v) { contagem[v - 1]++; });
-  return contagem;
-}
-
-/** Respostas de texto de uma chave (p5, p16c...), com o CPF de quem escreveu. */
-function textosDa(chave) {
-  return participantes()
-    .filter(function (p) { return p.respostas[chave]; })
-    .map(function (p) { return { cpf: p.cpf, texto: p.respostas[chave] }; });
+  return '<div class="w-full ' + (comLegenda ? 'h-5' : 'h-2.5') + ' rounded-full overflow-hidden flex bg-neutral-100">' + fatias + '</div>' + legenda;
 }
 
 function itemTexto(item) {
@@ -379,33 +471,35 @@ function itemTexto(item) {
 }
 
 function renderizarPerguntas() {
-  $('painel-perguntas').innerHTML = SECOES.map(function (secao, i) {
-    var mediaSecao = mediaDaSecao(secao);
+  $('lista-perguntas').innerHTML = SECOES.map(function (secao, i) {
+    var resumoSecao = resumo(notasDe(secao.perguntas.filter(temNota)));
 
     var blocos = secao.perguntas.map(function (p) {
       if (p.tipo === 'aberta') {
         var qtd = textosDa('p' + p.n).length;
         return '<div class="py-5 border-t border-neutral-100 evitar-quebra">' +
             '<p class="text-sm font-medium text-neutral-800 leading-snug mb-1.5"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) + '</p>' +
-            '<button type="button" onclick="verAbertas(' + p.n + ')" class="text-xs text-gp-blue font-medium hover:underline sem-pdf">' +
-              'Pergunta aberta · ' + qtd + (qtd === 1 ? ' resposta' : ' respostas') + ' →</button>' +
+            '<button type="button" onclick="verAbertas(' + p.n + ')" class="text-xs text-gp-blue font-medium hover:underline">' +
+              'Pergunta aberta · ' + qtd + (qtd === 1 ? ' resposta' : ' respostas') + ' <span class="sem-pdf">→</span></button>' +
           '</div>';
       }
 
-      var notas = notasDa(p.n);
-      var m = media(notas);
+      var r = resumo(notasDa(p.n));
       var comentarios = p.tipo === 'comentario' ? textosDa('p' + p.n + 'c') : [];
 
       return '<div class="py-5 border-t border-neutral-100 evitar-quebra">' +
           '<div class="flex items-start justify-between gap-4 mb-3">' +
             '<p class="text-sm font-medium text-neutral-800 leading-snug"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) + '</p>' +
-            '<span class="text-xl font-semibold shrink-0" style="color:' + corDaMedia(m) + '">' + formatarMedia(m) + '</span>' +
+            '<div class="text-right shrink-0">' +
+              '<p class="text-xl font-semibold leading-none" style="color:' + corDaMedia(r.media) + '">' + formatarMedia(r.media) + '</p>' +
+              (r.n ? '<p class="text-[11px] text-neutral-400 mt-1">' + r.positivo + '% positivo</p>' : '') +
+            '</div>' +
           '</div>' +
           barraDistribuicao(contagemDa(p.n), true) +
           (comentarios.length
             ? '<details class="mt-4 group">' +
                 '<summary class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gp-blue list-none">' +
-                  '<i class="w-4 h-4 transition-transform group-open:rotate-90" data-lucide="chevron-right"></i>' +
+                  '<i class="w-4 h-4 transition-transform group-open:rotate-90 sem-pdf" data-lucide="chevron-right"></i>' +
                   'Comentários (' + comentarios.length + ')' +
                 '</summary>' +
                 '<ul class="space-y-2 mt-3">' + comentarios.map(itemTexto).join('') + '</ul>' +
@@ -420,8 +514,8 @@ function renderizarPerguntas() {
             '<span class="w-8 h-8 rounded-full bg-gp-blue text-white text-sm font-semibold flex items-center justify-center shrink-0">' + (i + 1) + '</span>' +
             '<h2 class="text-lg font-semibold tracking-tight leading-snug pt-1">' + escapar(secao.titulo) + '</h2>' +
           '</div>' +
-          (mediaSecao != null
-            ? '<span class="text-sm text-neutral-400 shrink-0 pt-1.5">média <strong style="color:' + corDaMedia(mediaSecao) + '">' + formatarMedia(mediaSecao) + '</strong></span>'
+          (resumoSecao.n
+            ? '<span class="text-sm text-neutral-400 shrink-0 pt-1.5">média <strong style="color:' + corDaMedia(resumoSecao.media) + '">' + formatarMedia(resumoSecao.media) + '</strong></span>'
             : '') +
         '</div>' +
         blocos +
@@ -475,9 +569,11 @@ function renderizarAbertas() {
       if (busca && !itens.length) return;
 
       html += '<section id="aberta-p' + p.n + '" class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 scroll-mt-6">' +
-          '<p class="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-2">' + (i + 1) + '. ' + escapar(secao.titulo) + '</p>' +
-          '<h3 class="text-base font-semibold leading-snug mb-5"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) +
-            (p.tipo === 'comentario' ? ' <span class="text-neutral-400 font-normal">(comentários)</span>' : '') + '</h3>' +
+          '<div class="evitar-quebra">' +
+            '<p class="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-2">' + (i + 1) + '. ' + escapar(secao.titulo) + '</p>' +
+            '<h3 class="text-base font-semibold leading-snug mb-5"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) +
+              (p.tipo === 'comentario' ? ' <span class="text-neutral-400 font-normal">(comentários)</span>' : '') + '</h3>' +
+          '</div>' +
           (itens.length
             ? '<ul class="space-y-3">' + itens.map(itemTexto).join('') + '</ul>'
             : '<p class="text-sm text-neutral-400">Nenhuma resposta.</p>') +
@@ -489,41 +585,65 @@ function renderizarAbertas() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Participantes                                                       */
+/* Participantes: mapa de calor                                        */
 /* ------------------------------------------------------------------ */
 
-function mediaDoParticipante(p, numeros) {
-  var notas = numeros
-    .map(function (n) { return p.respostas['p' + n]; })
-    .filter(function (v) { return typeof v === 'number'; });
-  return media(notas);
+function mediaDoParticipante(pessoa, perguntas) {
+  return media(perguntas
+    .map(function (p) { return pessoa.respostas['p' + p.n]; })
+    .filter(function (v) { return typeof v === 'number'; }));
 }
 
-function numerosComNota() {
-  return todasPerguntas().filter(temNota).map(function (p) { return p.n; });
+/** Célula colorida pela nota: a cor mostra de longe quem está crítico com o quê. */
+function celulaCalor(valor) {
+  if (valor == null) return '<td class="celula-calor py-2 px-1 text-center text-neutral-300">–</td>';
+  var cor = corDaMedia(valor);
+  return '<td class="celula-calor py-1.5 px-1 text-center">' +
+      '<span class="inline-block w-11 py-1.5 rounded-md text-xs font-semibold" style="background-color:' + cor + '22;color:' + cor + '">' +
+        formatarMedia(valor) +
+      '</span>' +
+    '</td>';
 }
 
 function renderizarParticipantes() {
   var busca = $('busca-cpf').value.replace(/\D/g, '');
-  var lista = participantes().filter(function (p) {
-    return !busca || String(p.cpf).replace(/\D/g, '').indexOf(busca) !== -1;
-  });
+  var ordem = $('ordem-participantes').value;
+  var secoes = secoesDaRadio();
+  var daRadio = perguntasDaRadio();
+  var auto = SECOES[INDICE_AUTOAVALIACAO].perguntas.filter(temNota);
 
-  var todos = numerosComNota();
+  $('cabecalho-calor').innerHTML =
+    '<th class="pb-3 pr-3 font-medium text-left">CPF</th>' +
+    secoes.map(function (s) {
+      return '<th class="pb-3 px-1 font-medium text-center" title="' + escapar(s.secao.titulo) + '">' + (s.indice + 1) + '</th>';
+    }).join('') +
+    '<th class="pb-3 px-1 font-semibold text-center text-neutral-600">Rádio</th>' +
+    '<th class="pb-3 px-1 font-medium text-center">Auto</th>' +
+    '<th class="pb-3 pl-3 font-medium text-left sem-pdf">Enviada em</th>';
 
-  $('lista-participantes').innerHTML = lista.map(function (p, i) {
-    var mGeral = mediaDoParticipante(p, todos);
-    var mAuto = mediaDoParticipante(p, NUMEROS_AUTOAVALIACAO);
+  var lista = participantes()
+    .filter(function (p) { return !busca || String(p.cpf).replace(/\D/g, '').indexOf(busca) !== -1; })
+    .map(function (p) { return { pessoa: p, radio: mediaDoParticipante(p, daRadio) }; });
 
+  if (ordem === 'critico') lista.sort(function (a, b) { return (a.radio || 0) - (b.radio || 0); });
+  if (ordem === 'positivo') lista.sort(function (a, b) { return (b.radio || 0) - (a.radio || 0); });
+
+  $('lista-participantes').innerHTML = lista.map(function (item) {
+    var p = item.pessoa;
     return '<tr class="border-b border-neutral-100 hover:bg-neutral-50 cursor-pointer evitar-quebra" onclick="abrirDetalhe(\'' + escapar(p.cpf) + '\')">' +
-        '<td class="py-3 pr-4 text-neutral-400">' + (i + 1) + '</td>' +
-        '<td class="py-3 pr-4 font-medium tabular-nums">' + escapar(p.cpf) + '</td>' +
-        '<td class="py-3 pr-4 text-neutral-500 tabular-nums">' + escapar(p.quando) + '</td>' +
-        '<td class="py-3 pr-4 font-semibold" style="color:' + corDaMedia(mGeral) + '">' + formatarMedia(mGeral) + '</td>' +
-        '<td class="py-3 pr-4 font-semibold" style="color:' + corDaMedia(mAuto) + '">' + formatarMedia(mAuto) + '</td>' +
-        '<td class="py-3 text-right text-gp-blue text-xs font-medium sem-pdf">Ver respostas →</td>' +
+        '<td class="py-2 pr-3 font-medium tabular-nums whitespace-nowrap text-gp-blue">' + escapar(p.cpf) + '</td>' +
+        secoes.map(function (s) { return celulaCalor(mediaDoParticipante(p, s.secao.perguntas.filter(temNota))); }).join('') +
+        celulaCalor(item.radio) +
+        celulaCalor(mediaDoParticipante(p, auto)) +
+        '<td class="py-2 pl-3 text-neutral-400 tabular-nums whitespace-nowrap text-xs sem-pdf">' + escapar(p.quando) + '</td>' +
       '</tr>';
   }).join('');
+
+  $('legenda-calor').innerHTML = secoes.map(function (s) {
+    return '<span><strong class="text-neutral-600">' + (s.indice + 1) + '</strong> ' + escapar(s.secao.titulo) + '</span>';
+  }).join('') +
+    '<span><strong class="text-neutral-600">Rádio</strong> média das seções 1 a 8</span>' +
+    '<span><strong class="text-neutral-600">Auto</strong> autoavaliação</span>';
 
   $('sem-participantes').hidden = lista.length > 0;
 }
@@ -532,12 +652,14 @@ function abrirDetalhe(cpf) {
   var pessoa = participantes().filter(function (p) { return p.cpf === cpf; })[0];
   if (!pessoa) return;
 
-  $('detalhe-cpf').textContent = pessoa.cpf;
+  var mRadio = mediaDoParticipante(pessoa, perguntasDaRadio());
+  var mAuto = mediaDoParticipante(pessoa, SECOES[INDICE_AUTOAVALIACAO].perguntas.filter(temNota));
 
+  $('detalhe-cpf').textContent = pessoa.cpf;
   $('detalhe-corpo').innerHTML =
     '<p class="text-sm text-neutral-400 mb-6">Enviada em ' + escapar(pessoa.quando) +
-      ' · média dada <strong style="color:' + corDaMedia(mediaDoParticipante(pessoa, numerosComNota())) + '">' +
-      formatarMedia(mediaDoParticipante(pessoa, numerosComNota())) + '</strong></p>' +
+      ' · média dada à rádio <strong style="color:' + corDaMedia(mRadio) + '">' + formatarMedia(mRadio) + '</strong>' +
+      ' · autoavaliação <strong style="color:' + corDaMedia(mAuto) + '">' + formatarMedia(mAuto) + '</strong></p>' +
     SECOES.map(function (secao, i) {
       return '<div class="mb-8">' +
           '<h3 class="text-xs font-semibold uppercase tracking-wide text-gp-blue mb-3">' + (i + 1) + '. ' + escapar(secao.titulo) + '</h3>' +
@@ -585,13 +707,6 @@ function fecharDetalhe() {
 /* ------------------------------------------------------------------ */
 /* Abas e exportação                                                   */
 /* ------------------------------------------------------------------ */
-
-var TITULOS_ABAS = {
-  geral: 'Visão geral',
-  perguntas: 'Resultados por pergunta',
-  abertas: 'Respostas abertas',
-  participantes: 'Participantes'
-};
 
 function abrirAba(qual) {
   abaAtual = qual;
@@ -643,38 +758,60 @@ function exportarCsv() {
   setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
 }
 
-/** Exporta a aba aberta. Comentários recolhidos são abertos para sair no PDF. */
+/**
+ * Relatório completo em PDF pela impressão do navegador ("Salvar como PDF").
+ *
+ * Antes era html2pdf, que fotografa a página e fatia a imagem: cortava
+ * cartões ao meio e, dentro das grades, os espaçadores que ele insere para
+ * evitar o corte ocupavam uma célula e desalinhavam tudo. A impressão nativa
+ * pagina de verdade, respeita break-inside e mantém o texto nítido.
+ * O layout de impressão fica no @media print de styles.css.
+ */
 function exportarPdf() {
-  var elemento = $('relatorio');
-  var detalhes = elemento.querySelectorAll('details');
-  var semPdf = elemento.querySelectorAll('.sem-pdf');
-  var estadoAnterior = [];
+  var busca = $('busca-abertas').value;
+  var filtro = $('filtro-secao').value;
+  var buscaCpf = $('busca-cpf').value;
+  var detalhes = document.querySelectorAll('#relatorio details');
+  var abertos = [];
   var i;
 
+  // O relatório sai completo, sem os filtros que estiverem aplicados na tela.
+  $('busca-abertas').value = '';
+  $('filtro-secao').value = '';
+  $('busca-cpf').value = '';
+  renderizarAbertas();
+  renderizarParticipantes();
+
   for (i = 0; i < detalhes.length; i++) {
-    estadoAnterior.push(detalhes[i].open);
+    abertos.push(detalhes[i].open);
     detalhes[i].open = true;
   }
-  for (i = 0; i < semPdf.length; i++) semPdf[i].style.display = 'none';
 
   var hoje = new Date();
-  $('pdf-subtitulo').textContent = TITULOS_ABAS[abaAtual] + ' · Grupo Paraná · Confidencial';
   $('pdf-rodape').textContent = 'Emitido em ' + hoje.toLocaleDateString('pt-BR') +
-    ' · ' + participantes().length + ' avaliações';
-  $('cabecalho-pdf').hidden = false;
+    ' · ' + participantes().length + ' avaliações · Confidencial — uso exclusivo da Diretoria';
 
-  html2pdf().set({
-    margin: [12, 10, 14, 10],
-    filename: 'avaliacao-super-fm-' + abaAtual + '-' + hoje.toISOString().slice(0, 10) + '.pdf',
-    image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'], avoid: ['.evitar-quebra'] }
-  }).from(elemento).save().then(function () {
-    $('cabecalho-pdf').hidden = true;
-    for (var j = 0; j < detalhes.length; j++) detalhes[j].open = estadoAnterior[j];
-    for (var k = 0; k < semPdf.length; k++) semPdf[k].style.display = '';
-  });
+  // O título vira o nome sugerido do arquivo no "Salvar como PDF".
+  var tituloOriginal = document.title;
+  document.title = 'avaliacao-super-fm-' + hoje.toISOString().slice(0, 10);
+
+  var restaurado = false;
+  function restaurar() {
+    if (restaurado) return;
+    restaurado = true;
+    document.title = tituloOriginal;
+    for (var j = 0; j < detalhes.length; j++) detalhes[j].open = abertos[j];
+    $('busca-abertas').value = busca;
+    $('filtro-secao').value = filtro;
+    $('busca-cpf').value = buscaCpf;
+    renderizarAbertas();
+    renderizarParticipantes();
+  }
+
+  window.addEventListener('afterprint', restaurar, { once: true });
+  window.print();
+  // Alguns navegadores não disparam afterprint; print() bloqueia até fechar.
+  setTimeout(restaurar, 1000);
 }
 
 /* ------------------------------------------------------------------ */
