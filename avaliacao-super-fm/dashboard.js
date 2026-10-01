@@ -506,10 +506,13 @@ function renderizarPerguntas() {
               '</details>'
             : '') +
         '</div>';
-    }).join('');
+    });
 
+    // O cabeçalho da seção vai junto com a primeira pergunta, para não
+    // ficar sozinho no pé da página do PDF.
     return '<section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">' +
-        '<div class="flex items-start justify-between gap-4 mb-2 evitar-quebra">' +
+      '<div class="evitar-quebra">' +
+        '<div class="flex items-start justify-between gap-4 mb-2">' +
           '<div class="flex items-start gap-3">' +
             '<span class="w-8 h-8 rounded-full bg-gp-blue text-white text-sm font-semibold flex items-center justify-center shrink-0">' + (i + 1) + '</span>' +
             '<h2 class="text-lg font-semibold tracking-tight leading-snug pt-1">' + escapar(secao.titulo) + '</h2>' +
@@ -518,7 +521,9 @@ function renderizarPerguntas() {
             ? '<span class="text-sm text-neutral-400 shrink-0 pt-1.5">média <strong style="color:' + corDaMedia(resumoSecao.media) + '">' + formatarMedia(resumoSecao.media) + '</strong></span>'
             : '') +
         '</div>' +
-        blocos +
+        blocos[0] +
+      '</div>' +
+      blocos.slice(1).join('') +
       '</section>';
   }).join('');
 }
@@ -568,15 +573,20 @@ function renderizarAbertas() {
 
       if (busca && !itens.length) return;
 
+      // No PDF, o título fica preso à primeira resposta: sozinho, ele podia
+      // sobrar no pé da página com as respostas começando na seguinte.
       html += '<section id="aberta-p' + p.n + '" class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 scroll-mt-6">' +
           '<div class="evitar-quebra">' +
             '<p class="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-2">' + (i + 1) + '. ' + escapar(secao.titulo) + '</p>' +
             '<h3 class="text-base font-semibold leading-snug mb-5"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) +
               (p.tipo === 'comentario' ? ' <span class="text-neutral-400 font-normal">(comentários)</span>' : '') + '</h3>' +
+            (itens.length
+              ? '<ul>' + itemTexto(itens[0]) + '</ul>'
+              : '<p class="text-sm text-neutral-400">Nenhuma resposta.</p>') +
           '</div>' +
-          (itens.length
-            ? '<ul class="space-y-3">' + itens.map(itemTexto).join('') + '</ul>'
-            : '<p class="text-sm text-neutral-400">Nenhuma resposta.</p>') +
+          (itens.length > 1
+            ? '<ul class="space-y-3 mt-3">' + itens.slice(1).map(itemTexto).join('') + '</ul>'
+            : '') +
         '</section>';
     });
   });

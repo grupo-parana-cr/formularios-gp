@@ -175,11 +175,20 @@ body {
     break-before: page;
   }
 
-  /* No papel, cartões sem sombra e com menos respiro. */
+  /* No papel, cartões sem sombra e com menos respiro. Quando um cartão
+     atravessa a página, cada pedaço ganha borda e respiro próprios em vez
+     de aparecer "cortado". */
   section {
     box-shadow: none !important;
     padding: 1.1rem 1.25rem !important;
     border-radius: 0.75rem !important;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* Título nunca fica sozinho no pé da página. */
+  h1, h2, h3 {
+    break-after: avoid;
   }
 
   .space-y-6 > * + * {
