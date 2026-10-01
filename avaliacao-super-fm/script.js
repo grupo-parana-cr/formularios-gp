@@ -336,6 +336,13 @@ function compactarHero() {
 function iniciarAvaliacao() {
   compactarHero();
   $('cartao').hidden = false;
+
+  // Voltando da capa: as respostas continuam na tela, é só reabrir.
+  if (estado.envioId) {
+    irParaSecao(estado.indice);
+    return;
+  }
+
   renderizarSecoes();
 
   var rascunho = lerRascunho();
@@ -495,7 +502,7 @@ function irParaSecao(indice) {
   $('progresso-contagem').textContent = (indice + 1) + ' de ' + SECOES.length;
   $('progresso-barra').style.width = ((indice + 1) / SECOES.length * 100) + '%';
 
-  $('btn-voltar').style.visibility = indice === 0 ? 'hidden' : 'visible';
+  $('btn-voltar-texto').textContent = indice === 0 ? 'Início' : 'Anterior';
   $('btn-avancar-texto').textContent = (indice === SECOES.length - 1) ? 'Enviar avaliação' : 'Próxima seção';
 
   salvarRascunho();
@@ -540,7 +547,21 @@ function avancarEtapa() {
 }
 
 function voltarEtapa() {
-  if (estado.indice > 0) irParaSecao(estado.indice - 1);
+  if (estado.indice > 0) {
+    irParaSecao(estado.indice - 1);
+    return;
+  }
+
+  voltarParaCapa();
+}
+
+/** Da primeira seção, volta à apresentação. O que já foi marcado fica guardado. */
+function voltarParaCapa() {
+  $('cartao').hidden = true;
+  $('navegacao').hidden = true;
+  $('progresso').hidden = true;
+  $('hero').classList.remove('hero-compacto');
+  rolarAoTopo();
 }
 
 /* ------------------------------------------------------------------ */
