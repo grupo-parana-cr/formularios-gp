@@ -19,6 +19,32 @@ var NUMEROS_AUTOAVALIACAO = [42, 43, 44, 45, 46];
 /** Abaixo disso, médias mudam muito a cada nova resposta. */
 var MINIMO_CONFIAVEL = 5;
 
+/**
+ * Critérios FIXOS para classificar uma pergunta. Antes os rankings eram
+ * relativos ("as 5 menores médias"), e com tudo bem avaliado a lista de
+ * atenção mostrava perguntas com 4,4 e nenhuma nota 1 ou 2 -- apontava
+ * problema onde não havia.
+ */
+var CRITERIO = {
+  forte: 4.0,           // média a partir disto = ponto forte
+  atencaoMedia: 3.0,    // média abaixo disto = atenção
+  atencaoNegativo: 25   // ou: pelo menos 25% das notas foram 1 ou 2
+};
+
+function classificar(r) {
+  if (r.media < CRITERIO.atencaoMedia || r.negativo >= CRITERIO.atencaoNegativo) return 'atencao';
+  if (r.media >= CRITERIO.forte) return 'forte';
+  return 'intermediario';
+}
+
+/** Por que a pergunta caiu em atenção, em linguagem direta. */
+function motivoAtencao(r) {
+  var motivos = [];
+  if (r.media < CRITERIO.atencaoMedia) motivos.push('média abaixo de 3');
+  if (r.negativo >= CRITERIO.atencaoNegativo) motivos.push(r.negativo + '% deram 1 ou 2');
+  return motivos.join(' · ');
+}
+
 /** Pares de temas equivalentes entre a seção 8 (equipe) e a 9 (autoavaliação). */
 var COMPARATIVO = [
   { tema: 'Preparação e pontualidade', equipe: 38, auto: 42 },
@@ -285,8 +311,14 @@ function renderizar() {
     var pior = secoes[secoes.length - 1];
     $('kpi-melhor').textContent = melhor.secao.titulo;
     $('kpi-melhor-nota').textContent = 'Média ' + formatarMedia(melhor.resumo.media) + ' · ' + melhor.resumo.positivo + '% positivo';
+    // Só chama de "crítica" se a seção de fato cair nos critérios de
+    // atenção; senão é apenas a menor média entre seções que vão bem.
+    var critica = classificar(pior.resumo) === 'atencao';
+    $('kpi-pior-rotulo').textContent = critica ? 'Seção mais crítica' : 'Seção com menor média';
     $('kpi-pior').textContent = pior.secao.titulo;
-    $('kpi-pior-nota').textContent = 'Média ' + formatarMedia(pior.resumo.media) + ' · ' + pior.resumo.negativo + '% negativo';
+    $('kpi-pior').className = 'text-base font-semibold leading-snug ' + (critica ? 'text-red-700' : 'text-neutral-700');
+    $('kpi-pior-nota').textContent = 'Média ' + formatarMedia(pior.resumo.media) + ' · ' +
+      (critica ? pior.resumo.negativo + '% deram 1 ou 2' : 'sem sinal de problema');
   } else {
     ['kpi-melhor', 'kpi-pior'].forEach(function (id) { $(id).textContent = '–'; });
     ['kpi-melhor-nota', 'kpi-pior-nota'].forEach(function (id) { $(id).textContent = ''; });
@@ -346,18 +378,38 @@ function renderizarGeral() {
     '</div>' +
     legendaEscala();
 
-  // Rankings: só perguntas sobre a rádio, e uma pergunta nunca aparece nas duas listas.
+  // Classificação por critério fixo: só perguntas sobre a rádio.
   var ranking = perguntasDaRadio()
-    .map(function (p) { return { p: p, r: resumo(notasDa(p.n)) }; })
+    .map(function (p) {
+      var r = resumo(notasDa(p.n));
+      return { p: p, r: r, classe: r.n ? classificar(r) : null };
+    })
     .filter(function (item) { return item.r.n; });
 
-  var porMedia = ranking.slice().sort(function (a, b) { return b.r.media - a.r.media || b.r.positivo - a.r.positivo; });
-  var metade = Math.floor(porMedia.length / 2);
-  var melhores = porMedia.slice(0, Math.min(5, metade));
-  var piores = porMedia.slice().reverse().slice(0, Math.min(5, metade));
+  var fortes = ranking.filter(function (i) { return i.classe === 'forte'; })
+    .sort(function (a, b) { return b.r.media - a.r.media || b.r.positivo - a.r.positivo; });
+  var atencao = ranking.filter(function (i) { return i.classe === 'atencao'; })
+    .sort(function (a, b) { return a.r.media - b.r.media || b.r.negativo - a.r.negativo; });
+  var intermediarias = ranking.filter(function (i) { return i.classe === 'intermediario'; });
 
-  $('ranking-melhores').innerHTML = listaRanking(melhores, 'positivo');
-  $('ranking-piores').innerHTML = listaRanking(piores, 'negativo');
+  renderizarDiagnostico(fortes.length, intermediarias.length, atencao.length, ranking.length);
+
+  $('ranking-melhores').innerHTML = fortes.length
+    ? listaRanking(fortes.slice(0, 6), 'forte') + maisItens(fortes.length - 6, 'com média 4 ou mais')
+    : '<p class="text-sm text-neutral-500 leading-relaxed">Nenhuma pergunta chegou a média 4 ainda.</p>';
+
+  $('ranking-piores').innerHTML = atencao.length
+    ? listaRanking(atencao.slice(0, 8), 'atencao') + maisItens(atencao.length - 8, 'em atenção')
+    : '<div class="flex gap-3 bg-emerald-50 text-emerald-800 rounded-xl px-4 py-3.5 text-sm leading-relaxed">' +
+        '<i class="w-4 h-4 shrink-0 mt-0.5" data-lucide="check-circle"></i>' +
+        '<span><strong>Nenhum ponto de atenção.</strong> Nenhuma pergunta tem média abaixo de 3 ' +
+        'nem 1 em cada 4 notas sendo 1 ou 2.</span>' +
+      '</div>' +
+      (intermediarias.length
+        ? '<p class="text-xs font-semibold uppercase tracking-wide text-neutral-400 mt-6 mb-1">Para acompanhar</p>' +
+          '<p class="text-xs text-neutral-400 mb-2">Ainda abaixo de 4, mas sem sinal de problema.</p>' +
+          listaRanking(intermediarias.sort(function (a, b) { return a.r.media - b.r.media; }).slice(0, 3), 'intermediario')
+        : '');
 
   // Opinião dividida: maior desvio padrão. Só faz sentido com algumas respostas.
   var divididas = ranking
@@ -417,13 +469,54 @@ function linhaComparativo(rotulo, valor, cor) {
     '</div>';
 }
 
-function listaRanking(itens, destaque) {
-  if (!itens.length) return '<p class="text-sm text-neutral-400">Sem avaliações suficientes ainda.</p>';
+/**
+ * Faixa no topo da visão geral: quantas perguntas sobre a rádio estão fortes,
+ * intermediárias ou em atenção, pelos critérios fixos.
+ */
+function renderizarDiagnostico(nFortes, nIntermediarias, nAtencao, total) {
+  if (!total) {
+    $('diagnostico').innerHTML = '<p class="text-sm text-neutral-400">Sem avaliações ainda.</p>';
+    return;
+  }
 
+  var grupos = [
+    { n: nFortes, rotulo: 'pontos fortes', detalhe: 'média 4 ou mais', cor: '#1e9e57' },
+    { n: nIntermediarias, rotulo: 'intermediárias', detalhe: 'entre 3 e 4, sem muitas notas baixas', cor: '#d4a017' },
+    { n: nAtencao, rotulo: 'pontos de atenção', detalhe: 'média abaixo de 3 ou 25%+ de notas 1–2', cor: '#d63d3d' }
+  ];
+
+  $('diagnostico').innerHTML =
+    '<div class="grid grid-cols-3 gap-3 mb-5">' +
+      grupos.map(function (g) {
+        return '<div>' +
+            '<p class="text-3xl font-semibold tracking-tight" style="color:' + g.cor + '">' + g.n + '</p>' +
+            '<p class="text-sm font-medium text-neutral-700">' + g.rotulo + '</p>' +
+            '<p class="text-xs text-neutral-400 leading-snug mt-0.5">' + g.detalhe + '</p>' +
+          '</div>';
+      }).join('') +
+    '</div>' +
+    '<div class="w-full h-3 rounded-full overflow-hidden flex bg-neutral-100">' +
+      grupos.map(function (g) {
+        return g.n ? '<div style="width:' + (g.n / total * 100) + '%;background-color:' + g.cor + '"></div>' : '';
+      }).join('') +
+    '</div>' +
+    '<p class="text-xs text-neutral-400 mt-2">' + total + ' perguntas com nota sobre a rádio (a autoavaliação fica de fora).</p>';
+}
+
+function maisItens(restantes, descricao) {
+  return restantes > 0
+    ? '<p class="text-xs text-neutral-400 pt-3">+ ' + restantes + (restantes === 1 ? ' outra pergunta ' : ' outras perguntas ') +
+        descricao + ' — veja em "Por pergunta".</p>'
+    : '';
+}
+
+function listaRanking(itens, tipo) {
   return itens.map(function (item) {
-    var pct = destaque === 'positivo'
+    var pct = tipo === 'forte'
       ? item.r.positivo + '% deram 4 ou 5'
-      : item.r.negativo + '% deram 1 ou 2';
+      : tipo === 'atencao'
+        ? motivoAtencao(item.r)
+        : item.r.positivo + '% deram 4 ou 5 · ' + item.r.negativo + '% deram 1 ou 2';
 
     return '<div class="flex items-start gap-3 py-3 border-b border-neutral-100 last:border-b-0 evitar-quebra">' +
         '<span class="text-base font-semibold w-9 shrink-0" style="color:' + corDaMedia(item.r.media) + '">' + formatarMedia(item.r.media) + '</span>' +

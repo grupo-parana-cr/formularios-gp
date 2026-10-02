@@ -19,7 +19,7 @@
     }
   };
 </script>
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body class="bg-neutral-50 text-neutral-900 antialiased">
 
@@ -146,7 +146,7 @@
           <p id="kpi-melhor-nota" class="text-xs text-neutral-400 mt-1"></p>
         </div>
         <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
-          <p class="text-sm text-neutral-400 mb-1.5">Seção mais crítica</p>
+          <p id="kpi-pior-rotulo" class="text-sm text-neutral-400 mb-1.5">Seção com menor média</p>
           <p id="kpi-pior" class="text-base font-semibold leading-snug text-red-700">–</p>
           <p id="kpi-pior-nota" class="text-xs text-neutral-400 mt-1"></p>
         </div>
@@ -156,7 +156,13 @@
       <div id="painel-geral" class="painel space-y-6">
         <h2 class="so-pdf titulo-pdf">Visão geral</h2>
 
-        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">
+        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+          <h2 class="text-lg font-semibold tracking-tight mb-1">Diagnóstico</h2>
+          <p class="text-sm text-neutral-400 mb-5">Como estão as perguntas sobre a rádio, por critérios fixos — não em comparação umas com as outras.</p>
+          <div id="diagnostico"></div>
+        </section>
+
+        <section id="cartao-secoes" class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">
           <div class="evitar-quebra">
             <h2 class="text-lg font-semibold tracking-tight mb-1">Resultado por seção</h2>
             <p class="text-sm text-neutral-400 mb-6">
@@ -170,16 +176,16 @@
         <div class="grid md:grid-cols-2 gap-6">
           <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
             <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
-              <i class="w-5 h-5 text-emerald-600" data-lucide="thumbs-up"></i> Pontos mais fortes
+              <i class="w-5 h-5 text-emerald-600" data-lucide="thumbs-up"></i> Pontos fortes
             </h2>
-            <p class="text-sm text-neutral-400 mb-4">Perguntas sobre a rádio com maior média.</p>
+            <p class="text-sm text-neutral-400 mb-4">Perguntas com média 4 ou mais.</p>
             <div id="ranking-melhores"></div>
           </section>
           <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
             <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
               <i class="w-5 h-5 text-red-600" data-lucide="alert-triangle"></i> Pontos de atenção
             </h2>
-            <p class="text-sm text-neutral-400 mb-4">Perguntas sobre a rádio com menor média.</p>
+            <p class="text-sm text-neutral-400 mb-4">Média abaixo de 3, ou pelo menos 1 em cada 4 notas sendo 1 ou 2.</p>
             <div id="ranking-piores"></div>
           </section>
         </div>
@@ -278,7 +284,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-<script src="script.js?v=4"></script>
-<script src="dashboard.js?v=4"></script>
+<script src="script.js?v=5"></script>
+<script src="dashboard.js?v=5"></script>
 </body>
 </html>

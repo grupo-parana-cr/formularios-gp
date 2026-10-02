@@ -206,7 +206,7 @@ body {
 
   /* Exceção: o resultado por seção é alto e, preso inteiro, deixava a
      primeira página quase vazia. Ele pode quebrar entre as linhas. */
-  #painel-geral > section:first-of-type {
+  #painel-geral > #cartao-secoes {
     break-inside: auto;
   }
 
