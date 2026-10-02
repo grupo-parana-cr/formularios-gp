@@ -221,7 +221,9 @@ function inserirEmLinhaAleatoria_(sheet, linha) {
 /* ------------------------------------------------------------------ */
 
 /**
- * Devolve todas as avaliacoes (anonimas). O dashboard agrega no navegador.
+ * Devolve todas as avaliacoes (anonimas), so com as respostas: a data fica
+ * na planilha e nao vai para o dashboard -- numa equipe pequena, "quem veio
+ * naquele dia" basta para identificar alguem. O dashboard agrega no navegador.
  * Fail-closed: sem credenciais validas, nada sai daqui.
  */
 function handleGetAllData(data) {
@@ -239,14 +241,14 @@ function handleGetAllData(data) {
     var valores = sheet.getRange(2, 1, ultimaLinha - 1, cols.length).getDisplayValues();
 
     var participantes = valores.map(function (linha) {
-      var registro = { quando: '', respostas: {} };
+      var registro = { respostas: {} };
 
       for (var i = 0; i < cols.length; i++) {
         var col = cols[i];
         var valor = String(linha[i] == null ? '' : linha[i]);
 
         if (col.chave === 'quando') {
-          registro.quando = valor;
+          continue;
         } else if (col.nota) {
           var nota = parseInt(valor, 10);
           if (!isNaN(nota)) registro.respostas[col.chave] = nota;

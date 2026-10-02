@@ -411,40 +411,107 @@ function renderizarGeral() {
           listaRanking(intermediarias.sort(function (a, b) { return a.r.media - b.r.media; }).slice(0, 3), 'intermediario')
         : '');
 
-  // Opinião dividida: maior desvio padrão. Só faz sentido com algumas respostas.
+  // Opinião dividida: parte da equipe deu nota alta e parte deu nota baixa.
+  // O cartão só aparece quando existe alguma -- vazio, era só ruído.
   var divididas = ranking
     .filter(function (item) { return item.r.n >= 3 && item.r.desvio >= 1; })
     .sort(function (a, b) { return b.r.desvio - a.r.desvio; })
     .slice(0, 5);
 
-  $('divididas').innerHTML = divididas.length
-    ? divididas.map(function (item) {
-        return '<div class="py-3 border-b border-neutral-100 last:border-b-0 evitar-quebra">' +
-            '<p class="text-sm text-neutral-600 leading-snug mb-2"><span class="text-neutral-400">P' + item.p.n + '.</span> ' + escapar(item.p.texto) + '</p>' +
-            barraDistribuicao(contagemDa(item.p.n), false) +
-          '</div>';
-      }).join('')
-    : '<p class="text-sm text-neutral-400">Nenhuma pergunta com opinião muito dividida' +
-        (participantes().length < 3 ? ' (precisa de pelo menos 3 avaliações).' : '.') + '</p>';
-
-  // Comparativo equipe × autoavaliação
-  $('comparativo').innerHTML = COMPARATIVO.map(function (par) {
-    var mEquipe = media(notasDa(par.equipe));
-    var mAuto = media(notasDa(par.auto));
-    var diferenca = (mEquipe != null && mAuto != null) ? mAuto - mEquipe : null;
-    var textoDif = diferenca == null ? '' :
-      (Math.abs(diferenca) < 0.05 ? 'mesma média' :
-        (diferenca > 0 ? '+' : '−') + Math.abs(diferenca).toFixed(1).replace('.', ',') + ' na autoavaliação');
-
-    return '<div class="mb-6 last:mb-0 evitar-quebra">' +
-        '<div class="flex items-baseline justify-between gap-4 mb-2.5">' +
-          '<p class="text-sm font-semibold text-neutral-800">' + escapar(par.tema) + '</p>' +
-          '<p class="text-xs text-neutral-400 shrink-0">' + textoDif + '</p>' +
-        '</div>' +
-        linhaComparativo('Equipe (P' + par.equipe + ')', mEquipe, '#7EA6E8') +
-        linhaComparativo('Autoavaliação (P' + par.auto + ')', mAuto, '#004AC9') +
+  $('cartao-divididas').hidden = !divididas.length;
+  $('divididas').innerHTML = divididas.map(function (item) {
+    var c = contagemDa(item.p.n);
+    var altas = c[3] + c[4];
+    var baixas = c[0] + c[1];
+    return '<div class="py-3 border-b border-neutral-100 last:border-b-0 evitar-quebra">' +
+        '<p class="text-sm text-neutral-700 leading-snug mb-1"><span class="text-neutral-400">P' + item.p.n + '.</span> ' + escapar(item.p.texto) + '</p>' +
+        '<p class="text-xs text-neutral-500 mb-2">' +
+          '<strong class="text-emerald-700">' + altas + ' deram 4 ou 5</strong> e ' +
+          '<strong class="text-red-700">' + baixas + ' deram 1 ou 2</strong>' +
+        '</p>' +
+        barraDistribuicao(c, false) +
       '</div>';
   }).join('');
+
+  renderizarComparativo();
+}
+
+/**
+ * Equipe de locução (seção 8) x autoavaliação (seção 9), nos temas
+ * equivalentes. Em vez de barras quase iguais, uma tabela com a leitura em
+ * palavras e uma frase-resumo: o que importa é a diferença, não os números.
+ */
+var LIMITE_DIFERENCA = 0.4;   // abaixo disto, na escala de 1 a 5, é "alinhado"
+
+function leituraDiferenca(d) {
+  if (d == null) return { texto: '–', classe: 'text-neutral-400 bg-neutral-100' };
+  if (d >= LIMITE_DIFERENCA) return { texto: 'Se veem melhor', classe: 'text-amber-800 bg-amber-100' };
+  if (d <= -LIMITE_DIFERENCA) return { texto: 'Se cobram mais', classe: 'text-sky-800 bg-sky-100' };
+  return { texto: 'Alinhado', classe: 'text-emerald-800 bg-emerald-100' };
+}
+
+function renderizarComparativo() {
+  var linhas = COMPARATIVO.map(function (par) {
+    var equipe = media(notasDa(par.equipe));
+    var auto = media(notasDa(par.auto));
+    return { par: par, equipe: equipe, auto: auto, d: (equipe != null && auto != null) ? auto - equipe : null };
+  });
+
+  var validas = linhas.filter(function (l) { return l.d != null; });
+  if (!validas.length) {
+    $('comparativo').innerHTML = '<p class="text-sm text-neutral-400">Sem avaliações ainda.</p>';
+    return;
+  }
+
+  var difMedia = validas.reduce(function (s, l) { return s + l.d; }, 0) / validas.length;
+  var dif = Math.abs(difMedia).toFixed(1).replace('.', ',');
+  var resumo;
+
+  if (validas.every(function (l) { return Math.abs(l.d) < LIMITE_DIFERENCA; })) {
+    resumo = '<strong>Visões alinhadas.</strong> A nota que as pessoas dão a si mesmas é praticamente a mesma que dão à equipe de locução.';
+  } else if (difMedia > 0) {
+    resumo = '<strong>As pessoas se avaliam melhor do que avaliam a equipe</strong> — em média, ' + dif +
+      ' ponto acima. Vale conversar: cada um pode não perceber em si o que vê no grupo.';
+  } else {
+    resumo = '<strong>As pessoas se cobram mais do que cobram a equipe</strong> — em média, ' + dif +
+      ' ponto abaixo na autoavaliação.';
+  }
+
+  function nota(v) {
+    return '<span class="font-semibold" style="color:' + corDaMedia(v) + '">' + formatarMedia(v) + '</span>';
+  }
+
+  $('comparativo').innerHTML =
+    '<p class="text-sm text-neutral-700 leading-relaxed bg-neutral-50 rounded-xl px-4 py-3 mb-5">' + resumo + '</p>' +
+    '<table class="w-full text-sm">' +
+      '<thead>' +
+        '<tr class="text-xs text-neutral-400 border-b border-neutral-150">' +
+          '<th class="text-left font-medium pb-2.5 pr-3">Tema</th>' +
+          '<th class="text-center font-medium pb-2.5 px-2">Nota dada<br class="sm:hidden"> à equipe</th>' +
+          '<th class="text-center font-medium pb-2.5 px-2">Nota dada<br class="sm:hidden"> a si mesmo</th>' +
+          '<th class="text-right font-medium pb-2.5 pl-2">Leitura</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+        linhas.map(function (l) {
+          var leitura = leituraDiferenca(l.d);
+          return '<tr class="border-b border-neutral-100 last:border-b-0">' +
+              '<td class="py-3 pr-3 text-neutral-700">' + escapar(l.par.tema) +
+                '<span class="block text-xs text-neutral-400">P' + l.par.equipe + ' × P' + l.par.auto + '</span></td>' +
+              '<td class="py-3 px-2 text-center">' + nota(l.equipe) + '</td>' +
+              '<td class="py-3 px-2 text-center">' + nota(l.auto) + '</td>' +
+              '<td class="py-3 pl-2 text-right">' +
+                '<span class="inline-block text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ' + leitura.classe + '">' + leitura.texto + '</span>' +
+              '</td>' +
+            '</tr>';
+        }).join('') +
+      '</tbody>' +
+    '</table>' +
+    '<p class="text-xs text-neutral-400 leading-relaxed mt-4">' +
+      'Diferença de menos de ' + String(LIMITE_DIFERENCA).replace('.', ',') + ' ponto conta como alinhado. ' +
+      'Atenção: a autoavaliação é respondida por todos, inclusive quem não é locutor. A comparação faz mais ' +
+      'sentido se a maior parte de quem respondeu for da locução.' +
+    '</p>';
 }
 
 function legendaEscala() {
@@ -455,17 +522,6 @@ function legendaEscala() {
             item.valor + ' ' + item.rotulo +
           '</span>';
       }).join('') +
-    '</div>';
-}
-
-function linhaComparativo(rotulo, valor, cor) {
-  var largura = valor == null ? 0 : (valor / 5 * 100);
-  return '<div class="flex items-center gap-3 mb-1.5">' +
-      '<span class="text-xs text-neutral-500 w-32 sm:w-36 shrink-0">' + rotulo + '</span>' +
-      '<div class="flex-1 h-2.5 bg-neutral-100 rounded-full overflow-hidden">' +
-        '<div class="h-full rounded-full" style="width:' + largura + '%;background-color:' + cor + '"></div>' +
-      '</div>' +
-      '<span class="text-sm font-semibold w-8 text-right" style="color:' + cor + '">' + formatarMedia(valor) + '</span>' +
     '</div>';
 }
 
@@ -559,47 +615,80 @@ function barraDistribuicao(contagem, comLegenda) {
   return '<div class="w-full ' + (comLegenda ? 'h-5' : 'h-2.5') + ' rounded-full overflow-hidden flex bg-neutral-100">' + fatias + '</div>' + legenda;
 }
 
+/**
+ * Uma resposta de texto. O número da avaliação fica discreto, à direita:
+ * serve para abrir a avaliação inteira, não para competir com o texto.
+ */
 function itemTexto(item) {
-  return '<li class="border-l-2 border-gp-light pl-3 py-1 evitar-quebra">' +
-      '<p class="text-sm text-neutral-700 leading-relaxed whitespace-pre-line">' + escapar(item.texto) + '</p>' +
-      '<button type="button" onclick="abrirDetalhe(' + item.numero + ')" ' +
-        'class="text-xs text-gp-blue/80 hover:text-gp-blue mt-1 font-medium">Avaliação #' + item.numero + '</button>' +
+  return '<li class="flex items-start gap-4 py-3 border-b border-neutral-100 last:border-b-0 evitar-quebra">' +
+      '<p class="flex-1 text-[15px] text-neutral-700 leading-relaxed whitespace-pre-line">' + escapar(item.texto) + '</p>' +
+      '<button type="button" onclick="abrirDetalhe(' + item.numero + ')" title="Ver a avaliação completa" ' +
+        'class="shrink-0 text-[11px] font-medium text-neutral-300 hover:text-gp-blue tabular-nums pt-1">#' + item.numero + '</button>' +
     '</li>';
+}
+
+/** Selo da classificação por critério fixo. Intermediária não leva selo. */
+function seloClasse(classe) {
+  if (classe === 'forte') return '<span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">Ponto forte</span>';
+  if (classe === 'atencao') return '<span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-800 whitespace-nowrap">Atenção</span>';
+  return '';
+}
+
+/** "4 deram 5 · 3 deram 4 · 1 deu 3" -- só as notas que alguém deu, da maior para a menor. */
+function contagemPorExtenso(contagem) {
+  var partes = [];
+  for (var nota = 5; nota >= 1; nota--) {
+    var qtd = contagem[nota - 1];
+    if (qtd) partes.push(qtd + (qtd === 1 ? ' deu ' : ' deram ') + nota);
+  }
+  return partes.join(' · ');
+}
+
+function contarTextos(p) {
+  return textosDa(p.tipo === 'comentario' ? 'p' + p.n + 'c' : 'p' + p.n).length;
 }
 
 function renderizarPerguntas() {
   $('lista-perguntas').innerHTML = SECOES.map(function (secao, i) {
     var resumoSecao = resumo(notasDe(secao.perguntas.filter(temNota)));
+    var nAtencao = 0;
 
     var blocos = secao.perguntas.map(function (p) {
       if (p.tipo === 'aberta') {
-        var qtd = textosDa('p' + p.n).length;
-        return '<div class="py-5 border-t border-neutral-100 evitar-quebra">' +
-            '<p class="text-sm font-medium text-neutral-800 leading-snug mb-1.5"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) + '</p>' +
-            '<button type="button" onclick="verAbertas(' + p.n + ')" class="text-xs text-gp-blue font-medium hover:underline">' +
-              'Pergunta aberta · ' + qtd + (qtd === 1 ? ' resposta' : ' respostas') + ' <span class="sem-pdf">→</span></button>' +
+        var qtd = contarTextos(p);
+        return '<div class="py-4 border-t border-neutral-100 flex items-start justify-between gap-4 evitar-quebra">' +
+            '<p class="text-sm text-neutral-500 leading-snug"><span class="text-neutral-400 font-medium">P' + p.n + '.</span> ' + escapar(p.texto) + '</p>' +
+            '<button type="button" onclick="verAbertas(' + p.n + ')" class="shrink-0 text-xs font-medium text-gp-blue hover:underline whitespace-nowrap">' +
+              qtd + (qtd === 1 ? ' resposta' : ' respostas') + '<span class="sem-pdf"> →</span></button>' +
           '</div>';
       }
 
       var r = resumo(notasDa(p.n));
+      var classe = r.n ? classificar(r) : null;
+      if (classe === 'atencao') nAtencao++;
+      var contagem = contagemDa(p.n);
       var comentarios = p.tipo === 'comentario' ? textosDa('p' + p.n + 'c') : [];
 
-      return '<div class="py-5 border-t border-neutral-100 evitar-quebra">' +
-          '<div class="flex items-start justify-between gap-4 mb-3">' +
-            '<p class="text-sm font-medium text-neutral-800 leading-snug"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) + '</p>' +
-            '<div class="text-right shrink-0">' +
-              '<p class="text-xl font-semibold leading-none" style="color:' + corDaMedia(r.media) + '">' + formatarMedia(r.media) + '</p>' +
-              (r.n ? '<p class="text-[11px] text-neutral-400 mt-1">' + r.positivo + '% positivo</p>' : '') +
+      return '<div class="py-4 border-t border-neutral-100 evitar-quebra">' +
+          '<div class="flex items-start justify-between gap-4">' +
+            '<div class="flex-1 min-w-0">' +
+              '<p class="text-sm font-medium text-neutral-800 leading-snug"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) +
+                (classe ? ' ' + seloClasse(classe) : '') + '</p>' +
+              '<div class="mt-2.5 max-w-md">' + barraDistribuicao(contagem, false) + '</div>' +
+              '<p class="text-xs text-neutral-400 mt-1.5">' + (r.n ? contagemPorExtenso(contagem) : 'Sem notas ainda') + '</p>' +
+            '</div>' +
+            '<div class="text-right shrink-0 w-16">' +
+              '<p class="text-2xl font-semibold leading-none" style="color:' + corDaMedia(r.media) + '">' + formatarMedia(r.media) + '</p>' +
+              (r.n ? '<p class="text-[11px] text-neutral-400 mt-1">' + r.positivo + '% 4 ou 5</p>' : '') +
             '</div>' +
           '</div>' +
-          barraDistribuicao(contagemDa(p.n), true) +
           (comentarios.length
-            ? '<details class="mt-4 group">' +
-                '<summary class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gp-blue list-none">' +
-                  '<i class="w-4 h-4 transition-transform group-open:rotate-90 sem-pdf" data-lucide="chevron-right"></i>' +
-                  'Comentários (' + comentarios.length + ')' +
+            ? '<details class="mt-3 group">' +
+                '<summary class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-gp-blue list-none">' +
+                  '<i class="w-3.5 h-3.5 transition-transform group-open:rotate-90 sem-pdf" data-lucide="chevron-right"></i>' +
+                  comentarios.length + (comentarios.length === 1 ? ' comentário' : ' comentários') +
                 '</summary>' +
-                '<ul class="space-y-2 mt-3">' + comentarios.map(itemTexto).join('') + '</ul>' +
+                '<ul class="mt-1">' + comentarios.map(itemTexto).join('') + '</ul>' +
               '</details>'
             : '') +
         '</div>';
@@ -609,14 +698,19 @@ function renderizarPerguntas() {
     // ficar sozinho no pé da página do PDF.
     return '<section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8">' +
       '<div class="evitar-quebra">' +
-        '<div class="flex items-start justify-between gap-4 mb-2">' +
+        '<div class="flex items-start justify-between gap-4 mb-3">' +
           '<div class="flex items-start gap-3">' +
             '<span class="w-8 h-8 rounded-full bg-gp-blue text-white text-sm font-semibold flex items-center justify-center shrink-0">' + (i + 1) + '</span>' +
-            '<h2 class="text-lg font-semibold tracking-tight leading-snug pt-1">' + escapar(secao.titulo) + '</h2>' +
+            '<div class="pt-1">' +
+              '<h2 class="text-lg font-semibold tracking-tight leading-snug">' + escapar(secao.titulo) + '</h2>' +
+              (i === INDICE_AUTOAVALIACAO ? '<p class="text-xs text-neutral-400 mt-0.5">Cada pessoa avaliando a si mesma — não entra na média da rádio.</p>' : '') +
+              (nAtencao ? '<p class="text-xs text-red-700 mt-0.5">' + nAtencao + (nAtencao === 1 ? ' pergunta' : ' perguntas') + ' em atenção</p>' : '') +
+            '</div>' +
           '</div>' +
           (resumoSecao.n
-            ? '<span class="text-sm text-neutral-400 shrink-0 pt-1.5">média <strong style="color:' + corDaMedia(resumoSecao.media) + '">' + formatarMedia(resumoSecao.media) + '</strong></span>'
-            : '') +
+            ? '<div class="text-right shrink-0"><p class="text-[11px] text-neutral-400">média da seção</p>' +
+                '<p class="text-lg font-semibold" style="color:' + corDaMedia(resumoSecao.media) + '">' + formatarMedia(resumoSecao.media) + '</p></div>'
+            : '<p class="text-xs text-neutral-400 shrink-0 pt-2">só perguntas abertas</p>') +
         '</div>' +
         blocos[0] +
       '</div>' +
@@ -652,40 +746,56 @@ function verAbertas(n) {
   if (alvo) setTimeout(function () { alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
 }
 
+/**
+ * Respostas abertas agrupadas por seção: o nome da seção aparece uma vez, e
+ * cada pergunta mostra quantas pessoas escreveram algo.
+ */
 function renderizarAbertas() {
   var busca = $('busca-abertas').value.trim().toLowerCase();
   var filtroSecao = $('filtro-secao').value;
+  var total = participantes().length;
   var html = '';
 
   SECOES.forEach(function (secao, i) {
     if (filtroSecao !== '' && String(i) !== filtroSecao) return;
 
-    secao.perguntas.forEach(function (p) {
-      if (p.tipo === 'escala') return;
-
+    var cartoes = secao.perguntas.filter(function (p) { return p.tipo !== 'escala'; }).map(function (p) {
       var chave = p.tipo === 'comentario' ? 'p' + p.n + 'c' : 'p' + p.n;
-      var itens = textosDa(chave).filter(function (item) {
+      var todos = textosDa(chave);
+      var itens = todos.filter(function (item) {
         return !busca || item.texto.toLowerCase().indexOf(busca) !== -1;
       });
 
-      if (busca && !itens.length) return;
+      if (busca && !itens.length) return '';
+
+      var contador = busca
+        ? itens.length + ' de ' + todos.length + ' com "' + escapar(busca) + '"'
+        : todos.length + ' de ' + total + (total === 1 ? ' pessoa respondeu' : ' pessoas responderam');
 
       // No PDF, o título fica preso à primeira resposta: sozinho, ele podia
       // sobrar no pé da página com as respostas começando na seguinte.
-      html += '<section id="aberta-p' + p.n + '" class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 scroll-mt-6">' +
+      return '<section id="aberta-p' + p.n + '" class="bg-white rounded-2xl border border-neutral-150 px-6 py-5 md:px-8 md:py-6 scroll-mt-6">' +
           '<div class="evitar-quebra">' +
-            '<p class="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-2">' + (i + 1) + '. ' + escapar(secao.titulo) + '</p>' +
-            '<h3 class="text-base font-semibold leading-snug mb-5"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) +
-              (p.tipo === 'comentario' ? ' <span class="text-neutral-400 font-normal">(comentários)</span>' : '') + '</h3>' +
+            '<div class="flex items-start justify-between gap-4 mb-2">' +
+              '<h3 class="text-base font-semibold leading-snug"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) +
+                (p.tipo === 'comentario' ? ' <span class="text-neutral-400 font-normal text-sm">(comentário opcional da nota)</span>' : '') + '</h3>' +
+              '<span class="shrink-0 text-xs text-neutral-400 pt-1 whitespace-nowrap">' + contador + '</span>' +
+            '</div>' +
             (itens.length
               ? '<ul>' + itemTexto(itens[0]) + '</ul>'
-              : '<p class="text-sm text-neutral-400">Nenhuma resposta.</p>') +
+              : '<p class="text-sm text-neutral-400 py-2">Ninguém respondeu esta pergunta.</p>') +
           '</div>' +
-          (itens.length > 1
-            ? '<ul class="space-y-3 mt-3">' + itens.slice(1).map(itemTexto).join('') + '</ul>'
-            : '') +
+          (itens.length > 1 ? '<ul>' + itens.slice(1).map(itemTexto).join('') + '</ul>' : '') +
         '</section>';
-    });
+    }).filter(Boolean);
+
+    if (!cartoes.length) return;
+
+    html += '<div class="space-y-4">' +
+        '<h2 class="text-sm font-semibold uppercase tracking-wide text-neutral-500 pt-2 evitar-quebra">' +
+          '<span class="text-gp-blue">' + (i + 1) + '.</span> ' + escapar(secao.titulo) + '</h2>' +
+        cartoes.join('') +
+      '</div>';
   });
 
   $('lista-abertas').innerHTML = html || '<p class="text-sm text-neutral-400 text-center py-10">Nada encontrado.</p>';
@@ -724,8 +834,7 @@ function renderizarParticipantes() {
       return '<th class="pb-3 px-1 font-medium text-center" title="' + escapar(s.secao.titulo) + '">' + (s.indice + 1) + '</th>';
     }).join('') +
     '<th class="pb-3 px-1 font-semibold text-center text-neutral-600">Rádio</th>' +
-    '<th class="pb-3 px-1 font-medium text-center">Auto</th>' +
-    '<th class="pb-3 pl-3 font-medium text-left sem-pdf">Enviada em</th>';
+    '<th class="pb-3 px-1 font-medium text-center">Auto</th>';
 
   var lista = participantes()
     .map(function (p) { return { pessoa: p, radio: mediaDoParticipante(p, daRadio) }; });
@@ -740,7 +849,6 @@ function renderizarParticipantes() {
         secoes.map(function (s) { return celulaCalor(mediaDoParticipante(p, s.secao.perguntas.filter(temNota))); }).join('') +
         celulaCalor(item.radio) +
         celulaCalor(mediaDoParticipante(p, auto)) +
-        '<td class="py-2 pl-3 text-neutral-400 tabular-nums whitespace-nowrap text-xs sem-pdf">' + escapar(p.quando) + '</td>' +
       '</tr>';
   }).join('');
 
@@ -762,8 +870,7 @@ function abrirDetalhe(numero) {
 
   $('detalhe-titulo').textContent = 'Avaliação #' + pessoa.numero;
   $('detalhe-corpo').innerHTML =
-    '<p class="text-sm text-neutral-400 mb-6">Enviada em ' + escapar(pessoa.quando) +
-      ' · média dada à rádio <strong style="color:' + corDaMedia(mRadio) + '">' + formatarMedia(mRadio) + '</strong>' +
+    '<p class="text-sm text-neutral-400 mb-6">Média dada à rádio <strong style="color:' + corDaMedia(mRadio) + '">' + formatarMedia(mRadio) + '</strong>' +
       ' · autoavaliação <strong style="color:' + corDaMedia(mAuto) + '">' + formatarMedia(mAuto) + '</strong></p>' +
     SECOES.map(function (secao, i) {
       return '<div class="mb-8">' +
@@ -831,7 +938,7 @@ function abrirAba(qual) {
 
 /** CSV com uma linha por participante: abre direto no Excel (separador ;). */
 function exportarCsv() {
-  var colunas = ['Avaliação', 'Data'];
+  var colunas = ['Avaliação'];
   var chaves = [];
 
   todasPerguntas().forEach(function (p) {
@@ -849,7 +956,7 @@ function exportarCsv() {
   }
 
   var linhas = [colunas.map(celula).join(';')].concat(participantes().map(function (p) {
-    return [p.numero, p.quando].concat(chaves.map(function (k) { return p.respostas[k]; })).map(celula).join(';');
+    return [p.numero].concat(chaves.map(function (k) { return p.respostas[k]; })).map(celula).join(';');
   }));
 
   // BOM para o Excel reconhecer UTF-8 e não estragar os acentos.

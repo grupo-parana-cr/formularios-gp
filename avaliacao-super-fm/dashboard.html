@@ -19,7 +19,7 @@
     }
   };
 </script>
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body class="bg-neutral-50 text-neutral-900 antialiased">
 
@@ -190,7 +190,7 @@
           </section>
         </div>
 
-        <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
+        <section id="cartao-divididas" class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra" hidden>
           <h2 class="text-lg font-semibold tracking-tight mb-1 flex items-center gap-2">
             <i class="w-5 h-5 text-amber-600" data-lucide="split"></i> Opinião dividida
           </h2>
@@ -202,9 +202,9 @@
         </section>
 
         <section class="bg-white rounded-2xl border border-neutral-150 p-6 md:p-8 evitar-quebra">
-          <h2 class="text-lg font-semibold tracking-tight mb-1">Equipe de locução × autoavaliação</h2>
-          <p class="text-sm text-neutral-400 mb-6">
-            Compara como a equipe é vista (seção 8) com como cada um se vê (seção 9), nos temas equivalentes.
+          <h2 class="text-lg font-semibold tracking-tight mb-1">Como a equipe se vê × como vê a locução</h2>
+          <p class="text-sm text-neutral-400 mb-5">
+            Mesmos temas, duas notas: a que cada pessoa deu à equipe de locução (seção 8) e a que deu a si mesma (seção 9).
           </p>
           <div id="comparativo"></div>
         </section>
@@ -213,6 +213,14 @@
       <!-- Por pergunta -->
       <div id="painel-perguntas" class="painel" hidden>
         <h2 class="so-pdf titulo-pdf">Resultado por pergunta</h2>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-5 text-xs text-neutral-500 evitar-quebra">
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#d63d3d"></span>1 Muito ruim</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#ef8a1f"></span>2 Ruim</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#d4a017"></span>3 Regular</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#5aa83c"></span>4 Bom</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background:#1e9e57"></span>5 Excelente</span>
+          <span class="text-neutral-400">· Ponto forte: média 4+ · Atenção: média abaixo de 3 ou 25%+ de notas 1–2</span>
+        </div>
         <div id="lista-perguntas" class="space-y-6"></div>
       </div>
 
@@ -228,7 +236,7 @@
           <select id="filtro-secao" onchange="renderizarAbertas()"
                   class="px-4 py-3 rounded-xl border border-neutral-200 bg-white focus:border-gp-blue outline-none text-sm"></select>
         </div>
-        <div id="lista-abertas" class="space-y-6"></div>
+        <div id="lista-abertas" class="space-y-8"></div>
       </div>
 
       <!-- Por participante -->
@@ -284,7 +292,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-<script src="script.js?v=5"></script>
-<script src="dashboard.js?v=5"></script>
+<script src="script.js?v=7"></script>
+<script src="dashboard.js?v=7"></script>
 </body>
 </html>
