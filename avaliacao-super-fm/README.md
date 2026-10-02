@@ -113,6 +113,16 @@ A **autoavaliação (seção 9) fica fora da "média da rádio"**, dos rankings 
 bem avaliada: é cada pessoa dando nota a si mesma, e misturada às demais tomava o topo dos
 pontos fortes. Ela aparece à parte e no comparativo com a seção 8.
 
+Cada pergunta é classificada por **critério fixo** (`CRITERIO` em `dashboard.js`), não em
+comparação com as outras — um ranking relativo chamava de "atenção" perguntas com média 4,4:
+
+- **ponto forte:** média 4 ou mais;
+- **ponto de atenção:** média abaixo de 3, ou 25% ou mais das notas sendo 1 ou 2;
+- **intermediária:** o resto.
+
+Sem nada em atenção, o dashboard diz isso em vez de montar uma lista. A seção de menor
+média só é chamada de "mais crítica" quando ela mesma cai nesses critérios.
+
 "Positivo" = notas 4 e 5; "negativo" = 1 e 2. "Opinião dividida" lista as perguntas com
 maior desvio padrão (a partir de 3 avaliações). Com menos de 5 avaliações o dashboard avisa
 que as médias ainda são instáveis.
