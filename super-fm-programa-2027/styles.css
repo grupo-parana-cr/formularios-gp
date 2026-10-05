@@ -1,0 +1,136 @@
+/* Complementos ao Tailwind — Super FM | Meu programa em 2027, Grupo Paraná */
+
+:root {
+  --gp-blue: #004AC9;
+  --gp-dark: #003580;
+  --gp-light: #E8F2FF;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* As classes de display do Tailwind (.flex, .grid) têm a mesma especificidade
+   que o [hidden] do navegador e vêm depois na cascata — sem o !important,
+   elementos marcados como hidden continuariam visíveis. */
+[hidden] {
+  display: none !important;
+}
+
+/* Tailwind não tem neutral-150 */
+.border-neutral-150 {
+  border-color: #ececec;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+
+.animate-pulse-once {
+  animation: pulsar 0.6s ease-out;
+}
+
+@keyframes pulsar {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Campo vazio quando a pessoa tentou enviar */
+.bloco-pergunta.pendente textarea,
+.bloco-pergunta.pendente input {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+/* Blocos que não podem ser partidos entre duas páginas do PDF */
+.evitar-quebra {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ------------------------------------------------------------------ */
+/* Relatório em PDF (dashboard) — impressão nativa do navegador        */
+/* ------------------------------------------------------------------ */
+
+.so-pdf {
+  display: none !important;
+}
+
+@page {
+  size: A4;
+  margin: 14mm 14mm;
+}
+
+@media print {
+  html, body {
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sem-pdf,
+  #login, #carregando, #erro {
+    display: none !important;
+  }
+
+  .so-pdf {
+    display: block !important;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  /* No papel vai a leitura por pessoa, mesmo que a tela esteja na outra
+     aba. A "por pergunta" repetiria os mesmos textos e fica de fora. Os
+     seletores com id vencem a regra global de [hidden]. */
+  #relatorio #painel-pessoas.painel {
+    display: block !important;
+  }
+
+  #relatorio #painel-perguntas.painel {
+    display: none !important;
+  }
+
+  /* Cada pessoa numa folha: a Diretoria pode entregar ou arquivar o plano
+     de cada um separadamente. */
+  .folha-pessoa {
+    break-before: page;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  #lista-pessoas {
+    display: block !important;
+  }
+
+  section, .folha-pessoa {
+    box-shadow: none !important;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  h1, h2, h3 {
+    break-after: avoid;
+  }
+
+  .titulo-pdf {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gp-blue);
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Respeita quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Respostas | Meu Programa em 2027 — Super FM</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { gp: { blue: '#004AC9', dark: '#003580', light: '#E8F2FF' } },
+        fontFamily: { sans: ['Plus Jakarta Sans', 'Segoe UI', 'sans-serif'] }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body class="bg-neutral-50 text-neutral-900 antialiased">
+
+<header class="sem-pdf bg-gradient-to-br from-gp-blue to-gp-dark text-white">
+  <div class="max-w-5xl mx-auto px-5 sm:px-6 py-8">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <img src="../img/logo-grupo-parana.png" alt="Grupo Paraná" class="h-8 w-auto bg-white rounded-lg p-1.5 mb-4">
+        <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">Super FM · Meu programa em 2027</h1>
+        <p class="text-white/70 mt-1.5 text-sm">Respostas identificadas · acesso restrito à Diretoria</p>
+      </div>
+      <div id="acoes" class="flex flex-wrap gap-2.5" hidden>
+        <button type="button" onclick="carregarDados()"
+                class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="refresh-cw"></i> Atualizar
+        </button>
+        <button type="button" onclick="exportarCsv()"
+                class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="sheet"></i> CSV
+        </button>
+        <button type="button" onclick="exportarPdf()"
+                class="bg-white text-gp-dark text-sm font-medium px-4 py-2.5 rounded-full hover:bg-white/90 transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="printer"></i> PDF
+        </button>
+        <button type="button" onclick="sair()"
+                class="bg-white/15 hover:bg-white/25 text-white text-sm font-medium px-4 py-2.5 rounded-full transition-colors inline-flex items-center gap-2">
+          <i class="w-4 h-4" data-lucide="log-out"></i> Sair
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+
+  <div id="login" class="max-w-sm mx-auto py-16" hidden>
+    <div class="bg-white rounded-2xl border border-neutral-150 p-8">
+      <div class="w-14 h-14 bg-gp-light rounded-full flex items-center justify-center mb-6">
+        <i class="w-7 h-7 text-gp-blue" data-lucide="lock"></i>
+      </div>
+      <h2 class="text-xl font-semibold tracking-tight mb-1.5">Acesso restrito</h2>
+      <p class="text-sm text-neutral-500 mb-6">As respostas são visíveis apenas para a Diretoria.</p>
+
+      <label for="usuario" class="block text-sm font-medium text-neutral-700 mb-1.5">Usuário</label>
+      <input type="text" id="usuario" autocomplete="username"
+             class="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none transition-colors mb-4">
+
+      <label for="senha" class="block text-sm font-medium text-neutral-700 mb-1.5">Senha</label>
+      <input type="password" id="senha" autocomplete="current-password"
+             class="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none transition-colors">
+
+      <p id="login-erro" class="text-sm text-red-600 mt-3" hidden></p>
+
+      <button type="button" id="btn-entrar" onclick="entrar()"
+              class="w-full mt-6 bg-gp-blue text-white text-base font-medium px-8 py-3.5 rounded-full hover:bg-gp-dark transition-colors inline-flex items-center justify-center gap-2 disabled:opacity-60">
+        Entrar
+        <i class="w-4 h-4" data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="carregando" class="text-center py-24" hidden>
+    <div class="w-10 h-10 border-[3px] border-neutral-200 border-t-gp-blue rounded-full animate-spin mx-auto mb-4"></div>
+    <p class="text-neutral-400 text-sm">Carregando respostas...</p>
+    <p id="carregando-demora" class="text-neutral-400 text-sm mt-2 max-w-xs mx-auto leading-relaxed" hidden></p>
+  </div>
+
+  <div id="erro" class="text-center py-24" hidden>
+    <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="w-7 h-7 text-red-500" data-lucide="alert-circle"></i>
+    </div>
+    <p class="text-neutral-600 font-medium mb-1">Não foi possível carregar as respostas</p>
+    <p id="erro-detalhe" class="text-neutral-400 text-sm"></p>
+  </div>
+
+  <div id="conteudo" hidden>
+
+    <div id="relatorio">
+
+      <!-- Capa do PDF -->
+      <div class="so-pdf mb-6 pb-4 border-b-2 border-gp-blue">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-gp-blue">Super FM · Meu programa em 2027</h1>
+            <p class="text-sm text-neutral-500 mt-1">Planejamento individual dos programas · Grupo Paraná</p>
+            <p id="pdf-rodape" class="text-xs text-neutral-400 mt-1"></p>
+          </div>
+          <img src="../img/logo-grupo-parana.png" alt="Grupo Paraná" class="h-9 w-auto">
+        </div>
+      </div>
+
+      <!-- Indicadores -->
+      <div class="grid grid-cols-3 gap-4 mb-8 evitar-quebra">
+        <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
+          <p class="text-sm text-neutral-400 mb-1.5">Pessoas que responderam</p>
+          <p id="kpi-pessoas" class="text-4xl font-semibold tracking-tight text-gp-blue">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
+          <p class="text-sm text-neutral-400 mb-1.5">Programas</p>
+          <p id="kpi-programas" class="text-4xl font-semibold tracking-tight text-gp-blue">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-neutral-150 p-5 md:p-6">
+          <p class="text-sm text-neutral-400 mb-1.5">Última resposta</p>
+          <p id="kpi-ultima" class="text-base font-semibold leading-snug mt-2">–</p>
+        </div>
+      </div>
+
+      <!-- Lista de quem respondeu: só no PDF, na capa -->
+      <div class="so-pdf evitar-quebra">
+        <h2 class="titulo-pdf">Quem respondeu</h2>
+        <div id="pdf-indice"></div>
+      </div>
+
+      <!-- Abas e busca -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sem-pdf">
+        <div class="flex gap-2 overflow-x-auto pb-1">
+          <button type="button" onclick="abrirAba('pessoas')" data-aba="pessoas" class="aba">Por pessoa</button>
+          <button type="button" onclick="abrirAba('perguntas')" data-aba="perguntas" class="aba">Por pergunta</button>
+        </div>
+        <div class="relative flex-1">
+          <i class="w-4 h-4 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" data-lucide="search"></i>
+          <input type="search" id="busca" placeholder="Buscar por nome, programa ou palavra..." oninput="aoBuscar()"
+                 class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-neutral-200 bg-white focus:border-gp-blue focus:ring-0 outline-none">
+        </div>
+      </div>
+
+      <!-- Por pessoa -->
+      <div id="painel-pessoas" class="painel">
+        <div id="lista-pessoas" class="space-y-6"></div>
+      </div>
+
+      <!-- Por pergunta -->
+      <div id="painel-perguntas" class="painel" hidden>
+        <div id="lista-perguntas" class="space-y-6"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="script.js?v=1"></script>
+<script src="dashboard.js?v=1"></script>
+</body>
+</html>

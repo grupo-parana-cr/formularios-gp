@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Programa em 2027 | Super FM — Grupo Paraná</title>
+<meta name="description" content="Super FM: planejamento individual de cada programa para 2027.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { gp: { blue: '#004AC9', dark: '#003580', light: '#E8F2FF' } },
+        fontFamily: { sans: ['Plus Jakarta Sans', 'Segoe UI', 'sans-serif'] }
+      }
+    }
+  };
+</script>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body class="bg-white text-neutral-900 antialiased selection:bg-gp-light selection:text-gp-dark">
+
+<nav class="sticky top-0 z-50 w-full bg-white/85 backdrop-blur-md border-b border-neutral-100">
+  <div class="max-w-5xl mx-auto px-5 sm:px-6 py-3 flex items-center justify-between">
+    <img src="../img/logo-grupo-parana.png" alt="Grupo Paraná" class="h-8 w-auto">
+    <span class="text-sm font-medium text-neutral-500 hidden sm:block">Super FM · Meu programa em 2027</span>
+  </div>
+</nav>
+
+<main class="w-full overflow-hidden">
+
+  <!-- Apresentação -->
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 mt-4">
+    <div class="relative bg-gp-blue rounded-[2.5rem] p-6 sm:p-8 md:p-14 overflow-hidden text-white">
+      <div class="relative z-10 max-w-2xl">
+        <span class="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold tracking-wide uppercase px-4 py-1.5 rounded-full mb-4 md:mb-6">
+          <i class="w-3.5 h-3.5" data-lucide="radio"></i>
+          Super FM
+        </span>
+        <h1 class="text-[1.75rem] sm:text-3xl md:text-5xl font-semibold tracking-tight leading-[1.15] mb-4 md:mb-5">
+          Meu programa em 2027
+        </h1>
+        <p class="text-base sm:text-lg text-white/90 leading-relaxed mb-6">
+          Pensando no seu programa, na sua atuação como locutor e nos desafios da Super FM para
+          continuarmos crescendo e inovando, responda com sinceridade e de forma prática.
+        </p>
+        <div class="bg-white/10 border border-white/20 rounded-2xl px-5 py-4 flex gap-3 text-sm sm:text-[15px] text-white/90 leading-relaxed">
+          <i class="w-5 h-5 shrink-0 mt-0.5" data-lucide="user-check"></i>
+          <p>
+            <strong class="text-white font-semibold">Esta etapa é identificada.</strong>
+            Pedimos seu nome e seu programa porque o objetivo agora é transformar a avaliação em
+            responsabilidade individual, desenvolvimento e planejamento para 2027.
+          </p>
+        </div>
+      </div>
+      <div class="absolute -bottom-24 -left-16 w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
+      <div class="absolute -top-24 -right-10 w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
+    </div>
+  </div>
+
+  <section class="max-w-3xl mx-auto px-4 sm:px-6 mt-8 mb-20">
+
+    <!-- Formulário -->
+    <div id="formulario">
+      <div class="bg-white rounded-[2rem] border border-neutral-150 shadow-sm p-5 sm:p-6 md:p-10">
+
+        <div class="grid sm:grid-cols-2 gap-x-5 pb-2">
+          <div class="bloco-pergunta pb-5" id="bloco-nome">
+            <label for="campo-nome" class="block text-sm font-semibold text-neutral-700 mb-1.5">Nome</label>
+            <input type="text" id="campo-nome" autocomplete="name" oninput="aoDigitar('nome')"
+                   class="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none transition-colors">
+            <p class="erro-campo text-sm text-red-600 mt-2" hidden>Informe seu nome.</p>
+          </div>
+          <div class="bloco-pergunta pb-5" id="bloco-programa">
+            <label for="campo-programa" class="block text-sm font-semibold text-neutral-700 mb-1.5">Programa</label>
+            <input type="text" id="campo-programa" oninput="aoDigitar('programa')"
+                   class="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-gp-blue focus:ring-0 outline-none transition-colors">
+            <p class="erro-campo text-sm text-red-600 mt-2" hidden>Informe o nome do seu programa.</p>
+          </div>
+        </div>
+
+        <!-- Perguntas: renderizadas por script.js -->
+        <div id="lista-perguntas"></div>
+      </div>
+
+      <div class="flex justify-end mt-6">
+        <button type="button" id="btn-enviar" onclick="enviar()"
+                class="bg-gp-blue text-white text-base font-medium px-8 py-3.5 rounded-full hover:bg-gp-dark transition-colors inline-flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+          <span id="btn-enviar-texto">Enviar respostas</span>
+          <i class="w-4 h-4" data-lucide="send"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Agradecimento -->
+    <div id="fim" class="bg-white rounded-[2rem] border border-neutral-150 shadow-sm p-8 md:p-12 text-center" hidden>
+      <div class="w-20 h-20 bg-gp-light rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-once">
+        <i class="w-10 h-10 text-gp-blue" data-lucide="check"></i>
+      </div>
+      <h2 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">Obrigado, <span id="fim-nome"></span>!</h2>
+      <p class="text-neutral-500 leading-relaxed max-w-md mx-auto">
+        Suas respostas foram registradas e serão a base do planejamento do seu programa para 2027.
+      </p>
+    </div>
+  </section>
+
+  <footer class="border-t border-neutral-100 py-8">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <p class="text-sm text-neutral-400">© 2026 Grupo Paraná · Rádio Super FM</p>
+    </div>
+  </footer>
+</main>
+
+<!-- Aviso flutuante -->
+<div id="aviso" class="fixed inset-x-0 bottom-6 flex justify-center px-4 z-50 pointer-events-none" hidden>
+  <div id="aviso-caixa" class="bg-neutral-900 text-white text-sm px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 max-w-md">
+    <i id="aviso-icone" class="w-4 h-4 shrink-0" data-lucide="info"></i>
+    <span id="aviso-texto"></span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="script.js?v=1"></script>
+</body>
+</html>
