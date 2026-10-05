@@ -644,23 +644,32 @@ function contagemPorExtenso(contagem) {
   return partes.join(' · ');
 }
 
-function contarTextos(p) {
-  return textosDa(p.tipo === 'comentario' ? 'p' + p.n + 'c' : 'p' + p.n).length;
-}
-
 function renderizarPerguntas() {
   $('lista-perguntas').innerHTML = SECOES.map(function (secao, i) {
     var resumoSecao = resumo(notasDe(secao.perguntas.filter(temNota)));
     var nAtencao = 0;
 
+    // Cada bloco tem a cabeça (que não pode ser partida entre páginas) e um
+    // resto opcional, que pode continuar na página seguinte.
     var blocos = secao.perguntas.map(function (p) {
       if (p.tipo === 'aberta') {
-        var qtd = contarTextos(p);
-        return '<div class="py-4 border-t border-neutral-100 flex items-start justify-between gap-4 evitar-quebra">' +
-            '<p class="text-sm text-neutral-500 leading-snug"><span class="text-neutral-400 font-medium">P' + p.n + '.</span> ' + escapar(p.texto) + '</p>' +
-            '<button type="button" onclick="verAbertas(' + p.n + ')" class="shrink-0 text-xs font-medium text-gp-blue hover:underline whitespace-nowrap">' +
-              qtd + (qtd === 1 ? ' resposta' : ' respostas') + '<span class="sem-pdf"> →</span></button>' +
-          '</div>';
+        var itens = textosDa('p' + p.n);
+        var qtd = itens.length;
+        // Na tela as respostas ficam na aba "Respostas abertas"; no PDF elas
+        // saem aqui mesmo, logo abaixo da pergunta.
+        return {
+          cabeca: '<div class="pt-4 border-t border-neutral-100 ' + (qtd > 1 ? 'pb-4 print:pb-0' : 'pb-4') + '">' +
+              '<div class="flex items-start justify-between gap-4">' +
+                '<p class="text-sm text-neutral-500 leading-snug"><span class="text-neutral-400 font-medium">P' + p.n + '.</span> ' + escapar(p.texto) + '</p>' +
+                '<button type="button" onclick="verAbertas(' + p.n + ')" class="shrink-0 text-xs font-medium text-gp-blue hover:underline whitespace-nowrap">' +
+                  qtd + (qtd === 1 ? ' resposta' : ' respostas') + '<span class="sem-pdf"> →</span></button>' +
+              '</div>' +
+              (qtd
+                ? '<ul class="so-pdf mt-1">' + itemTexto(itens[0]) + '</ul>'
+                : '<p class="so-pdf text-sm text-neutral-400 mt-2">Ninguém respondeu esta pergunta.</p>') +
+            '</div>',
+          resto: qtd > 1 ? '<ul class="so-pdf pb-4 border-t border-neutral-100">' + itens.slice(1).map(itemTexto).join('') + '</ul>' : ''
+        };
       }
 
       var r = resumo(notasDa(p.n));
@@ -669,7 +678,19 @@ function renderizarPerguntas() {
       var contagem = contagemDa(p.n);
       var comentarios = p.tipo === 'comentario' ? textosDa('p' + p.n + 'c') : [];
 
-      return '<div class="py-4 border-t border-neutral-100 evitar-quebra">' +
+      // Os comentários ficam no resto: uma lista longa pode seguir na página
+      // seguinte sem arrastar a pergunta junto.
+      return {
+        resto: comentarios.length
+          ? '<details class="pt-3 pb-4 group">' +
+              '<summary class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-gp-blue list-none evitar-quebra">' +
+                '<i class="w-3.5 h-3.5 transition-transform group-open:rotate-90 sem-pdf" data-lucide="chevron-right"></i>' +
+                comentarios.length + (comentarios.length === 1 ? ' comentário' : ' comentários') +
+              '</summary>' +
+              '<ul class="mt-1">' + comentarios.map(itemTexto).join('') + '</ul>' +
+            '</details>'
+          : '',
+        cabeca: '<div class="pt-4 border-t border-neutral-100' + (comentarios.length ? '' : ' pb-4') + '">' +
           '<div class="flex items-start justify-between gap-4">' +
             '<div class="flex-1 min-w-0">' +
               '<p class="text-sm font-medium text-neutral-800 leading-snug"><span class="text-gp-blue">P' + p.n + '.</span> ' + escapar(p.texto) +
@@ -682,16 +703,7 @@ function renderizarPerguntas() {
               (r.n ? '<p class="text-[11px] text-neutral-400 mt-1">' + r.positivo + '% 4 ou 5</p>' : '') +
             '</div>' +
           '</div>' +
-          (comentarios.length
-            ? '<details class="mt-3 group">' +
-                '<summary class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-medium text-gp-blue list-none">' +
-                  '<i class="w-3.5 h-3.5 transition-transform group-open:rotate-90 sem-pdf" data-lucide="chevron-right"></i>' +
-                  comentarios.length + (comentarios.length === 1 ? ' comentário' : ' comentários') +
-                '</summary>' +
-                '<ul class="mt-1">' + comentarios.map(itemTexto).join('') + '</ul>' +
-              '</details>'
-            : '') +
-        '</div>';
+        '</div>' };
     });
 
     // O cabeçalho da seção vai junto com a primeira pergunta, para não
@@ -712,9 +724,12 @@ function renderizarPerguntas() {
                 '<p class="text-lg font-semibold" style="color:' + corDaMedia(resumoSecao.media) + '">' + formatarMedia(resumoSecao.media) + '</p></div>'
             : '<p class="text-xs text-neutral-400 shrink-0 pt-2">só perguntas abertas</p>') +
         '</div>' +
-        blocos[0] +
+        blocos[0].cabeca +
       '</div>' +
-      blocos.slice(1).join('') +
+      blocos[0].resto +
+      blocos.slice(1).map(function (b) {
+        return '<div class="evitar-quebra">' + b.cabeca + '</div>' + b.resto;
+      }).join('') +
       '</section>';
   }).join('');
 }
@@ -978,19 +993,15 @@ function exportarCsv() {
  * evitar o corte ocupavam uma célula e desalinhavam tudo. A impressão nativa
  * pagina de verdade, respeita break-inside e mantém o texto nítido.
  * O layout de impressão fica no @media print de styles.css.
+ *
+ * As respostas abertas e os comentários saem dentro do "Resultado por
+ * pergunta", logo abaixo de cada pergunta; por isso a aba "Respostas
+ * abertas" (que repetiria tudo) não vai para o papel.
  */
 function exportarPdf() {
-  var busca = $('busca-abertas').value;
-  var filtro = $('filtro-secao').value;
   var detalhes = document.querySelectorAll('#relatorio details');
   var abertos = [];
   var i;
-
-  // O relatório sai completo, sem os filtros que estiverem aplicados na tela.
-  $('busca-abertas').value = '';
-  $('filtro-secao').value = '';
-  renderizarAbertas();
-  renderizarParticipantes();
 
   for (i = 0; i < detalhes.length; i++) {
     abertos.push(detalhes[i].open);
@@ -1011,10 +1022,6 @@ function exportarPdf() {
     restaurado = true;
     document.title = tituloOriginal;
     for (var j = 0; j < detalhes.length; j++) detalhes[j].open = abertos[j];
-    $('busca-abertas').value = busca;
-    $('filtro-secao').value = filtro;
-    renderizarAbertas();
-    renderizarParticipantes();
   }
 
   window.addEventListener('afterprint', restaurar, { once: true });

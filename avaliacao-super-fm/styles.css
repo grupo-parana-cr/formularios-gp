@@ -168,11 +168,33 @@ body {
     margin-bottom: 1rem;
   }
 
+  /* As respostas abertas já saem abaixo de cada pergunta; a aba própria
+     só repetiria tudo. O seletor precisa vencer o de .painel[hidden]. */
+  #relatorio #painel-abertas.painel {
+    display: none !important;
+  }
+
   /* Cada parte começa em página nova, menos a primeira. */
   #painel-perguntas,
-  #painel-abertas,
   #painel-participantes {
     break-before: page;
+  }
+
+  /* Respostas de texto recuadas com um fio azul: dá para ver de relance
+     onde termina a pergunta e começam as respostas. */
+  #lista-perguntas ul {
+    margin-left: 0.25rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid #b9d3ff;
+  }
+
+  #lista-perguntas ul li {
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
+  }
+
+  #lista-perguntas ul li p {
+    font-size: 0.8rem !important;
   }
 
   /* No papel, cartões sem sombra e com menos respiro. Quando um cartão
