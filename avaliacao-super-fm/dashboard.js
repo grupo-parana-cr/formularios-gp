@@ -97,6 +97,20 @@ function mostrarLogin(mensagem) {
   desenharIcones();
 }
 
+/** Olho do campo de senha: mostra e esconde o que foi digitado. */
+function alternarSenha() {
+  var campo = $('senha');
+  var mostrar = campo.type === 'password';
+  var botao = $('btn-ver-senha');
+
+  campo.type = mostrar ? 'text' : 'password';
+  botao.setAttribute('aria-label', mostrar ? 'Esconder senha' : 'Mostrar senha');
+  botao.title = botao.getAttribute('aria-label');
+  botao.innerHTML = '<i class="w-[18px] h-[18px]" data-lucide="' + (mostrar ? 'eye-off' : 'eye') + '"></i>';
+  desenharIcones();
+  campo.focus();
+}
+
 function entrar() {
   var usuario = $('usuario').value.trim();
   var senha = $('senha').value;
